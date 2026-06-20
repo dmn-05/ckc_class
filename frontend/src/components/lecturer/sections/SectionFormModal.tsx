@@ -26,7 +26,18 @@ export default function SectionFormModal({ initialData, onSave, onClose }: Secti
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        subjectName: initialData.subjectName,
+        code: initialData.code,
+        semester: initialData.semester,
+        academicYear: initialData.academicYear,
+        room: initialData.room,
+        schedule: initialData.schedule,
+        maxStudents: initialData.maxStudents,
+        enrolledStudents: initialData.enrolledStudents,
+        status: initialData.status,
+        description: initialData.description || ''
+      });
     }
   }, [initialData]);
 
