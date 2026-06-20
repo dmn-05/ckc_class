@@ -1,7 +1,7 @@
 import React from 'react';
-import StudentSidebar from '@/components/layout/StudentSidebar';
-import StudentHeader from '@/components/layout/StudentHeader';
-import styles from '@/components/layout/StudentLayout.module.css';
+import StudentSidebar from '@/components/student/layout/StudentSidebar';
+import StudentHeader from '@/components/student/layout/StudentHeader';
+import styles from '@/components/student/layout/StudentLayout.module.css';
 
 export default function StudentLayout({
   children,

@@ -1,7 +1,7 @@
 import React from 'react';
-import LecturerSidebar from '@/components/layout/LecturerSidebar';
-import LecturerHeader from '@/components/layout/LecturerHeader';
-import styles from '@/components/layout/LecturerLayout.module.css';
+import LecturerSidebar from '@/components/lecturer/layout/LecturerSidebar';
+import LecturerHeader from '@/components/lecturer/layout/LecturerHeader';
+import styles from '@/components/lecturer/layout/LecturerLayout.module.css';
 
 export default function LecturerLayout({
   children,
