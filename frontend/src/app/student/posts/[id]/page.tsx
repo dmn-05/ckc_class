@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import styles from '@/components/student/posts/PostsManagement.module.css';
-import PostSummary from '@/components/student/posts/PostSummary';
-import CommentInput from '@/components/student/posts/CommentInput';
-import CommentThread, { CommentData } from '@/components/student/posts/CommentThread';
-import Pagination from '@/components/student/posts/Pagination';
+import PostSummary from '../../../../../components/student/posts/PostSummary';
+import CommentInput from '../../../../../components/student/posts/CommentInput';
+import CommentThread, { CommentData } from '../../../../../components/student/posts/CommentThread';
+import Pagination from '../../../../../components/student/posts/Pagination';
 import Link from 'next/link';
 
 const INITIAL_COMMENTS: CommentData[] = [
@@ -75,7 +75,7 @@ export default function PostDetailPage() {
   const handleReplySubmit = (parentId: string, content: string) => {
     setComments(prev => prev.map(c => {
       if (c.id === parentId || c.replies?.some(r => r.id === parentId)) {
-        const actualParent = c; 
+        const actualParent = c;
         const newReply: CommentData = {
           id: `reply-${Date.now()}`,
           authorName: CURRENT_USER.name,
@@ -141,7 +141,7 @@ export default function PostDetailPage() {
       </header>
 
       <PostSummary />
-      
+
       <CommentInput onSubmit={handleMainCommentSubmit} />
 
       <section className={styles.sectionBox} style={{ background: 'transparent', boxShadow: 'none', border: 'none', padding: '0 1.5rem' }}>
@@ -158,11 +158,11 @@ export default function PostDetailPage() {
         </div>
 
         {comments.map(comment => (
-          <CommentThread 
-            key={comment.id} 
-            comment={comment} 
-            onReplySubmit={handleReplySubmit} 
-            onDelete={handleDeleteComment} 
+          <CommentThread
+            key={comment.id}
+            comment={comment}
+            onReplySubmit={handleReplySubmit}
+            onDelete={handleDeleteComment}
             onEdit={handleEditComment}
             currentUser={CURRENT_USER}
           />

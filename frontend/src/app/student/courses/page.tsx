@@ -1,7 +1,7 @@
 import React from 'react';
-import CourseHeader from '@/components/student/courses/CourseHeader';
-import EnrolledCourses, { CourseType } from '@/components/student/courses/EnrolledCourses';
-import CourseSidebar, { TaskType, QuizType } from '@/components/student/courses/CourseSidebar';
+import CourseHeader from '../../../../components/student/courses/CourseHeader';
+import EnrolledCourses, { CourseType } from '../../../../components/student/courses/EnrolledCourses';
+import CourseSidebar, { TaskType, QuizType } from '../../../../components/student/courses/CourseSidebar';
 import styles from '@/components/student/courses/CourseManagement.module.css';
 
 // Mock Data
@@ -82,23 +82,23 @@ const MOCK_QUIZZES: QuizType[] = [
 export default function StudentCoursesPage() {
   return (
     <div className={styles.pageContainer}>
-      <CourseHeader 
-        semester="Học kỳ 1" 
-        year="2023 - 2024" 
-        totalCredits={18} 
-        maxCredits={24} 
+      <CourseHeader
+        semester="Học kỳ 1"
+        year="2023 - 2024"
+        totalCredits={18}
+        maxCredits={24}
       />
-      
+
       <div className={styles.gridContainer}>
-        <EnrolledCourses 
-          activeCourses={ACTIVE_COURSES} 
-          completedCourses={COMPLETED_COURSES} 
+        <EnrolledCourses
+          activeCourses={ACTIVE_COURSES}
+          completedCourses={COMPLETED_COURSES}
         />
-        <CourseSidebar 
-          tasks={MOCK_TASKS} 
-          quizzes={MOCK_QUIZZES} 
-          gpa="3.64" 
-          progress={78} 
+        <CourseSidebar
+          tasks={MOCK_TASKS}
+          quizzes={MOCK_QUIZZES}
+          gpa="3.64"
+          progress={78}
         />
       </div>
     </div>

@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import styles from '@/components/student/quizzes/QuizzesManagement.module.css';
-import QuizList from '@/components/student/quizzes/QuizList';
-import QuizInterface, { QuestionData } from '@/components/student/quizzes/QuizInterface';
-import QuizResult from '@/components/student/quizzes/QuizResult';
-import { QuizData } from '@/components/student/quizzes/QuizCard';
+import QuizList from '../../../../components/student/quizzes/QuizList';
+import QuizInterface, { QuestionData } from '../../../../components/student/quizzes/QuizInterface';
+import QuizResult from '../../../../components/student/quizzes/QuizResult';
+import { QuizData } from '../../../../components/student/quizzes/QuizCard';
 
 const MOCK_QUIZZES: QuizData[] = [
   {
@@ -106,7 +106,7 @@ export default function StudentQuizzesPage() {
   const [view, setView] = useState<'list' | 'taking' | 'result'>('list');
   const [quizzes, setQuizzes] = useState<QuizData[]>(MOCK_QUIZZES);
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
-  
+
   const [resultData, setResultData] = useState<any>(null);
 
   const activeQuiz = quizzes.find(q => q.id === activeQuizId);
@@ -125,7 +125,7 @@ export default function StudentQuizzesPage() {
 
   const handleSubmitQuiz = (answers: Record<string, any>, timeLeft: number) => {
     if (!activeQuiz) return;
-    
+
     // Calculate mock result
     let correctCount = 0;
     let hasTextQuestions = false;
@@ -147,7 +147,7 @@ export default function StudentQuizzesPage() {
     });
 
     const score = Number(((correctCount / activeQuestions.length) * 10).toFixed(1));
-    
+
     const totalSeconds = activeQuiz.durationMinutes * 60;
     const spentSeconds = Math.max(0, totalSeconds - timeLeft);
     const formatS = (s: number) => {
@@ -200,16 +200,16 @@ export default function StudentQuizzesPage() {
             <h2 className={styles.pageTitle}>Bài kiểm tra</h2>
             <p className={styles.pageSubtitle}>Hoàn thành các bài kiểm tra được giao để đánh giá kiến thức của bạn.</p>
           </div>
-          <QuizList 
-            quizzes={quizzes} 
-            onStartQuiz={handleStartQuiz} 
-            onViewResult={handleViewResult} 
+          <QuizList
+            quizzes={quizzes}
+            onStartQuiz={handleStartQuiz}
+            onViewResult={handleViewResult}
           />
         </>
       )}
 
       {view === 'taking' && activeQuiz && (
-        <QuizInterface 
+        <QuizInterface
           quizTitle={activeQuiz.title}
           quizId={activeQuiz.id}
           durationMinutes={activeQuiz.durationMinutes}
@@ -220,7 +220,7 @@ export default function StudentQuizzesPage() {
       )}
 
       {view === 'result' && resultData && (
-        <QuizResult 
+        <QuizResult
           {...resultData}
           onBackToList={handleBackToList}
         />

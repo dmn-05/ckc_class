@@ -19,10 +19,10 @@ export function LoginForm() {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.fieldGroup}>
-        <label htmlFor="email">EMAIL CÔNG VỤ</label>
+        <label htmlFor="email">EMAIL</label>
         <div className={styles.inputWrap}>
           <span className={styles.inputIcon} aria-hidden="true">
-            @
+            <span className="material-symbols-outlined register-label-icon">alternate_email</span>
           </span>
           <input
             id="email"
@@ -42,7 +42,7 @@ export function LoginForm() {
         </div>
         <div className={styles.inputWrap}>
           <span className={styles.inputIcon} aria-hidden="true">
-            *
+            <span className="material-symbols-outlined register-label-icon">lock</span>
           </span>
           <input
             id="password"
@@ -82,7 +82,7 @@ export function LoginForm() {
               ? "ĐANG XỬ LÝ..."
               : "THÀNH CÔNG"}
         </span>
-        {status === "idle" && <span aria-hidden="true">→</span>}
+        {status === "idle" && <span aria-hidden="true"></span>}
       </button>
     </form>
   );

@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import styles from '@/components/student/assignments/AssignmentsManagement.module.css';
-import AssignmentCard, { AssignmentData } from '@/components/student/assignments/AssignmentCard';
-import AssignmentDetail from '@/components/student/assignments/AssignmentDetail';
-import SubmitModal from '@/components/student/assignments/SubmitModal';
-import TeacherFeedback from '@/components/student/assignments/TeacherFeedback';
+import AssignmentCard, { AssignmentData } from '../../../../components/student/assignments/AssignmentCard';
+import AssignmentDetail from '../../../../components/student/assignments/AssignmentDetail';
+import SubmitModal from '../../../../components/student/assignments/SubmitModal';
+import TeacherFeedback from '../../../../components/student/assignments/TeacherFeedback';
 
 const MOCK_ASSIGNMENTS: AssignmentData[] = [
   {
@@ -116,11 +116,11 @@ export default function StudentAssignmentsPage() {
         <div>
           <h2 className={styles.pageTitle}>Bài tập</h2>
         </div>
-        
+
         <div>
-          <select 
-            className={styles.filterSelect} 
-            value={filter} 
+          <select
+            className={styles.filterSelect}
+            value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">Tất cả trạng thái</option>
@@ -134,18 +134,18 @@ export default function StudentAssignmentsPage() {
       <div className={styles.mainGrid}>
         <div className={styles.leftColumn}>
           {activeAssignment && (
-            <AssignmentDetail 
-              assignment={activeAssignment} 
-              onSubmitClick={() => handleOpenSubmitModal(activeAssignment.id)} 
+            <AssignmentDetail
+              assignment={activeAssignment}
+              onSubmitClick={() => handleOpenSubmitModal(activeAssignment.id)}
             />
           )}
 
           <div className={styles.cardsGrid}>
             {filteredAssignments.filter(a => a.id !== activeAssignmentId).map(assignment => (
-              <AssignmentCard 
-                key={assignment.id} 
-                assignment={assignment} 
-                onClick={() => setActiveAssignmentId(assignment.id)} 
+              <AssignmentCard
+                key={assignment.id}
+                assignment={assignment}
+                onClick={() => setActiveAssignmentId(assignment.id)}
               />
             ))}
             {filteredAssignments.length === 0 && (
@@ -155,16 +155,16 @@ export default function StudentAssignmentsPage() {
         </div>
 
         <div className={styles.rightColumn}>
-          <TeacherFeedback 
-            assignments={assignments} 
-            onResubmitClick={(id) => handleOpenSubmitModal(id)} 
+          <TeacherFeedback
+            assignments={assignments}
+            onResubmitClick={(id) => handleOpenSubmitModal(id)}
           />
         </div>
       </div>
 
-      <SubmitModal 
-        isOpen={isSubmitModalOpen} 
-        onClose={() => setIsSubmitModalOpen(false)} 
+      <SubmitModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
         assignmentTitle={activeAssignment?.title || ''}
         onSubmit={handleAssignmentSubmit}
       />
