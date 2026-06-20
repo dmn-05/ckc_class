@@ -2,11 +2,11 @@
 
 import React, { useState, useMemo } from 'react';
 import styles from '@/components/student/resources/ResourcesManagement.module.css';
-import ResourcesHeader from '@/components/student/resources/ResourcesHeader';
-import CategoryTabs from '@/components/student/resources/CategoryTabs';
-import ResourceCard, { ResourceData } from '@/components/student/resources/ResourceCard';
-import FeaturedSection from '@/components/student/resources/FeaturedSection';
-import MediaModal from '@/components/student/resources/MediaModal';
+import ResourcesHeader from '../../../../components/student/resources/ResourcesHeader';
+import CategoryTabs from '../../../../components/student/resources/CategoryTabs';
+import ResourceCard, { ResourceData } from '../../../../components/student/resources/ResourceCard';
+import FeaturedSection from '../../../../components/student/resources/FeaturedSection';
+import MediaModal from '../../../../components/student/resources/MediaModal';
 
 // Mock Data
 const MOCK_RESOURCES: ResourceData[] = [
@@ -80,7 +80,7 @@ const CATEGORIES = ['Tất cả', 'Tài liệu (PDF)', 'Video bài giảng', 'H�
 
 export default function StudentResourcesPage() {
   const [activeCategory, setActiveCategory] = useState('Tất cả');
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState<{ title: string; type: 'video' | 'image'; src?: string } | null>(null);
 
@@ -107,20 +107,20 @@ export default function StudentResourcesPage() {
   return (
     <div className={styles.pageContainer}>
       <ResourcesHeader courseName="Thiết kế UI/UX" lastUpdated="2 giờ trước" />
-      
-      <CategoryTabs 
-        categories={CATEGORIES} 
-        activeCategory={activeCategory} 
-        onSelectCategory={setActiveCategory} 
+
+      <CategoryTabs
+        categories={CATEGORIES}
+        activeCategory={activeCategory}
+        onSelectCategory={setActiveCategory}
       />
 
       <div className={styles.resourcesGrid}>
         {visibleResources.map(resource => (
-          <ResourceCard 
-            key={resource.id} 
-            data={resource} 
-            onView={handleView} 
-            onDownload={handleDownload} 
+          <ResourceCard
+            key={resource.id}
+            data={resource}
+            onView={handleView}
+            onDownload={handleDownload}
           />
         ))}
       </div>
@@ -128,12 +128,12 @@ export default function StudentResourcesPage() {
       <FeaturedSection />
 
       {modalData && (
-        <MediaModal 
-          isOpen={modalOpen} 
-          onClose={() => setModalOpen(false)} 
-          title={modalData.title} 
-          type={modalData.type} 
-          src={modalData.src} 
+        <MediaModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={modalData.title}
+          type={modalData.type}
+          src={modalData.src}
         />
       )}
     </div>
