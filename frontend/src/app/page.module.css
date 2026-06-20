@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 48px 24px;
+  padding: 24px;
   background:
     radial-gradient(circle at top left, #e2dfff 0%, transparent 38%),
     radial-gradient(circle at bottom right, #ffdbcc 0%, transparent 36%),
@@ -144,7 +144,7 @@
   font-weight: 800;
 }
 
-.avatarStack span + span {
+.avatarStack span+span {
   margin-left: -12px;
 }
 
