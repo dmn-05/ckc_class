@@ -129,16 +129,6 @@ export default function LecturerInfoForm() {
         </div>
       </div>
 
-      <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem', alignItems: 'center' }}>
-        <button type="button" className={styles.btnCancel}>
-          Hủy bỏ
-        </button>
-        <button type="submit" className={styles.btnSubmit}>
-          Lưu thông tin
-          <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>save</span>
-        </button>
-      </div>
-
       <div className={styles.securityInfo}>
         <span className={`material-symbols-outlined ${styles.securityIcon}`}>info</span>
         <p className={styles.securityText}>

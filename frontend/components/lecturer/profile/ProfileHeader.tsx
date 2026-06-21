@@ -10,6 +10,10 @@ export default function ProfileHeader() {
           Cập nhật hồ sơ chuyên môn và thông tin định danh của giảng viên trong hệ thống học thuật.
         </p>
       </div>
+      <div className={styles.actionGroup}>
+        <button className={styles.btnCancel}>Hủy bỏ</button>
+        <button className={styles.btnSubmit}>Lưu thay đổi</button>
+      </div>
     </div>
   );
 }
