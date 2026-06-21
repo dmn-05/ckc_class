@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import styles from './ClassesManagement.module.css';
+import styles from './AdminClasses.module.css';
 import { ClassData, ClassStatus } from './ClassCard';
 
 interface ClassFormModalProps {

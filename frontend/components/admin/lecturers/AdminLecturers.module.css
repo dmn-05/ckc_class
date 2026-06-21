@@ -1,0 +1,652 @@
+/* AdminLecturers.module.css */
+
+.pageContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: var(--font-inter, system-ui, -apple-system, sans-serif);
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #191c1e;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.pageSubtitle {
+  color: #464555;
+  font-size: 0.875rem;
+  max-width: 32rem;
+}
+
+.btnAddLecturer {
+  background-color: #3525cd;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px 0 rgba(53, 37, 205, 0.2);
+  transition: all 0.2s;
+}
+
+.btnAddLecturer:hover {
+  background-color: rgba(53, 37, 205, 0.9);
+  transform: scale(1.02);
+}
+
+.btnAddLecturer:active {
+  transform: scale(0.95);
+}
+
+.layoutGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+/* Left Column */
+.leftColumn {
+  grid-column: span 12 / span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .leftColumn {
+    grid-column: span 4 / span 12;
+  }
+}
+
+.glassCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e3e5;
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.glassCard:hover {
+  border-color: #3525cd;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.overviewCard {
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.overviewGlow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8rem;
+  height: 8rem;
+  background-color: rgba(53, 37, 205, 0.05);
+  border-radius: 50%;
+  filter: blur(24px);
+  margin-right: -2.5rem;
+  margin-top: -2.5rem;
+  transition: all 0.3s;
+}
+
+.overviewCard:hover .overviewGlow {
+  background-color: rgba(53, 37, 205, 0.1);
+}
+
+.overviewTitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #3525cd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.statList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #f2f4f6;
+  border-radius: 1rem;
+  border: 1px solid rgba(199, 196, 216, 0.3);
+}
+
+.statItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statIconBoxPrimary {
+  padding: 0.5rem;
+  background-color: rgba(53, 37, 205, 0.1);
+  color: #3525cd;
+  border-radius: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #191c1e;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.statValuePrimary { color: #3525cd; }
+
+.subStatsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subStatItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f7f9fb;
+  border-radius: 0.75rem;
+}
+
+.subStatLabel {
+  font-size: 0.75rem;
+  color: #464555;
+}
+
+.subStatValueTertiary {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #7e3000;
+}
+
+.subStatValueSecondary {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4648d4;
+}
+
+.subStatValuePrimary {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3525cd;
+}
+
+.filtersCard {
+  padding: 1.5rem;
+}
+
+.filterTitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4648d4; /* Secondary from light mode */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterGroup {
+  margin-bottom: 1.25rem;
+}
+
+.filterLabel {
+  font-size: 0.75rem;
+  color: #464555;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.filterSelect {
+  width: 100%;
+  background-color: #f7f9fb;
+  border: 1px solid rgba(199, 196, 216, 0.5);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #191c1e;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.filterSelect:focus {
+  border-color: #4648d4;
+  box-shadow: 0 0 0 2px rgba(70, 72, 212, 0.1);
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(199, 196, 216, 0.8);
+  accent-color: #7e3000;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-size: 0.875rem;
+  color: #464555;
+  transition: color 0.2s;
+}
+
+.checkboxLabel:hover .checkboxText {
+  color: #191c1e;
+}
+
+.bannerCard {
+  height: 10rem;
+  border-radius: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  transition: transform 0.7s;
+}
+
+.bannerCard:hover .bannerImage {
+  transform: scale(1.1);
+}
+
+.bannerContent {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(25, 28, 30, 0.8), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+}
+
+.bannerTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.bannerSubtitle {
+  font-size: 0.75rem;
+  color: #e1e0ff; /* light primary */
+}
+
+/* Right Column */
+.rightColumn {
+  grid-column: span 12 / span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .rightColumn {
+    grid-column: span 8 / span 12;
+  }
+}
+
+.searchBarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.searchBoxRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.searchBoxMain {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 1rem;
+  border: 1px solid #e0e3e5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.searchIconMain {
+  color: #464555;
+  margin-right: 0.75rem;
+}
+
+.searchInputMain {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 0;
+  outline: none;
+  font-size: 0.875rem;
+  color: #191c1e;
+}
+
+.btnFilter {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #464555;
+  border: 1px solid #e0e3e5;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnFilter:hover {
+  color: #7e3000;
+  border-color: #7e3000;
+}
+
+.filterTagScroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.filterTagScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filterTagScrollBtn {
+  padding: 0.5rem 1.25rem;
+  background-color: #ffffff;
+  color: #464555;
+  border: 1px solid rgba(199, 196, 216, 0.5);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterTagScrollBtn:hover {
+  background-color: #e6e8ea;
+}
+
+.filterTagScrollBtnActive {
+  background-color: #3525cd;
+  color: #ffffff;
+  border-color: #3525cd;
+  font-weight: 700;
+}
+
+.lecturerList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lecturerCard {
+  padding: 1.25rem;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.lecturerCardPrimary { border-left-color: #3525cd; }
+.lecturerCardSecondary { border-left-color: #4648d4; }
+.lecturerCardTertiary { border-left-color: #7e3000; }
+
+.lecturerCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.avatarWrapper {
+  position: relative;
+}
+
+.avatarBox {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(199, 196, 216, 0.5);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.lecturerCard:hover .avatarBox {
+  border-color: #3525cd;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%);
+  transition: filter 0.2s;
+}
+
+.lecturerCard:hover .avatarImage {
+  filter: grayscale(0%);
+}
+
+.statusIndicator {
+  position: absolute;
+  bottom: -0.25rem;
+  right: -0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+
+.statusIndicatorActive {
+  background-color: #7e3000; /* tertiary */
+  box-shadow: 0 0 8px rgba(126, 48, 0, 0.4);
+}
+
+.statusIndicatorInactive {
+  background-color: #ba1a1a; /* error */
+  box-shadow: 0 0 8px rgba(186, 26, 26, 0.4);
+}
+
+.lecturerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.lecturerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.lecturerTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.lecturerCodeBadge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lecturerCodePrimary { background-color: rgba(53, 37, 205, 0.1); color: #3525cd; }
+.lecturerCodeSecondary { background-color: rgba(70, 72, 212, 0.1); color: #4648d4; }
+.lecturerCodeTertiary { background-color: rgba(126, 48, 0, 0.1); color: #7e3000; }
+
+.lecturerDetailsRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.875rem;
+  color: #464555;
+  flex-wrap: wrap;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.detailIcon {
+  font-size: 0.875rem;
+}
+
+.detailHighlight {
+  color: #7e3000;
+}
+
+.emailText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.lecturerCardRight {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+@media (max-width: 768px) {
+  .lecturerCardRight {
+    opacity: 1;
+  }
+}
+
+.lecturerCard:hover .lecturerCardRight {
+  opacity: 1;
+}
+
+.btnActionSmall {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background-color: #eceef0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #464555;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnActionSmall:hover {
+  background-color: rgba(53, 37, 205, 0.1);
+  color: #3525cd;
+}
+
+.btnActionDelete:hover {
+  background-color: rgba(186, 26, 26, 0.1);
+  color: #ba1a1a;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.paginationText {
+  font-size: 0.75rem;
+  color: #464555;
+  font-weight: 500;
+}
+
+.paginationButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btnPage {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid rgba(199, 196, 216, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #464555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnPage:hover:not(:disabled) {
+  background-color: #eceef0;
+}
+
+.btnPageActive {
+  background-color: rgba(70, 72, 212, 0.1);
+  color: #4648d4;
+  font-weight: 700;
+  border-color: rgba(70, 72, 212, 0.3);
+}
+
+.btnPageDisabled {
+  background-color: #f2f4f6;
+  opacity: 0.5;
+  cursor: not-allowed;
+}

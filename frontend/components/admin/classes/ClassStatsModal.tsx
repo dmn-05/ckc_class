@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React from 'react';
-import styles from './ClassesManagement.module.css';
+import styles from './AdminClasses.module.css';
 
 interface ClassStatsModalProps {
   classTitle: string;
@@ -49,7 +49,7 @@ export default function ClassStatsModal({ classTitle, stats, onClose }: ClassSta
               <p className={styles.statBoxValue} style={{ color: '#ba1a1a' }}>{stats.pendingGrading}</p>
             </div>
           </div>
-          
+
           <div style={{ padding: '1rem', backgroundColor: '#e1e0ff', borderRadius: '0.75rem', color: '#2f2ebe', fontSize: '0.875rem' }}>
             <strong>Gợi ý:</strong> Hãy vào xem chi tiết lớp học để chấm điểm các bài tập còn tồn đọng hoặc tạo thêm tài nguyên học tập cho sinh viên.
           </div>

@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
-import styles from './ClassesManagement.module.css';
+import styles from './AdminClasses.module.css';
 
 interface ClassDashboardProps {
   activeCount: number;
@@ -23,7 +23,7 @@ export default function ClassDashboard({
       {/* System Overview */}
       <div className={`${styles.glassCard} ${styles.overviewCard}`}>
         <div className={styles.overviewGlow}></div>
-        <h3 className={styles.overviewTitle}>Tổng quan học kỳ</h3>
+        <h3 className={styles.overviewTitle}>TỔNG QUAN HỌC PHẦN</h3>
         
         <div className={styles.statList}>
           <div className={styles.statItem}>
@@ -33,33 +33,23 @@ export default function ClassDashboard({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className={styles.statLabel}>Lớp đang mở</span>
+              <span className={styles.statLabel}>Học phần đang mở</span>
             </div>
-            <span className={`${styles.statValue} ${styles.statValuePrimary}`}>{activeCount}</span>
+            <span className={`${styles.statValue} ${styles.statValuePrimary}`}>12</span>
           </div>
 
           <div className={styles.statItem}>
             <div className={styles.statItemLeft}>
               <div className={styles.statIconBoxError}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  <circle cx="16" cy="16" r="5" fill="#fff" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 14v2l1.5 1.5M16 11a5 5 0 100 10 5 5 0 000-10z" />
                 </svg>
               </div>
-              <span className={styles.statLabel}>Bài tập chờ chấm</span>
+              <span className={styles.statLabel}>Chờ phê duyệt</span>
             </div>
-            <span className={`${styles.statValue} ${styles.statValueError}`}>{pendingAssignments}</span>
-          </div>
-
-          <div className={styles.statItem}>
-            <div className={styles.statItemLeft}>
-              <div className={styles.statIconBoxWarn}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className={styles.statLabel}>Quiz sắp diễn ra</span>
-            </div>
-            <span className={`${styles.statValue} ${styles.statValueWarn}`}>{upcomingQuizzes}</span>
+            <span className={`${styles.statValue} ${styles.statValueError}`}>03</span>
           </div>
         </div>
       </div>

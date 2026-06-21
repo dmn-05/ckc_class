@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import styles from './ClassesManagement.module.css';
+import styles from './AdminClasses.module.css';
 import ClassCard, { ClassData } from './ClassCard';
 
 interface ClassListProps {

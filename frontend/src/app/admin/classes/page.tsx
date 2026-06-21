@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import styles from '@/components/admin/classes/ClassesManagement.module.css';
+import styles from '@/components/admin/classes/AdminClasses.module.css';
 import ClassDashboard from '@/components/admin/classes/ClassDashboard';
 import ClassList from '@/components/admin/classes/ClassList';
 import ClassFormModal from '@/components/admin/classes/ClassFormModal';
