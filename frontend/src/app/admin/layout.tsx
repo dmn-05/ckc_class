@@ -1,18 +1,18 @@
 import React from 'react';
-import LecturerSidebar from '@/components/lecturer/layout/LecturerSidebar';
-import LecturerHeader from '@/components/lecturer/layout/LecturerHeader';
-import styles from '@/components/lecturer/layout/LecturerLayout.module.css';
+import AdminSidebar from '@/components/admin/layout/AdminSidebar';
+import AdminHeader from '@/components/admin/layout/AdminHeader';
+import styles from '@/components/admin/layout/AdminLayout.module.css';
 
-export default function LecturerLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <div className={styles.layoutContainer}>
-      <LecturerSidebar />
+      <AdminSidebar />
       <div className={styles.mainContent}>
-        <LecturerHeader />
+        <AdminHeader />
         <main className={styles.pageContent}>
           {children}
         </main>

@@ -150,11 +150,12 @@ a {
   padding: 1rem;
   position: relative;
   background: radial-gradient(circle at top right, rgba(200, 202, 255, 0.2), transparent 40%),
-              radial-gradient(circle at bottom left, rgba(172, 237, 255, 0.2), transparent 40%),
-              #f8f9fc;
+    radial-gradient(circle at bottom left, rgba(172, 237, 255, 0.2), transparent 40%),
+    #f8f9fc;
   font-family: 'Inter', sans-serif;
   overflow: hidden;
 }
+
 @media (min-width: 1024px) {
   .register-page {
     padding: 2rem;
@@ -287,6 +288,7 @@ a {
   grid-template-columns: 1fr;
   gap: 1rem;
 }
+
 @media (min-width: 768px) {
   .register-grid-2 {
     grid-template-columns: repeat(2, 1fr);
@@ -350,6 +352,7 @@ a {
   align-items: center;
   justify-content: center;
 }
+
 .register-toggle-btn:hover {
   color: #494bd6;
 }
@@ -387,6 +390,7 @@ a {
   font-weight: 500;
   text-decoration: none;
 }
+
 .register-link:hover {
   text-decoration: underline;
 }
@@ -437,6 +441,7 @@ a {
   margin-left: 0.25rem;
   transition: color 0.2s;
 }
+
 .register-login-link:hover {
   color: #6750a4;
 }
@@ -464,6 +469,7 @@ a {
   font-size: 12px;
   transition: color 0.2s;
 }
+
 .register-footer-link:hover {
   color: #494bd6;
 }
@@ -486,37 +492,9 @@ a {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* ---- ADMIN & COMPONENTS STYLES ---- */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-.glass-card {
-  background: #ffffff;
-  border: 1px solid var(--color-surface-container-highest, #e2e8f0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-  border-color: var(--color-outline-variant, #c7c4d7);
-  transform: translateY(-2px);
-}
-.sidebar-active {
-  border-left: 4px solid var(--color-primary, #494bd6);
-  background: rgba(73, 75, 214, 0.08);
-  color: var(--color-primary, #494bd6);
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
