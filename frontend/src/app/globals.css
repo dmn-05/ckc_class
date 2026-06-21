@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
+@source "../../components";
+
 
 @theme {
   --color-outline-variant: #c7c4d7;
@@ -76,7 +79,12 @@
   --text-headline-lg--line-height: 1.2;
   --text-headline-lg--letter-spacing: -0.02em;
   --text-headline-lg--font-weight: 700;
+
+  --spacing-container-max: 1280px;
+  --spacing-margin-desktop: 48px;
+  --spacing-gutter: 24px;
 }
+
 
 :root {
   --background: #f7f9fb;
@@ -482,3 +490,4 @@ a {
     transform: translateY(0);
   }
 }
+
