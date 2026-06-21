@@ -492,3 +492,31 @@ a {
   }
 }
 
+/* ---- ADMIN & COMPONENTS STYLES ---- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.glass-card {
+  background: #ffffff;
+  border: 1px solid var(--color-surface-container-highest, #e2e8f0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-outline-variant, #c7c4d7);
+  transform: translateY(-2px);
+}
+.sidebar-active {
+  border-left: 4px solid var(--color-primary, #494bd6);
+  background: rgba(73, 75, 214, 0.08);
+  color: var(--color-primary, #494bd6);
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
