@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import styles from './StudentLayout.module.css';
+import styles from './LecturerLayout.module.css';
 
-export default function StudentHeader() {
-  const hasPhoto = false; // Set to true to display photo, false to display "SV"
+export default function LecturerHeader() {
+  const hasPhoto = false; // Set to true to display photo, false to display "GV"
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -22,7 +22,7 @@ export default function StudentHeader() {
   return (
     <header className={styles.header}>
       <div className={styles.headerTitle}>
-        Cổng thông tin sinh viên
+        Cổng thông tin giảng viên
       </div>
       
       <div className={styles.headerActions}>
@@ -36,16 +36,16 @@ export default function StudentHeader() {
         <div className={styles.userProfile} ref={dropdownRef} onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer', position: 'relative' }}>
           {hasPhoto ? (
             <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcNSQXs5-LbQJDOQbKGq1BFmI1eYpdaflsF67_AjsQxpMC-G6H6ercthK9v35xQ4iGLsJG7j0k2CIuH8CeP2Osj27FoHd2cX4vcKQ-JzZ_0AaDpqckd5k09eTQh63s-hxDjjOx0M6Q1CW-a3SWGyKEtnLkubsSE3xkB_PkZ4FLiM6N9zdY-ukYH1x2YhayxUdBjcpyn3JH1XoMP3i3c2uxIHp9XqVHrP3LBOb9rlMgGr6Uf3mZzVACiXoMzLw2vH2Fov6MyUgYiUs" 
-              alt="Nguyễn Văn A"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtePGyL-OCAwFTFV8YAPLu-ThfD2Ya_ReUOwIW0PAy5QZxRaVI1emqF1TwYnLtmBjk82_S0bbuCnvZDB3A9EABi_F5cflLk7rp3FDWrd8_9h-EWEcOtaZ7NvXogtRE8waz07f9Tt9JPywtGgT2FcFdCyCUlWgQizviojMizJufX4VylSSPlA7tbEzhobYEkJydP8-cRqvTMpfF6zWWfRC9zkGu1MbHMIizHugDZboKD2suWmV-XudErXZEimOSUUglNmnK9P96ru4" 
+              alt="TS. Nguyễn Văn Minh"
               className={styles.userAvatar} 
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div className={styles.userAvatar}>SV</div>
+            <div className={styles.userAvatar}>GV</div>
           )}
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Nguyễn Văn A
+            TS. Nguyễn Văn Minh
             <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: '#64748b' }}>arrow_drop_down</span>
           </div>
 
