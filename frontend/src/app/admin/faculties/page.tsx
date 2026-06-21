@@ -5,6 +5,7 @@ import styles from '@/components/admin/faculties/AdminFaculties.module.css';
 import FacultyDashboard from '@/components/admin/faculties/FacultyDashboard';
 import FacultyList from '@/components/admin/faculties/FacultyList';
 import { FacultyData } from '@/components/admin/faculties/FacultyCard';
+import Link from 'next/link';
 
 const INITIAL_FACULTIES: FacultyData[] = [
   {
@@ -74,21 +75,21 @@ export default function FacultiesManagementPage() {
           <p className={styles.pageSubtitle}>Tổ chức và quản lý các Khoa trong hệ thống CKC.</p>
         </div>
 
-        <button className={styles.btnAddFaculty}>
+        <Link href="/admin/faculties/create" className={styles.btnAddFaculty}>
           <span className="material-symbols-outlined">add</span>
           Thêm Khoa
-        </button>
+        </Link>
       </div>
 
       <div className={styles.layoutGrid}>
-        <FacultyDashboard 
+        <FacultyDashboard
           activeCount={activeCount}
           pendingCount={pendingCount}
           currentFilter={filter}
           onFilterChange={setFilter}
         />
 
-        <FacultyList 
+        <FacultyList
           faculties={faculties}
           onEdit={handleEdit}
           onDelete={handleDelete}

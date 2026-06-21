@@ -1,0 +1,22 @@
+'use client';
+
+import React from 'react';
+import { useParams } from 'next/navigation';
+import styles from '@/components/admin/classes/AdminUpdateClasses.module.css';
+import UpdateClassForm from '@/components/admin/classes/UpdateClassForm';
+
+export default function UpdateClassPage() {
+  const params = useParams();
+  const classId = params?.id as string;
+
+  return (
+    <div className={styles.pageContainer}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Chỉnh Sửa Lớp Học Phần ({classId || 'INT101.1'})</h1>
+        <p className={styles.pageSubtitle}>Cập nhật thông tin giảng viên, lịch học và trạng thái lớp học phần.</p>
+      </div>
+
+      <UpdateClassForm classId={classId} />
+    </div>
+  );
+}

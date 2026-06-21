@@ -7,6 +7,7 @@ import ClassList from '@/components/admin/classes/ClassList';
 import ClassFormModal from '@/components/admin/classes/ClassFormModal';
 import ClassStatsModal from '@/components/admin/classes/ClassStatsModal';
 import { ClassData } from '@/components/admin/classes/ClassCard';
+import Link from 'next/link';
 
 const INITIAL_CLASSES: ClassData[] = [
   {
@@ -111,12 +112,12 @@ export default function LecturerClassesPage() {
           <p className={styles.pageSubtitle}>Quản lý danh sách các lớp học.</p>
         </div>
 
-        <button className={styles.btnAddClass} onClick={handleOpenCreate}>
+        <Link href="/admin/classes/create" className={styles.btnAddClass}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Thêm lớp học
-        </button>
+        </Link>
       </div>
 
       <div className={styles.layoutGrid}>

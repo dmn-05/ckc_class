@@ -58,7 +58,7 @@ export default function FacultyCard({ faculty, onEdit, onDelete }: FacultyCardPr
           <div className={styles.facultyDetailsRow}>
             <div className={styles.detailItem}>
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>groups</span>
-              {faculty.students.toLocaleString()} Sinh viên • {faculty.lecturers} Giảng viên
+              {faculty.students.toLocaleString('vi-VN')} Sinh viên • {faculty.lecturers} Giảng viên
             </div>
             
             {faculty.status === 'active' ? (
