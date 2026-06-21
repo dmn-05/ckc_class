@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './AdminStudents.module.css';
-
+import Link from 'next/link';
 export default function StudentsHeader() {
   return (
     <div className={styles.headerContainer}>
@@ -10,7 +10,7 @@ export default function StudentsHeader() {
       </div>
       <button className={styles.addButton}>
         <span className="material-symbols-outlined">person_add</span>
-        Thêm Sinh Viên
+        <Link href="/admin/students/create">Thêm Sinh Viên</Link>
       </button>
     </div>
   );

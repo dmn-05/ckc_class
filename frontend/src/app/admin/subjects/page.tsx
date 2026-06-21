@@ -5,47 +5,48 @@ import styles from '@/components/admin/subjects/AdminSubjects.module.css';
 import SubjectDashboard from '@/components/admin/subjects/SubjectDashboard';
 import SubjectList from '@/components/admin/subjects/SubjectList';
 import { SubjectData } from '@/components/admin/subjects/SubjectCard';
+import Link from 'next/link';
 
 const INITIAL_SUBJECTS: SubjectData[] = [
-  { 
-    id: 's1', 
-    name: 'Lập trình Di động', 
-    code: 'MH-0012', 
+  {
+    id: 's1',
+    name: 'Lập trình Di động',
+    code: 'MH-0012',
     credits: 3,
     facultyName: 'CNTT',
     studentCount: 32,
-    theme: 'primary', 
-    icon: 'phone_iphone' 
+    theme: 'primary',
+    icon: 'phone_iphone'
   },
-  { 
-    id: 's2', 
-    name: 'Cơ sở dữ liệu', 
-    code: 'MH-0045', 
+  {
+    id: 's2',
+    name: 'Cơ sở dữ liệu',
+    code: 'MH-0045',
     credits: 4,
     facultyName: 'CNTT',
     studentCount: 45,
-    theme: 'secondary', 
-    icon: 'database' 
+    theme: 'secondary',
+    icon: 'database'
   },
-  { 
-    id: 's3', 
-    name: 'Phát triển Web', 
-    code: 'MH-0089', 
+  {
+    id: 's3',
+    name: 'Phát triển Web',
+    code: 'MH-0089',
     credits: 3,
     facultyName: 'CNTT',
     studentCount: 28,
-    theme: 'tertiary', 
-    icon: 'web' 
+    theme: 'tertiary',
+    icon: 'web'
   },
-  { 
-    id: 's4', 
-    name: 'Mạng máy tính', 
-    code: 'MH-0102', 
+  {
+    id: 's4',
+    name: 'Mạng máy tính',
+    code: 'MH-0102',
     credits: 3,
     facultyName: 'CNTT',
     studentCount: 50,
-    theme: 'primary', 
-    icon: 'language' 
+    theme: 'primary',
+    icon: 'language'
   }
 ];
 
@@ -81,21 +82,21 @@ export default function SubjectsManagementPage() {
           <p className={styles.pageSubtitle}>Theo dõi và quản lý danh mục học phần tại học viện.</p>
         </div>
 
-        <button className={styles.btnAddSubject}>
+        <Link href="/admin/subjects/create" className={styles.btnAddSubject}>
           <span className="material-symbols-outlined">add</span>
           Thêm Môn học
-        </button>
+        </Link>
       </div>
 
       <div className={styles.layoutGrid}>
-        <SubjectDashboard 
+        <SubjectDashboard
           totalCount={totalCount}
           activeCount={activeCount}
           pausedCount={pausedCount}
           distributionData={distributionData}
         />
 
-        <SubjectList 
+        <SubjectList
           subjects={subjects}
           currentFilter={filter}
           onFilterChange={setFilter}
