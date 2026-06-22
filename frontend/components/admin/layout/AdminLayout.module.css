@@ -181,6 +181,7 @@
   border-radius: 0.375rem;
   transition: all 0.2s;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .dropdownItem:hover {
