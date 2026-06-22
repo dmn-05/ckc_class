@@ -6,19 +6,23 @@ import styles from './AdminDepartments.module.css';
 interface DepartmentDashboardProps {
   activeCount: number;
   pendingCount: number;
+  inactiveCount: number;
   currentFacultyFilter: string;
   onFacultyFilterChange: (filter: string) => void;
   currentStatusFilter: string;
   onStatusFilterChange: (filter: string) => void;
+  faculties?: { id: string, name: string }[];
 }
 
 export default function DepartmentDashboard({
   activeCount,
   pendingCount,
+  inactiveCount,
   currentFacultyFilter,
   onFacultyFilterChange,
   currentStatusFilter,
-  onStatusFilterChange
+  onStatusFilterChange,
+  faculties = []
 }: DepartmentDashboardProps) {
   return (
     <div className={styles.leftColumn}>
@@ -49,6 +53,18 @@ export default function DepartmentDashboard({
               {pendingCount.toString().padStart(2, '0')}
             </span>
           </div>
+
+          <div className={styles.statItem}>
+            <div className={styles.statItemLeft}>
+              <div className={styles.statIconBoxError}>
+                <span className="material-symbols-outlined">cancel</span>
+              </div>
+              <span className={styles.statLabel}>Ngừng hoạt động</span>
+            </div>
+            <span className={`${styles.statValue} ${styles.statValueError}`}>
+              {inactiveCount.toString().padStart(2, '0')}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -64,9 +80,9 @@ export default function DepartmentDashboard({
             onChange={(e) => onFacultyFilterChange(e.target.value)}
           >
             <option value="all">Tất cả khoa</option>
-            <option value="CNTT">Công nghệ thông tin</option>
-            <option value="QTKD">Quản trị kinh doanh</option>
-            <option value="DDT">Điện - Điện tử</option>
+            {faculties.map(f => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
           </select>
         </div>
 
@@ -90,6 +106,12 @@ export default function DepartmentDashboard({
               onClick={() => onStatusFilterChange('paused')}
             >
               Tạm ngưng
+            </button>
+            <button 
+              className={`${styles.filterTag} ${currentStatusFilter === 'pending' ? styles.filterTagActive : ''}`}
+              onClick={() => onStatusFilterChange('pending')}
+            >
+              Chờ duyệt
             </button>
           </div>
         </div>

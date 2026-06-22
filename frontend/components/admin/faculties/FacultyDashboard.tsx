@@ -6,13 +6,15 @@ import styles from './AdminFaculties.module.css';
 interface FacultyDashboardProps {
   activeCount: number;
   pendingCount: number;
+  inactiveCount: number;
   currentFilter: string;
   onFilterChange: (filter: string) => void;
 }
 
 export default function FacultyDashboard({
-  activeCount,
-  pendingCount,
+  activeCount = 0,
+  pendingCount = 0,
+  inactiveCount = 0,
   currentFilter,
   onFilterChange
 }: FacultyDashboardProps) {
@@ -45,6 +47,18 @@ export default function FacultyDashboard({
               {pendingCount.toString().padStart(2, '0')}
             </span>
           </div>
+
+          <div className={styles.statItem}>
+            <div className={styles.statItemLeft}>
+              <div className={styles.statIconBoxError}>
+                <span className="material-symbols-outlined">cancel</span>
+              </div>
+              <span className={styles.statLabel}>Ngừng hoạt động</span>
+            </div>
+            <span className={`${styles.statValue} ${styles.statValueError}`}>
+              {inactiveCount.toString().padStart(2, '0')}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -71,6 +85,12 @@ export default function FacultyDashboard({
               onClick={() => onFilterChange('paused')}
             >
               Tạm ngừng
+            </button>
+            <button 
+              className={`${styles.filterTag} ${currentFilter === 'pending' ? styles.filterTagActive : ''}`}
+              onClick={() => onFilterChange('pending')}
+            >
+              Chờ duyệt
             </button>
           </div>
         </div>

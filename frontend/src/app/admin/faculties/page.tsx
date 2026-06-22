@@ -1,69 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '@/components/admin/faculties/AdminFaculties.module.css';
 import FacultyDashboard from '@/components/admin/faculties/FacultyDashboard';
 import FacultyList from '@/components/admin/faculties/FacultyList';
 import { FacultyData } from '@/components/admin/faculties/FacultyCard';
 import Link from 'next/link';
-
-const INITIAL_FACULTIES: FacultyData[] = [
-  {
-    id: 'f1',
-    name: 'Khoa Công nghệ thông tin',
-    code: 'K_CNTT',
-    students: 2850,
-    lecturers: 72,
-    status: 'active',
-    theme: 'primary',
-    icon: 'terminal'
-  },
-  {
-    id: 'f2',
-    name: 'Khoa Quản trị kinh doanh',
-    code: 'K_QTKD',
-    students: 1240,
-    lecturers: 48,
-    status: 'active',
-    theme: 'secondary',
-    icon: 'payments'
-  },
-  {
-    id: 'f3',
-    name: 'Khoa Thiết kế đồ họa',
-    code: 'K_TKDH',
-    students: 860,
-    lecturers: 24,
-    status: 'active',
-    theme: 'primary',
-    icon: 'palette'
-  },
-  {
-    id: 'f4',
-    name: 'Khoa Công nghệ thực phẩm',
-    code: 'K_CNTP',
-    students: 420,
-    lecturers: 18,
-    status: 'pending',
-    theme: 'tertiary',
-    icon: 'science'
-  }
-];
+import { getFaculties, deleteFaculty } from '@/app/actions/faculty';
 
 export default function FacultiesManagementPage() {
-  const [faculties, setFaculties] = useState<FacultyData[]>(INITIAL_FACULTIES);
+  const [faculties, setFaculties] = useState<FacultyData[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await getFaculties();
+        setFaculties(data);
+      } catch (error) {
+        console.error("Failed to load faculties", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const activeCount = faculties.filter(f => f.status === 'active').length;
   const pendingCount = faculties.filter(f => f.status === 'pending').length;
+  const inactiveCount = faculties.filter(f => f.status === 'inactive').length;
 
-  const handleEdit = (faculty: FacultyData) => {
-    console.log('Edit faculty', faculty);
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa Khoa này?')) {
-      setFaculties(prev => prev.filter(f => f.id !== id));
+      try {
+        await deleteFaculty(id);
+        setFaculties(prev => prev.filter(f => f.id !== id));
+      } catch (error) {
+        alert('Có lỗi xảy ra khi xóa Khoa.');
+        console.error(error);
+      }
     }
   };
 
@@ -85,15 +61,20 @@ export default function FacultiesManagementPage() {
         <FacultyDashboard
           activeCount={activeCount}
           pendingCount={pendingCount}
+          inactiveCount={inactiveCount}
           currentFilter={filter}
           onFilterChange={setFilter}
         />
 
-        <FacultyList
-          faculties={faculties}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Đang tải dữ liệu khoa...</div>
+        ) : (
+          <FacultyList
+            faculties={faculties}
+            filter={filter}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </div>
   );

@@ -175,7 +175,7 @@
 .filterTitle {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #464555;
+  color: #3525cd;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -260,6 +260,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: calc(100vh - 150px);
 }
 
 @media (min-width: 1024px) {
@@ -399,7 +400,13 @@
   gap: 1rem;
   font-size: 0.875rem;
   color: #464555;
-  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.facultyStatusRow {
+  display: flex;
+  font-size: 0.875rem;
+  color: #464555;
 }
 
 .detailItem {
@@ -470,6 +477,7 @@
   padding-top: 1.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  margin-top: auto;
 }
 
 .paginationText {

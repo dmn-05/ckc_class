@@ -1,68 +1,52 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '@/components/admin/departments/AdminDepartments.module.css';
 import DepartmentDashboard from '@/components/admin/departments/DepartmentDashboard';
 import DepartmentList from '@/components/admin/departments/DepartmentList';
 import { DepartmentData } from '@/components/admin/departments/DepartmentCard';
 import Link from 'next/link';
-
-const INITIAL_DEPARTMENTS: DepartmentData[] = [
-  {
-    id: 'd1',
-    name: 'Bộ môn Marketing',
-    code: 'BM_MKT',
-    facultyName: 'QTKD - Quản trị kinh doanh',
-    status: 'active',
-    theme: 'tertiary',
-    icon: 'trending_up'
-  },
-  {
-    id: 'd2',
-    name: 'Bộ môn Cơ sở dữ liệu',
-    code: 'BM_CSDL',
-    facultyName: 'CNTT - Công nghệ thông tin',
-    status: 'active',
-    theme: 'primary',
-    icon: 'database'
-  },
-  {
-    id: 'd3',
-    name: 'Bộ môn Lập trình',
-    code: 'BM_LT',
-    facultyName: 'CNTT - Công nghệ thông tin',
-    status: 'active',
-    theme: 'secondary',
-    icon: 'code'
-  },
-  {
-    id: 'd4',
-    name: 'Bộ môn Mạng máy tính',
-    code: 'BM_MMT',
-    facultyName: 'CNTT - Công nghệ thông tin',
-    status: 'pending',
-    theme: 'error',
-    icon: 'hub'
-  }
-];
+import { getDepartments, deleteDepartment } from '@/app/actions/department';
 
 export default function DepartmentsManagementPage() {
-  const [departments, setDepartments] = useState<DepartmentData[]>(INITIAL_DEPARTMENTS);
+  const [departments, setDepartments] = useState<DepartmentData[]>([]);
   const [facultyFilter, setFacultyFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await getDepartments();
+        setDepartments(data);
+      } catch (error) {
+        console.error("Failed to load departments", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const activeCount = departments.filter(d => d.status === 'active').length;
   const pendingCount = departments.filter(d => d.status === 'pending').length;
+  const inactiveCount = departments.filter(d => d.status === 'inactive').length;
 
-  const handleEdit = (department: DepartmentData) => {
-    console.log('Edit department', department);
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa Bộ môn này?')) {
-      setDepartments(prev => prev.filter(d => d.id !== id));
+      try {
+        await deleteDepartment(id);
+        setDepartments(prev => prev.filter(d => d.id !== id));
+      } catch (error) {
+        alert('Có lỗi xảy ra khi xóa Bộ môn.');
+        console.error(error);
+      }
     }
   };
+
+  const uniqueFaculties = Array.from(
+    new Map(departments.map(d => [d.facultyId, d.facultyName])).entries()
+  ).map(([id, name]) => ({ id, name }));
 
   return (
     <div className={styles.pageContainer}>
@@ -82,17 +66,24 @@ export default function DepartmentsManagementPage() {
         <DepartmentDashboard
           activeCount={activeCount}
           pendingCount={pendingCount}
+          inactiveCount={inactiveCount}
           currentFacultyFilter={facultyFilter}
           onFacultyFilterChange={setFacultyFilter}
           currentStatusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
+          faculties={uniqueFaculties}
         />
 
-        <DepartmentList
-          departments={departments}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Đang tải dữ liệu bộ môn...</div>
+        ) : (
+          <DepartmentList
+            departments={departments}
+            facultyFilter={facultyFilter}
+            statusFilter={statusFilter}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </div>
   );

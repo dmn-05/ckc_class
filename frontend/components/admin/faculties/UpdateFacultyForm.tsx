@@ -1,28 +1,81 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './AdminUpdateFaculties.module.css';
+import { getFacultyById, updateFaculty, getLecturers } from '@/app/actions/faculty';
 
 interface UpdateFacultyFormProps {
   facultyId?: string;
 }
 
 export default function UpdateFacultyForm({ facultyId }: UpdateFacultyFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [lecturers, setLecturers] = useState<{id: number, ho_ten: string}[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    dean: '',
+    status: 'active'
+  });
+
+  useEffect(() => {
+    if (!facultyId) return;
+    
+    async function fetchData() {
+      try {
+        const [data, lects] = await Promise.all([
+          getFacultyById(facultyId!),
+          getLecturers()
+        ]);
+        
+        setLecturers(lects);
+        setFormData({
+          name: data.name,
+          code: data.code,
+          dean: data.dean || '',
+          status: data.status
+        });
+      } catch (error: any) {
+        setErrorMsg('Không thể tải thông tin.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [facultyId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (!facultyId) return;
 
-    setTimeout(() => {
+    setIsSubmitting(true);
+    setErrorMsg('');
+
+    try {
+      await updateFaculty(facultyId, formData);
       setSubmitStatus('success');
+      
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-      }, 2000);
-    }, 1500);
+        router.push('/admin/faculties');
+        router.refresh();
+      }, 1500);
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Có lỗi xảy ra khi cập nhật khoa.');
+      setSubmitStatus('idle');
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Đang tải thông tin khoa...</div>;
+  }
 
   return (
     <div className={styles.layoutGrid}>
@@ -42,7 +95,8 @@ export default function UpdateFacultyForm({ facultyId }: UpdateFacultyFormProps)
                   type="text" 
                   className={styles.formInput} 
                   placeholder="Ví dụ: Khoa Công nghệ thông tin" 
-                  defaultValue="Khoa Công nghệ thông tin"
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
                   required
                 />
               </div>
@@ -50,10 +104,11 @@ export default function UpdateFacultyForm({ facultyId }: UpdateFacultyFormProps)
                 <label className={styles.formLabel}>Mã Khoa</label>
                 <input 
                   type="text" 
-                  className={`${styles.formInput} ${styles.formInputDisabled}`} 
+                  className={styles.formInput} 
                   placeholder="e.g. FIT" 
-                  value={facultyId || "FIT"} 
-                  disabled
+                  value={formData.code}
+                  onChange={e => setFormData({...formData, code: e.target.value})}
+                  required
                 />
               </div>
             </div>
@@ -61,55 +116,43 @@ export default function UpdateFacultyForm({ facultyId }: UpdateFacultyFormProps)
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trưởng Khoa</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="Dr. John Doe">
-                  <option>Chọn một Giảng viên</option>
-                  <option value="Dr. John Doe">Dr. John Doe</option>
-                  <option value="Prof. Sarah Williams">Prof. Sarah Williams</option>
-                  <option value="Dr. Alan Smith">Dr. Alan Smith</option>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.dean}
+                  onChange={e => setFormData({...formData, dean: e.target.value})}
+                >
+                  <option value="">Chọn một Giảng viên</option>
+                  {lecturers.map(lecturer => (
+                    <option key={lecturer.id} value={lecturer.ho_ten}>{lecturer.ho_ten}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái hoạt động</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="active">
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.status}
+                  onChange={e => setFormData({...formData, status: e.target.value})}
+                >
                   <option value="active">Đang hoạt động</option>
                   <option value="inactive">Tạm ngưng</option>
-                  <option value="planning">Đang lên kế hoạch</option>
+                  <option value="pending">Chờ phê duyệt</option>
                 </select>
               </div>
             </div>
 
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Số lượng sinh viên</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="0" 
-                    defaultValue={1200}
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>group</span>
-                </div>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Số lượng giảng viên</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="0" 
-                    defaultValue={45}
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>badge</span>
-                </div>
-              </div>
-            </div>
+
           </form>
         </div>
 
         {/* Submission Actions */}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary}>
+          {errorMsg && <div style={{ color: '#ef4444', marginRight: 'auto', fontWeight: '500' }}>{errorMsg}</div>}
+          <button 
+            type="button" 
+            className={styles.btnSecondary}
+            onClick={() => router.push('/admin/faculties')}
+          >
             Hủy bỏ
           </button>
           <button 
