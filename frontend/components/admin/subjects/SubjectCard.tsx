@@ -10,8 +10,11 @@ export interface SubjectData {
   name: string;
   code: string;
   credits: number;
+  facultyId?: string;
   facultyName: string;
-  studentCount: number;
+  departmentId?: string;
+  departmentName?: string;
+  status: string;
   theme: SubjectTheme;
   icon: string;
 }
@@ -24,23 +27,25 @@ interface SubjectCardProps {
 
 export default function SubjectCard({ subject, onEdit, onDelete }: SubjectCardProps) {
   // Theme mappings
-  const cardBorderClass = 
+  const cardBorderClass = subject.status === 'inactive' ? styles.subjectCardInactive :
     subject.theme === 'primary' ? styles.subjectCardPrimary : 
     subject.theme === 'secondary' ? styles.subjectCardSecondary : 
     styles.subjectCardTertiary;
     
-  const iconBoxClass = 
+  const iconBoxClass = subject.status === 'inactive' ? styles.subjectIconInactive :
     subject.theme === 'primary' ? styles.subjectIconPrimary : 
     subject.theme === 'secondary' ? styles.subjectIconSecondary : 
     styles.subjectIconTertiary;
     
-  const codeBadgeClass = 
+  const codeBadgeClass = subject.status === 'inactive' ? styles.subjectCodeInactive :
     subject.theme === 'primary' ? styles.subjectCodePrimary : 
     subject.theme === 'secondary' ? styles.subjectCodeSecondary : 
     styles.subjectCodeTertiary;
 
   return (
-    <div className={`${styles.glassCard} ${styles.subjectCard} ${cardBorderClass} group`}>
+    <div 
+      className={`${styles.glassCard} ${styles.subjectCard} ${cardBorderClass} group`}
+    >
       <div className={styles.subjectCardLeft}>
         <div className={`${styles.subjectIconBox} ${iconBoxClass}`}>
           <span className={`material-symbols-outlined ${styles.subjectIcon}`}>{subject.icon}</span>
@@ -64,11 +69,20 @@ export default function SubjectCard({ subject, onEdit, onDelete }: SubjectCardPr
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>domain</span>
               Khoa {subject.facultyName}
             </div>
-
-            <div className={`${styles.detailItem} ${styles.detailHighlight}`}>
-              <span className={`material-symbols-outlined ${styles.detailIcon}`}>groups</span>
-              {subject.studentCount} sinh viên
-            </div>
+          </div>
+          
+          <div className={styles.subjectDetailsRow} style={{ marginTop: '0.5rem' }}>
+            {subject.status === 'inactive' ? (
+              <div className={styles.detailItem} style={{ color: '#ba1a1a', fontWeight: 500 }}>
+                <span className={`material-symbols-outlined ${styles.detailIcon}`} style={{ color: '#ba1a1a' }}>cancel</span>
+                Ngừng hoạt động
+              </div>
+            ) : (
+              <div className={styles.detailItem} style={{ color: '#4648d4', fontWeight: 500 }}>
+                <span className={`material-symbols-outlined ${styles.detailIcon}`} style={{ color: '#4648d4' }}>check_circle</span>
+                Đang hoạt động
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SinhVien extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'sinh_vien';
 
@@ -35,5 +36,10 @@ class SinhVien extends Model
     public function lop()
     {
         return $this->belongsTo(Lop::class, 'lop_id');
+    }
+
+    public function khoa()
+    {
+        return $this->belongsTo(Khoa::class, 'khoa_id');
     }
 }

@@ -1,23 +1,70 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './AdminCreateSubjects.module.css';
+import { getFaculties } from '@/app/actions/faculty';
+import { getDepartments } from '@/app/actions/department';
+import { createSubject } from '@/app/actions/subject';
 
 export default function CreateSubjectForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  
+  const [formData, setFormData] = useState({
+    code: '',
+    name: '',
+    credits: '',
+    facultyId: '',
+    departmentId: '',
+    status: 'active'
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [facultiesData, departmentsData] = await Promise.all([
+          getFaculties(),
+          getDepartments()
+        ]);
+        setFaculties(facultiesData);
+        setDepartments(departmentsData);
+      } catch (error) {
+        console.error('Error loading form options', error);
+      }
+    }
+    loadData();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await createSubject({
+        code: formData.code,
+        name: formData.name,
+        credits: parseInt(formData.credits) || 0,
+        facultyId: formData.facultyId,
+        departmentId: formData.departmentId || null,
+        status: formData.status
+      });
+      
       setSubmitStatus('success');
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-      }, 2000);
-    }, 1500);
+        window.location.href = '/admin/subjects';
+      }, 1500);
+    } catch (error: any) {
+      alert(error.message || 'Lỗi khi thêm môn học');
+      setSubmitStatus('idle');
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    window.location.href = '/admin/subjects';
   };
 
   return (
@@ -39,6 +86,8 @@ export default function CreateSubjectForm() {
                   className={styles.formInput} 
                   placeholder="Ví dụ: Cơ sở dữ liệu nâng cao" 
                   required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
               </div>
               <div className={styles.formGroup}>
@@ -48,26 +97,38 @@ export default function CreateSubjectForm() {
                   className={styles.formInput} 
                   placeholder="e.g. CS201" 
                   required
+                  value={formData.code}
+                  onChange={(e) => setFormData({...formData, code: e.target.value})}
                 />
               </div>
             </div>
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Thuộc Bộ Môn</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option>Chọn một Bộ Môn</option>
-                  <option>Khoa học máy tính</option>
-                  <option>Kỹ thuật phần mềm</option>
-                  <option>Hệ thống thông tin</option>
+                <label className={styles.formLabel}>Khoa Quản Lý</label>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  required
+                  value={formData.facultyId}
+                  onChange={(e) => setFormData({...formData, facultyId: e.target.value})}
+                >
+                  <option value="">Chọn một Khoa</option>
+                  {faculties.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Loại Môn Học</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option value="core">Bắt buộc (Core)</option>
-                  <option value="elective">Tự chọn (Elective)</option>
-                  <option value="general">Đại cương</option>
+                <label className={styles.formLabel}>Thuộc Bộ Môn (Tùy chọn)</label>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.departmentId}
+                  onChange={(e) => setFormData({...formData, departmentId: e.target.value})}
+                >
+                  <option value="">Không thuộc bộ môn nào</option>
+                  {departments.filter(d => !formData.facultyId || d.facultyId?.toString() === formData.facultyId).map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -75,10 +136,13 @@ export default function CreateSubjectForm() {
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái môn học</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                >
                   <option value="active">Đang giảng dạy</option>
                   <option value="inactive">Tạm ngưng</option>
-                  <option value="draft">Bản nháp</option>
                 </select>
               </div>
               <div className={styles.formGroup}>
@@ -88,34 +152,29 @@ export default function CreateSubjectForm() {
                     type="number" 
                     className={styles.formInput} 
                     placeholder="Ví dụ: 3" 
+                    required
+                    min="1"
+                    value={formData.credits}
+                    onChange={(e) => setFormData({...formData, credits: e.target.value})}
                   />
                   <span className={`material-symbols-outlined ${styles.inputIcon}`}>stars</span>
                 </div>
               </div>
             </div>
-
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Mô tả ngắn</label>
-                <textarea 
-                  className={styles.formInput} 
-                  rows={3}
-                  placeholder="Nhập mô tả tóm tắt nội dung môn học..."
-                ></textarea>
-              </div>
-            </div>
+            
+            <button type="submit" style={{ display: 'none' }} id="hiddenSubmitBtn"></button>
           </form>
         </div>
 
         {/* Submission Actions */}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary}>
+          <button type="button" className={styles.btnSecondary} onClick={handleCancel}>
             Hủy bỏ
           </button>
           <button 
-            type="submit" 
+            type="button" 
             className={styles.btnPrimary}
-            onClick={handleSubmit}
+            onClick={() => document.getElementById('hiddenSubmitBtn')?.click()}
             disabled={isSubmitting}
             style={{ backgroundColor: submitStatus === 'success' ? '#059669' : '' }}
           >

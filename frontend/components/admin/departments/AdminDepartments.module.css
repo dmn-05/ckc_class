@@ -140,6 +140,13 @@
   gap: 0.75rem;
 }
 
+.statIconBoxPrimary {
+  padding: 0.5rem;
+  background-color: rgba(70, 72, 212, 0.1);
+  color: #4648d4;
+  border-radius: 0.5rem;
+}
+
 .statIconBoxTertiary {
   padding: 0.5rem;
   background-color: rgba(126, 48, 0, 0.1);
@@ -165,6 +172,7 @@
   font-weight: 600;
 }
 
+.statValuePrimary { color: #4648d4; }
 .statValueTertiary { color: #7e3000; }
 .statValueError { color: #ba1a1a; }
 
@@ -175,7 +183,7 @@
 .filterTitle {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #4648d4; /* Secondary from light mode */
+  color: #3525cd;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -414,13 +422,20 @@
 .departmentCodeTertiary { background-color: rgba(126, 48, 0, 0.1); color: #7e3000; }
 .departmentCodeError { background-color: rgba(186, 26, 26, 0.1); color: #ba1a1a; }
 
-.departmentDetailsRow {
-  display: flex;
-  align-items: center;
+.departmentDetailsGrid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
   gap: 1rem;
   font-size: 0.875rem;
   color: #464555;
-  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.departmentStatusRow {
+  display: flex;
+  font-size: 0.875rem;
+  color: #464555;
 }
 
 .detailItem {
@@ -440,7 +455,7 @@
   font-weight: 500;
 }
 
-.statusActive { color: #7e3000; }
+.statusActive { color: #4648d4; }
 .statusPending { color: #ba1a1a; }
 
 .departmentCardRight {
@@ -491,6 +506,7 @@
   padding-top: 1.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  margin-top: auto;
 }
 
 .paginationText {

@@ -1,28 +1,94 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './AdminUpdateDepartments.module.css';
+import { getDepartmentById, updateDepartment } from '@/app/actions/department';
+import { getFaculties, getLecturers } from '@/app/actions/faculty';
+import { FacultyData } from '@/components/admin/faculties/FacultyCard';
 
 interface UpdateDepartmentFormProps {
   departmentId?: string;
 }
 
 export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [faculties, setFaculties] = useState<FacultyData[]>([]);
+  const [lecturers, setLecturers] = useState<{id: number, ho_ten: string}[]>([]);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    facultyId: '',
+    head: '',
+    status: 'active'
+  });
+
+  useEffect(() => {
+    async function loadData() {
+      if (!departmentId) return;
+      try {
+        const [dept, facs, lecs] = await Promise.all([
+          getDepartmentById(departmentId),
+          getFaculties(),
+          getLecturers()
+        ]);
+        
+        setFormData({
+          name: dept.name,
+          code: dept.code,
+          facultyId: dept.facultyId,
+          head: dept.head || '',
+          status: dept.status
+        });
+        
+        setFaculties(facs);
+        setLecturers(lecs);
+      } catch (err) {
+        console.error("Failed to load department data", err);
+        setErrorMsg('Không thể tải dữ liệu bộ môn.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [departmentId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (!formData.facultyId) {
+      setErrorMsg('Vui lòng chọn Khoa quản lý');
+      return;
+    }
 
-    setTimeout(() => {
+    if (!departmentId) return;
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+
+    try {
+      await updateDepartment(departmentId, formData);
       setSubmitStatus('success');
+      
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-      }, 2000);
-    }, 1500);
+        router.push('/admin/departments');
+        router.refresh();
+      }, 1500);
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Có lỗi xảy ra khi cập nhật Bộ môn.');
+      setSubmitStatus('idle');
+      setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>;
+  }
 
   return (
     <div className={styles.layoutGrid}>
@@ -42,7 +108,8 @@ export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentF
                   type="text" 
                   className={styles.formInput} 
                   placeholder="Ví dụ: Khoa học máy tính" 
-                  defaultValue="Công nghệ phần mềm"
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
                   required
                 />
               </div>
@@ -50,10 +117,11 @@ export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentF
                 <label className={styles.formLabel}>Mã Bộ Môn</label>
                 <input 
                   type="text" 
-                  className={`${styles.formInput} ${styles.formInputDisabled}`} 
+                  className={styles.formInput} 
                   placeholder="e.g. CS-01" 
-                  value={departmentId || "SE-02"} 
-                  disabled
+                  value={formData.code} 
+                  onChange={e => setFormData({...formData, code: e.target.value})}
+                  required
                 />
               </div>
             </div>
@@ -61,20 +129,29 @@ export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentF
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Thuộc Khoa</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="CNTT">
-                  <option>Chọn một Khoa</option>
-                  <option value="CNTT">Công nghệ thông tin</option>
-                  <option value="CK">Cơ khí</option>
-                  <option value="DDT">Điện - Điện tử</option>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.facultyId}
+                  onChange={e => setFormData({...formData, facultyId: e.target.value})}
+                  required
+                >
+                  <option value="">Chọn một Khoa</option>
+                  {faculties.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trưởng Bộ Môn</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="Dr. John Doe">
-                  <option>Chọn một Giảng viên</option>
-                  <option value="Dr. John Doe">Dr. John Doe</option>
-                  <option value="Prof. Sarah Williams">Prof. Sarah Williams</option>
-                  <option value="Dr. Alan Smith">Dr. Alan Smith</option>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.head}
+                  onChange={e => setFormData({...formData, head: e.target.value})}
+                >
+                  <option value="">Chọn một Giảng viên</option>
+                  {lecturers.map(l => (
+                    <option key={l.id} value={l.ho_ten}>{l.ho_ten}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -82,23 +159,15 @@ export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentF
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái hoạt động</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="active">
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.status}
+                  onChange={e => setFormData({...formData, status: e.target.value})}
+                >
                   <option value="active">Đang hoạt động</option>
                   <option value="inactive">Tạm ngưng</option>
-                  <option value="planning">Đang lên kế hoạch</option>
+                  <option value="pending">Chờ phê duyệt</option>
                 </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Số lượng môn học</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="0" 
-                    defaultValue={12}
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>menu_book</span>
-                </div>
               </div>
             </div>
           </form>
@@ -106,7 +175,12 @@ export default function UpdateDepartmentForm({ departmentId }: UpdateDepartmentF
 
         {/* Submission Actions */}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary}>
+          {errorMsg && <div style={{ color: '#ef4444', marginRight: 'auto', fontWeight: '500' }}>{errorMsg}</div>}
+          <button 
+            type="button" 
+            className={styles.btnSecondary}
+            onClick={() => router.push('/admin/departments')}
+          >
             Hủy bỏ
           </button>
           <button 

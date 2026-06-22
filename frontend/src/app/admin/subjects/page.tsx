@@ -1,76 +1,62 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from '@/components/admin/subjects/AdminSubjects.module.css';
 import SubjectDashboard from '@/components/admin/subjects/SubjectDashboard';
 import SubjectList from '@/components/admin/subjects/SubjectList';
 import { SubjectData } from '@/components/admin/subjects/SubjectCard';
 import Link from 'next/link';
-
-const INITIAL_SUBJECTS: SubjectData[] = [
-  {
-    id: 's1',
-    name: 'Lập trình Di động',
-    code: 'MH-0012',
-    credits: 3,
-    facultyName: 'CNTT',
-    studentCount: 32,
-    theme: 'primary',
-    icon: 'phone_iphone'
-  },
-  {
-    id: 's2',
-    name: 'Cơ sở dữ liệu',
-    code: 'MH-0045',
-    credits: 4,
-    facultyName: 'CNTT',
-    studentCount: 45,
-    theme: 'secondary',
-    icon: 'database'
-  },
-  {
-    id: 's3',
-    name: 'Phát triển Web',
-    code: 'MH-0089',
-    credits: 3,
-    facultyName: 'CNTT',
-    studentCount: 28,
-    theme: 'tertiary',
-    icon: 'web'
-  },
-  {
-    id: 's4',
-    name: 'Mạng máy tính',
-    code: 'MH-0102',
-    credits: 3,
-    facultyName: 'CNTT',
-    studentCount: 50,
-    theme: 'primary',
-    icon: 'language'
-  }
-];
+import { getSubjects, getSubjectStats, deleteSubject } from '@/app/actions/subject';
+import { getDepartments } from '@/app/actions/department';
 
 export default function SubjectsManagementPage() {
-  const [subjects, setSubjects] = useState<SubjectData[]>(INITIAL_SUBJECTS);
+  const [subjects, setSubjects] = useState<SubjectData[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({
+    totalCount: 0,
+    activeCount: 0,
+    pausedCount: 0,
+    distributionData: []
+  });
   const [filter, setFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
 
-  const totalCount = 150; // Giả lập dữ liệu tổng
-  const activeCount = 142;
-  const pausedCount = 8;
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [subjectsData, statsData, deptsData] = await Promise.all([
+        getSubjects(),
+        getSubjectStats(),
+        getDepartments()
+      ]);
+      setSubjects(subjectsData);
+      setStats(statsData);
+      setDepartments(deptsData);
+    } catch (error) {
+      console.error('Error loading subjects data:', error);
+      alert('Không thể tải dữ liệu môn học. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const distributionData = [
-    { label: 'Công nghệ thông tin', percentage: 65, theme: 'primary' as const },
-    { label: 'Kinh tế - Quản trị', percentage: 20, theme: 'secondary' as const },
-    { label: 'Ngôn ngữ học', percentage: 15, theme: 'tertiary' as const }
-  ];
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleEdit = (subject: SubjectData) => {
-    console.log('Edit subject', subject);
+    window.location.href = `/admin/subjects/${subject.id}/edit`;
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa Môn học này?')) {
-      setSubjects(prev => prev.filter(s => s.id !== id));
+      try {
+        await deleteSubject(id);
+        alert('Xóa môn học thành công!');
+        loadData();
+      } catch (error: any) {
+        alert(error.message || 'Có lỗi xảy ra khi xóa môn học.');
+      }
     }
   };
 
@@ -90,19 +76,26 @@ export default function SubjectsManagementPage() {
 
       <div className={styles.layoutGrid}>
         <SubjectDashboard
-          totalCount={totalCount}
-          activeCount={activeCount}
-          pausedCount={pausedCount}
-          distributionData={distributionData}
+          totalCount={stats.totalCount}
+          activeCount={stats.activeCount}
+          pausedCount={stats.pausedCount}
+          distributionData={stats.distributionData}
         />
 
-        <SubjectList
-          subjects={subjects}
-          currentFilter={filter}
-          onFilterChange={setFilter}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '1rem', border: '1px solid #e2e8f0' }}>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        ) : (
+          <SubjectList
+            subjects={subjects}
+            departments={departments}
+            currentFilter={filter}
+            onFilterChange={setFilter}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </div>
   );
