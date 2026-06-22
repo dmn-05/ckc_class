@@ -11,7 +11,7 @@ export default function Login() {
                 <div className={styles.brandPanel}>
                     <div className={styles.brandMarkRow}>
                         <div className={styles.brandIcon} aria-hidden="true">
-                            SC
+                            <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>school</span>
                         </div>
                         <div>
                             <h1>CKC CLASSROOM</h1>
@@ -68,7 +68,7 @@ export default function Login() {
                     </div>
 
                     <p className={styles.signup}>
-                        Chưa có tài khoản? <a href="#">Đăng ký</a>
+                        Chưa có tài khoản? <a href="/register">Đăng ký</a>
                     </p>
                 </div>
             </section>
