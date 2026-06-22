@@ -9,7 +9,7 @@ export async function getDepartments() {
     if (!token) throw new Error("Unauthorized");
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/bo-mon`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -45,7 +45,7 @@ export async function createDepartment(data: { code: string; name: string; facul
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/bo-mon`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -75,7 +75,7 @@ export async function getDepartmentById(id: string) {
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/bo-mon/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments/${id}`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -103,7 +103,7 @@ export async function updateDepartment(id: string, data: { code: string; name: s
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/bo-mon/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments/${id}`, {
         method: "PUT",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -133,7 +133,7 @@ export async function deleteDepartment(id: string) {
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/bo-mon/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments/${id}`, {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${token}`,

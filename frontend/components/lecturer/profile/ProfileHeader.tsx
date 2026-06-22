@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './LecturerProfile.module.css';
 
-export default function ProfileHeader() {
+export default function ProfileHeader({ onSave, onCancel, isSaving }: { onSave?: () => void, onCancel?: () => void, isSaving?: boolean }) {
   return (
     <div className={styles.header}>
       <div>
@@ -11,8 +11,10 @@ export default function ProfileHeader() {
         </p>
       </div>
       <div className={styles.actionGroup}>
-        <button className={styles.btnCancel}>Hủy bỏ</button>
-        <button className={styles.btnSubmit}>Lưu thay đổi</button>
+        <button className={styles.btnCancel} onClick={onCancel} disabled={isSaving}>Hủy bỏ</button>
+        <button className={styles.btnSubmit} onClick={onSave} disabled={isSaving}>
+          {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+        </button>
       </div>
     </div>
   );

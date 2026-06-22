@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\NguoiDung;
 use Illuminate\Http\Request;
 
-class NguoiDungController extends Controller
+class UserController extends Controller
 {
     public function getGiangVien()
     {

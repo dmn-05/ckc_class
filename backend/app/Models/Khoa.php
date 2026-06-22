@@ -10,7 +10,6 @@ class Khoa extends Model
     use HasFactory;
 
     protected $table = 'khoa';
-
     protected $fillable = [
         'ma_khoa',
         'ten_khoa',
@@ -20,4 +19,9 @@ class Khoa extends Model
 
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
+
+    public function lops()
+    {
+        return $this->hasMany(Lop::class, 'khoa_id');
+    }
 }

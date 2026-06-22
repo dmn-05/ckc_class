@@ -11,7 +11,7 @@ export async function getFaculties() {
     }
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/khoa`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/faculties`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -51,7 +51,7 @@ export async function createFaculty(data: { code: string; name: string; status: 
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/khoa`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/faculties`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -80,7 +80,7 @@ export async function getFacultyById(id: string) {
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/khoa/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/faculties/${id}`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -109,7 +109,7 @@ export async function updateFaculty(id: string, data: { code: string; name: stri
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/khoa/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/faculties/${id}`, {
         method: "PUT",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -138,7 +138,7 @@ export async function deleteFaculty(id: string) {
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/khoa/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/faculties/${id}`, {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -159,7 +159,7 @@ export async function getLecturers() {
 
     if (!token) throw new Error("Unauthorized");
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/giang-vien`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,

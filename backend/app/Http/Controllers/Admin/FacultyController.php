@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Khoa;
 use Illuminate\Http\Request;
 
-class KhoaController extends Controller
+class FacultyController extends Controller
 {
     public function index()
     {

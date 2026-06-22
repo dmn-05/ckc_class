@@ -5,20 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BoMon extends Model
+class Lop extends Model
 {
     use HasFactory;
 
-    protected $table = 'bo_mon';
+    protected $table = 'lop';
+
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
 
     protected $fillable = [
-        'ma_bo_mon',
-        'ten_bo_mon',
+        'ten_lop',
         'khoa_id',
-        'truong_bo_mon',
-        'trang_thai',
     ];
 
     public function khoa()
@@ -26,8 +24,8 @@ class BoMon extends Model
         return $this->belongsTo(Khoa::class, 'khoa_id');
     }
 
-    public function giangViens()
+    public function sinhViens()
     {
-        return $this->hasMany(GiangVien::class, 'bo_mon_id');
+        return $this->hasMany(SinhVien::class, 'lop_id');
     }
 }

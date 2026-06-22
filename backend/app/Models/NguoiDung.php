@@ -37,4 +37,14 @@ class NguoiDung extends Authenticatable
     {
         return $this->mat_khau;
     }
+
+    public function sinhVien()
+    {
+        return $this->hasOne(SinhVien::class, 'nguoi_dung_id');
+    }
+
+    public function giangVien()
+    {
+        return $this->hasOne(GiangVien::class, 'nguoi_dung_id');
+    }
 }
