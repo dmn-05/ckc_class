@@ -2,22 +2,58 @@
 
 import { FormEvent, useState } from "react";
 import styles from "@/app/page.module.css";
+import { loginAction } from "@/app/actions/auth";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
+    setErrorMessage("");
 
-    window.setTimeout(() => {
-      setStatus("success");
-    }, 1200);
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ email, mat_khau: password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setStatus("success");
+        await loginAction({
+          token: data.token,
+          vai_tro_id: data.user.vai_tro_id,
+          user: data.user,
+        });
+      } else {
+        setStatus("error");
+        setErrorMessage(data.message || data.errors?.email?.[0] || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+      }
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage("Không thể kết nối đến máy chủ.");
+    }
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
+      {status === "error" && (
+        <div style={{ color: "red", marginBottom: "1rem", fontSize: "14px", textAlign: "center" }}>
+          {errorMessage}
+        </div>
+      )}
       <div className={styles.fieldGroup}>
         <label htmlFor="email">EMAIL</label>
         <div className={styles.inputWrap}>
@@ -71,18 +107,18 @@ export function LoginForm() {
       <button
         className={styles.submitButton}
         type="submit"
-        disabled={status !== "idle"}
+        disabled={status === "loading" || status === "success"}
       >
         {status === "loading" && <span className={styles.spinner} />}
         {status === "success" && <span aria-hidden="true">✓</span>}
         <span>
-          {status === "idle"
+          {status === "idle" || status === "error"
             ? "ĐĂNG NHẬP"
             : status === "loading"
               ? "ĐANG XỬ LÝ..."
               : "THÀNH CÔNG"}
         </span>
-        {status === "idle" && <span aria-hidden="true"></span>}
+        {(status === "idle" || status === "error") && <span aria-hidden="true"></span>}
       </button>
     </form>
   );
