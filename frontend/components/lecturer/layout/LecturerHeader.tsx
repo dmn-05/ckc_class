@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { logoutAction } from '@/app/actions/auth';
 import styles from './LecturerLayout.module.css';
 
-export default function LecturerHeader() {
+export default function LecturerHeader({ profileData }: { profileData?: any }) {
   const hasPhoto = false; // Set to true to display photo, false to display "GV"
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const lecturerName = profileData?.ho_ten || "Giảng viên";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -38,15 +40,17 @@ export default function LecturerHeader() {
           {hasPhoto ? (
             <img 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtePGyL-OCAwFTFV8YAPLu-ThfD2Ya_ReUOwIW0PAy5QZxRaVI1emqF1TwYnLtmBjk82_S0bbuCnvZDB3A9EABi_F5cflLk7rp3FDWrd8_9h-EWEcOtaZ7NvXogtRE8waz07f9Tt9JPywtGgT2FcFdCyCUlWgQizviojMizJufX4VylSSPlA7tbEzhobYEkJydP8-cRqvTMpfF6zWWfRC9zkGu1MbHMIizHugDZboKD2suWmV-XudErXZEimOSUUglNmnK9P96ru4" 
-              alt="TS. Nguyễn Văn Minh"
+              alt={lecturerName}
               className={styles.userAvatar} 
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div className={styles.userAvatar}>GV</div>
+            <div className={styles.userAvatar}>
+              {lecturerName.charAt(0).toUpperCase()}
+            </div>
           )}
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            TS. Nguyễn Văn Minh
+            {lecturerName}
             <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: '#64748b' }}>arrow_drop_down</span>
           </div>
 

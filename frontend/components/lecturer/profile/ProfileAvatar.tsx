@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './LecturerProfile.module.css';
 
-export default function ProfileAvatar() {
+export default function ProfileAvatar({ profileData }: { profileData?: any }) {
   const hasPhoto = false;
-  const lecturerName = "TS. Nguyễn Văn Minh";
-  const lecturerId = "GV.102948";
+  const lecturerName = profileData?.ho_ten || "";
+  const lecturerId = profileData?.giang_vien?.ma_giang_vien || "";
 
   return (
     <div className={`${styles.glassCard} ${styles.avatarSection}`}>
@@ -17,26 +17,21 @@ export default function ProfileAvatar() {
           />
         ) : (
           <div className={styles.avatarFallback}>
-            GV
+            {lecturerName ? lecturerName.charAt(0).toUpperCase() : 'GV'}
           </div>
         )}
       </div>
-      <button className={styles.avatarEditBtn}>
-        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit</span>
-      </button>
       <h3 className={styles.avatarName}>{lecturerName}</h3>
       <p className={styles.avatarId}>{lecturerId}</p>
       
-      <div className={styles.divider}></div>
-      
-      <div className={styles.statsList}>
+      <div className={styles.statsGrid}>
         <div className={styles.statItem}>
-          <span className={`material-symbols-outlined ${styles.statIcon}`}>verified</span>
-          <span className={styles.statText}>Trạng thái: Đang công tác</span>
+          <p className={styles.statLabel}>Ngày tạo</p>
+          <p className={styles.statValuePrimary}>{profileData?.ngay_tao ? new Date(profileData.ngay_tao).toLocaleDateString('vi-VN') : ''}</p>
         </div>
         <div className={styles.statItem}>
-          <span className={`material-symbols-outlined ${styles.statIcon}`}>calendar_today</span>
-          <span className={styles.statText}>Tham gia: Tháng 09/2018</span>
+          <p className={styles.statLabel}>Ngày cập nhật</p>
+          <p className={styles.statValueSecondary}>{profileData?.ngay_cap_nhat ? new Date(profileData.ngay_cap_nhat).toLocaleDateString('vi-VN') : ''}</p>
         </div>
       </div>
     </div>
