@@ -6,19 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BoMon extends Model
+class MonHoc extends Model
 {
     use HasFactory, SoftDeletes;
-
-    protected $table = 'bo_mon';
+    
+    protected $table = 'mon_hoc';
+    
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
 
     protected $fillable = [
-        'ma_bo_mon',
-        'ten_bo_mon',
+        'ma_mon',
+        'ten_mon',
+        'tin_chi',
         'khoa_id',
-        'truong_bo_mon',
+        'bo_mon_id',
         'trang_thai',
     ];
 
@@ -27,8 +29,8 @@ class BoMon extends Model
         return $this->belongsTo(Khoa::class, 'khoa_id');
     }
 
-    public function giangViens()
+    public function boMon()
     {
-        return $this->hasMany(GiangVien::class, 'bo_mon_id');
+        return $this->belongsTo(BoMon::class, 'bo_mon_id');
     }
 }

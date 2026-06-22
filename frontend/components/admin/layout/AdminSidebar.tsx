@@ -66,7 +66,7 @@ export default function AdminSidebar() {
       </div>
       <nav className={styles.navMenu}>
         {navLinks.map((link) => {
-          const isActive = pathname === link.href || (link.href !== '/lecturer' && pathname?.startsWith(link.href));
+          const isActive = pathname === link.href || (link.href !== '/admin' && pathname?.startsWith(link.href));
           return (
             <Link
               key={link.href}

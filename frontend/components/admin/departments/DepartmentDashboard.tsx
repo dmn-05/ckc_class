@@ -34,12 +34,12 @@ export default function DepartmentDashboard({
         <div className={styles.statList}>
           <div className={styles.statItem}>
             <div className={styles.statItemLeft}>
-              <div className={styles.statIconBoxTertiary}>
+              <div className={styles.statIconBoxPrimary}>
                 <span className="material-symbols-outlined">verified</span>
               </div>
               <span className={styles.statLabel}>Bộ môn Hoạt động</span>
             </div>
-            <span className={`${styles.statValue} ${styles.statValueTertiary}`}>{activeCount}</span>
+            <span className={`${styles.statValue} ${styles.statValuePrimary}`}>{activeCount}</span>
           </div>
 
           <div className={styles.statItem}>

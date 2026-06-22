@@ -9,6 +9,8 @@ use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Lecturer\LecturerProfileController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\ClassController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -21,8 +23,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Only Routes
     Route::middleware(\App\Http\Middleware\CheckRole::class.':1')->group(function () {
-        // Lecturer route
-        Route::get('/lecturers', [UserController::class, 'getGiangVien']);
+        // User routes
+        Route::get('/lecturers', [UserController::class, 'getLecturers']);
+        Route::get('/students', [UserController::class, 'getStudents']);
+        Route::get('/students/{id}', [UserController::class, 'getStudentById']);
+        Route::post('/students', [UserController::class, 'storeStudent']);
+        Route::put('/students/{id}', [UserController::class, 'updateStudent']);
+        Route::delete('/students/{id}', [UserController::class, 'destroyStudent']);
+        Route::post('/students/{id}/reset-password', [UserController::class, 'resetStudentPassword']);
+        
+        // Class routes
+        Route::get('/classes', [ClassController::class, 'index']);
+        
+        // Subject routes
+        Route::get('/subjects/stats', [SubjectController::class, 'stats']);
+        Route::apiResource('subjects', SubjectController::class);
         
         // Faculty routes
         Route::get('/faculties', [FacultyController::class, 'index']);

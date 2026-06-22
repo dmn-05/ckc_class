@@ -27,6 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: calc(100vh - 150px);
 }
 
 @media (min-width: 1024px) {
@@ -239,7 +240,6 @@
 
 .checkboxInput {
   border-radius: 4px;
-  background-color: #eceef0;
   border: 1px solid #e0e3e5;
   accent-color: #3525cd;
   width: 16px;
@@ -392,11 +392,13 @@
 .borderSecondary { border-left-color: #4648d4; }
 .borderError { border-left-color: #ba1a1a; }
 .borderTertiary { border-left-color: #7e3000; }
+.borderSuccess { border-left-color: #22c55e; }
 
 .studentCard:hover.borderPrimary { border-color: #3525cd; }
 .studentCard:hover.borderSecondary { border-color: #4648d4; }
 .studentCard:hover.borderError { border-color: #ba1a1a; }
 .studentCard:hover.borderTertiary { border-color: #7e3000; }
+.studentCard:hover.borderSuccess { border-color: #22c55e; }
 
 .cardLeft {
   display: flex;
@@ -421,6 +423,7 @@
 .studentCard:hover .avatarImgBox.borderSecondary { border-color: #4648d4; }
 .studentCard:hover .avatarImgBox.borderError { border-color: #ba1a1a; }
 .studentCard:hover .avatarImgBox.borderTertiary { border-color: #7e3000; }
+.studentCard:hover .avatarImgBox.borderSuccess { border-color: #22c55e; }
 
 .avatarImg {
   width: 100%;

@@ -1,30 +1,120 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './AdminUpdateStudents.module.css';
+import { getStudentById, updateStudent, resetStudentPassword, getClasses } from '@/app/actions/student';
+import { getFaculties } from '@/app/actions/faculty';
+import { useRouter } from 'next/navigation';
 
 interface UpdateStudentFormProps {
-  studentId?: string;
+  studentId: string;
 }
 
 export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  const [isResetting, setIsResetting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+
+  const [formData, setFormData] = useState({
+    ho_ten: '',
+    email: '',
+    so_dien_thoai: '',
+    ngay_sinh: '',
+    gioi_tinh: 'nam',
+    ma_sinh_vien: '',
+    khoa_id: '',
+    lop_id: '',
+    trang_thai: 'dang_hoat_dong',
+    anh_dai_dien: ''
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [studentData, facs, cls] = await Promise.all([
+          getStudentById(studentId),
+          getFaculties(),
+          getClasses()
+        ]);
+        setFaculties(facs);
+        setClasses(cls);
+
+        setFormData({
+          ho_ten: studentData.ho_ten || '',
+          email: studentData.email || '',
+          so_dien_thoai: studentData.so_dien_thoai || '',
+          ngay_sinh: studentData.ngay_sinh || '',
+          gioi_tinh: studentData.gioi_tinh || 'nam',
+          ma_sinh_vien: studentData.sinh_vien?.ma_sinh_vien || '',
+          khoa_id: studentData.sinh_vien?.khoa_id?.toString() || '',
+          lop_id: studentData.sinh_vien?.lop_id?.toString() || '',
+          trang_thai: studentData.sinh_vien?.trang_thai || 'dang_hoc',
+          anh_dai_dien: studentData.anh_dai_dien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(studentData.ho_ten)
+        });
+      } catch (err) {
+        console.error('Failed to load data', err);
+        alert('Không thể tải thông tin sinh viên');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (studentId) {
+      loadData();
+    }
+  }, [studentId]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === 'khoa_id') {
+      const filteredClasses = classes.filter(c => c.khoa_id.toString() === value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        lop_id: filteredClasses.length > 0 ? filteredClasses[0].id.toString() : ''
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await updateStudent(studentId, formData);
       setSubmitStatus('success');
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-        // In real app, redirect here
-      }, 2000);
-    }, 1500);
+        router.push('/admin/students');
+      }, 1500);
+    } catch (err: any) {
+      alert(err.message || 'Cập nhật sinh viên thất bại');
+      setIsSubmitting(false);
+      setSubmitStatus('idle');
+    }
   };
+
+  const handleResetPassword = async () => {
+    if (!confirm('Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên này (Mật khẩu sẽ là 123456)?')) return;
+    setIsResetting(true);
+    try {
+      await resetStudentPassword(studentId);
+      alert('Đặt lại mật khẩu thành công!');
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi đặt lại mật khẩu');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải thông tin...</div>;
+  }
 
   return (
     <div className={styles.layoutGrid}>
@@ -34,7 +124,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           <div className={styles.avatarUploadWrapper}>
             <div className={styles.avatarBox}>
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVJOZy2JtKpuw4v2rfBmimcBSqfAV8ily8tFIKjQtknp4KjuNB1IsPvgzV_dFLQ8Q5qAMN3fvI0YX4LCoWxdVNtrEuehZVm7dtJFHxuZnPQbGDHbxIZlzXX50sUW15vs77VV9sEjrhIYp4UqZx1aDkQDYJaaRkyPhNi6sLleVndlv7PLjayUrwo4L0C0mYZ2ceXuzelyOSSKTN85HOV8dfZK_vsdvo7PfERo4nMgQtzi-SeKJShd2JUIW7v-B6fEk-ykHXWO-bkMM"
+                src={formData.anh_dai_dien}
                 alt="Student Profile"
                 className={styles.avatarImg}
               />
@@ -43,35 +133,40 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               <span className={`material-symbols-outlined ${styles.avatarIcon}`}>edit</span>
             </div>
           </div>
-          <h3 className={styles.cardTitle}>Profile Picture</h3>
+          <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
-            Upload a high-resolution portrait. Max size 10MB. JPG or PNG.
+            Tải lên ảnh chân dung. Max size 10MB. JPG or PNG.
           </p>
-          <button className={styles.btnUpload} type="button">Change Image</button>
+          <button className={styles.btnUpload} type="button">Thay đổi ảnh</button>
         </section>
 
         <section className={styles.card}>
           <h3 className={styles.cardTitle}>
             <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>assignment_ind</span>
-            Identity Details
+            Thông tin định danh
           </h3>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Student ID</label>
+            <label className={styles.formLabel}>Mã Sinh Viên *</label>
             <input
-              className={`${styles.formInput} ${styles.formInputDisabled}`}
+              className={styles.formInput}
               type="text"
-              value={studentId || "STU-2024-0892"}
-              disabled
+              name="ma_sinh_vien"
+              value={formData.ma_sinh_vien}
+              onChange={handleChange}
+              required
             />
-            <span className={styles.helpText}>*Cannot be changed after creation</span>
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Study Status</label>
-            <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="Active / Full-time">
-              <option value="Active / Full-time">Active / Full-time</option>
-              <option value="On-Leave">On-Leave</option>
-              <option value="Internship">Internship</option>
-              <option value="Graduated">Graduated</option>
+            <label className={styles.formLabel}>Trạng thái</label>
+            <select
+              className={`${styles.formInput} ${styles.formSelect}`}
+              name="trang_thai"
+              value={formData.trang_thai}
+              onChange={handleChange}
+            >
+              <option value="dang_hoc">Đang học</option>
+              <option value="tam_nghi">Bảo lưu</option>
+              <option value="da_tot_nghiep">Đã tốt nghiệp</option>
             </select>
           </div>
         </section>
@@ -84,38 +179,54 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
               <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>person</span>
-              Personal Information
+              Thông tin cá nhân
             </h3>
             <div className={styles.grid2Col}>
               <div className={styles.colSpan2}>
-                <label className={styles.formLabel}>Full Name</label>
+                <label className={styles.formLabel}>Họ và tên *</label>
                 <input
                   className={styles.formInput}
                   type="text"
-                  placeholder="Enter student's full name"
-                  defaultValue="Nguyễn Văn Sinh Viên"
+                  name="ho_ten"
+                  value={formData.ho_ten}
+                  onChange={handleChange}
                   required
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Date of Birth</label>
+                <label className={styles.formLabel}>Ngày sinh</label>
                 <input
                   className={styles.formInput}
                   type="date"
-                  defaultValue="2003-05-15"
-                  required
+                  name="ngay_sinh"
+                  value={formData.ngay_sinh}
+                  onChange={handleChange}
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Gender</label>
+                <label className={styles.formLabel}>Giới tính</label>
                 <div className={styles.radioGroup}>
                   <label className={styles.radioLabel}>
-                    <input type="radio" name="gender" className={styles.radioInput} defaultChecked />
-                    <span className={styles.radioText}>Male</span>
+                    <input
+                      type="radio"
+                      name="gioi_tinh"
+                      value="nam"
+                      checked={formData.gioi_tinh === 'nam'}
+                      onChange={handleChange}
+                      className={styles.radioInput}
+                    />
+                    <span className={styles.radioText}>Nam</span>
                   </label>
                   <label className={styles.radioLabel}>
-                    <input type="radio" name="gender" className={styles.radioInput} />
-                    <span className={styles.radioText}>Female</span>
+                    <input
+                      type="radio"
+                      name="gioi_tinh"
+                      value="nu"
+                      checked={formData.gioi_tinh === 'nu'}
+                      onChange={handleChange}
+                      className={styles.radioInput}
+                    />
+                    <span className={styles.radioText}>Nữ</span>
                   </label>
                 </div>
               </div>
@@ -126,36 +237,29 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
               <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>contact_mail</span>
-              Contact Information
+              Thông tin liên hệ
             </h3>
             <div className={styles.grid2Col}>
               <div>
-                <label className={styles.formLabel}>Email Address</label>
+                <label className={styles.formLabel}>Email *</label>
                 <input
                   className={styles.formInput}
                   type="email"
-                  placeholder="student@university.edu"
-                  defaultValue="student@ckc.edu.vn"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Phone Number</label>
+                <label className={styles.formLabel}>Số điện thoại</label>
                 <input
                   className={styles.formInput}
                   type="tel"
-                  placeholder="+84 000 000 000"
-                  defaultValue="0901234567"
+                  name="so_dien_thoai"
+                  value={formData.so_dien_thoai}
+                  onChange={handleChange}
                 />
-              </div>
-              <div className={styles.colSpan2}>
-                <label className={styles.formLabel}>Current Address</label>
-                <textarea
-                  className={`${styles.formInput} ${styles.formTextarea}`}
-                  rows={3}
-                  placeholder="Street name, District, City..."
-                  defaultValue="123 Nguyễn Huệ, Quận 1, TP.HCM"
-                ></textarea>
               </div>
             </div>
           </div>
@@ -164,26 +268,36 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
               <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>school</span>
-              Academic Placement
+              Thông tin học thuật
             </h3>
             <div className={styles.grid2Col}>
               <div>
-                <label className={styles.formLabel}>Department</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="Information Technology">
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Business Administration">Business Administration</option>
-                  <option value="Information Technology">Information Technology</option>
-                  <option value="Electrical Engineering">Electrical Engineering</option>
-                  <option value="Digital Marketing">Digital Marketing</option>
+                <label className={styles.formLabel}>Khoa *</label>
+                <select
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  name="khoa_id"
+                  value={formData.khoa_id}
+                  onChange={handleChange}
+                  required
+                >
+                  {faculties.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className={styles.formLabel}>Class Code</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`} defaultValue="IT-PRO-24">
-                  <option value="CS-2024-A">CS-2024-A</option>
-                  <option value="CS-2024-B">CS-2024-B</option>
-                  <option value="BA-2024-K12">BA-2024-K12</option>
-                  <option value="IT-PRO-24">IT-PRO-24</option>
+                <label className={styles.formLabel}>Lớp *</label>
+                <select
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  name="lop_id"
+                  value={formData.lop_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Chọn lớp</option>
+                  {classes.filter(c => c.khoa_id.toString() === formData.khoa_id.toString()).map(c => (
+                    <option key={c.id} value={c.id}>{c.ma_lop || c.ten_lop}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -191,7 +305,23 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
 
           {/* Form Actions */}
           <div className={styles.formActions}>
-            <button type="button" className={styles.btnDiscard}>Cancel</button>
+            <button
+              type="button"
+              className={styles.btnDiscard}
+              onClick={handleResetPassword}
+              disabled={isResetting}
+            >
+              <span className="material-symbols-outlined" style={{ marginRight: '8px', fontSize: '18px', verticalAlign: 'middle' }}>lock_reset</span>
+              {isResetting ? 'Đang đặt lại...' : 'Đặt lại mật khẩu'}
+            </button>
+            <div style={{ flex: 1 }}></div>
+            <button
+              type="button"
+              className={styles.btnDiscard}
+              onClick={() => router.push('/admin/students')}
+            >
+              Hủy
+            </button>
             <button
               type="submit"
               className={styles.btnSubmit}
@@ -201,12 +331,12 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               {isSubmitting && submitStatus === 'idle' ? (
                 <>
                   <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
-                  Updating...
+                  Đang lưu...
                 </>
               ) : submitStatus === 'success' ? (
                 <>
                   <span className="material-symbols-outlined">check_circle</span>
-                  Updated Successfully
+                  Cập nhật Thành Công
                 </>
               ) : (
                 <>

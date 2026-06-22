@@ -140,6 +140,13 @@
   gap: 0.75rem;
 }
 
+.statIconBoxPrimary {
+  padding: 0.5rem;
+  background-color: rgba(70, 72, 212, 0.1);
+  color: #4648d4;
+  border-radius: 0.5rem;
+}
+
 .statIconBoxTertiary {
   padding: 0.5rem;
   background-color: rgba(126, 48, 0, 0.1);
@@ -165,6 +172,7 @@
   font-weight: 600;
 }
 
+.statValuePrimary { color: #4648d4; }
 .statValueTertiary { color: #7e3000; }
 .statValueError { color: #ba1a1a; }
 
