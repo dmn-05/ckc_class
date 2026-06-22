@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { logoutAction } from '@/app/actions/auth';
 import styles from './LecturerLayout.module.css';
 
 export default function LecturerHeader() {
@@ -50,11 +51,13 @@ export default function LecturerHeader() {
           </div>
 
           {showDropdown && (
-            <div className={styles.dropdownMenu}>
-              <Link href="/login" className={styles.dropdownItem}>
-                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>logout</span>
-                Đăng xuất
-              </Link>
+            <div className={styles.dropdownMenu} onClick={(e) => e.stopPropagation()}>
+              <form action={logoutAction}>
+                <button type="submit" className={styles.dropdownItem} style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>logout</span>
+                  Đăng xuất
+                </button>
+              </form>
             </div>
           )}
         </div>
