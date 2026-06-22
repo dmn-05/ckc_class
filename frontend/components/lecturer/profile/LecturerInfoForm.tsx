@@ -1,140 +1,168 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './LecturerProfile.module.css';
 
-export default function LecturerInfoForm() {
-  const [formData, setFormData] = useState({
-    fullName: 'Nguyễn Văn Minh',
-    id: 'GV.102948',
-    degree: 'Tiến sĩ',
-    department: 'Khoa Công nghệ thông tin',
-    email: 'minh.nv@academic.edu.vn',
-    researchArea: 'Học máy, Trí tuệ nhân tạo ứng dụng trong y tế, Phân tích dữ liệu lớn và Hệ thống gợi ý thông minh.'
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate save
-    alert('Thông tin đã được lưu!');
-  };
-
+export default function LecturerInfoForm({ profileData, formData, onChange }: { profileData?: any, formData?: any, onChange?: any }) {
   return (
-    <form className={styles.glassCard} onSubmit={handleSubmit}>
-      <div className={styles.formGrid}>
-        
-        {/* Họ và tên */}
-        <div className={styles.formGroupFull}>
-          <label className={styles.label}>Họ và tên</label>
-          <div className={styles.inputGlow}>
-            <input 
-              type="text" 
-              name="fullName"
-              className={styles.inputField} 
-              placeholder="Nhập họ và tên đầy đủ"
-              value={formData.fullName}
-              onChange={handleChange}
-            />
-          </div>
+    <>
+      <section className={styles.glassCard}>
+        <div className={styles.formHeader}>
+          <span className={`material-symbols-outlined ${styles.formIcon}`}>person_search</span>
+          <h2 className={styles.formTitle}>Thông tin cơ bản</h2>
         </div>
-
-        {/* Mã giảng viên (Readonly) */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Mã giảng viên</label>
-          <div className={`${styles.inputGlow} ${styles.inputDisabled}`}>
-            <input 
-              type="text" 
-              name="id"
-              className={styles.inputField} 
-              value={formData.id}
-              disabled
-              readOnly
-            />
-            <span className={`material-symbols-outlined ${styles.inputIconRight}`}>lock</span>
+        <div className={styles.formGrid}>
+          
+          {/* Họ và tên */}
+          <div className={styles.formGroupFull}>
+            <label className={styles.label} htmlFor="ho_ten">Họ và tên</label>
+            <div className={styles.inputGlow}>
+              <input 
+                type="text" 
+                id="ho_ten"
+                className={styles.inputField} 
+                value={formData?.ho_ten || ''}
+                onChange={onChange}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Học hàm / Học vị */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Học hàm / Học vị</label>
-          <div className={styles.inputGlow}>
-            <select 
-              name="degree"
-              className={styles.inputField}
-              value={formData.degree}
-              onChange={handleChange}
-            >
-              <option value="Cử nhân">Cử nhân</option>
-              <option value="Thạc sĩ">Thạc sĩ</option>
-              <option value="Tiến sĩ">Tiến sĩ</option>
-              <option value="Phó Giáo sư">Phó Giáo sư</option>
-              <option value="Giáo sư">Giáo sư</option>
-            </select>
-            <span className={`material-symbols-outlined ${styles.inputIconRight}`}>expand_more</span>
+          {/* Mã giảng viên (Readonly) */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="ma_giang_vien">Mã giảng viên</label>
+            <div className={`${styles.inputGlow} ${styles.inputDisabled}`}>
+              <input 
+                type="text" 
+                id="ma_giang_vien"
+                className={styles.inputField} 
+                value={profileData?.giang_vien?.ma_giang_vien || ''}
+                disabled
+                readOnly
+              />
+              <span className={`material-symbols-outlined ${styles.inputIconRight}`}>lock</span>
+            </div>
           </div>
-        </div>
 
-        {/* Khoa công tác */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Khoa công tác</label>
-          <div className={styles.inputGlow}>
-            <select 
-              name="department"
-              className={styles.inputField}
-              value={formData.department}
-              onChange={handleChange}
-            >
-              <option value="Khoa Công nghệ thông tin">Khoa Công nghệ thông tin</option>
-              <option value="Khoa Kinh tế">Khoa Kinh tế</option>
-              <option value="Khoa Điện - Điện tử">Khoa Điện - Điện tử</option>
-              <option value="Khoa Cơ khí">Khoa Cơ khí</option>
-            </select>
-            <span className={`material-symbols-outlined ${styles.inputIconRight}`}>expand_more</span>
+          {/* Ngày sinh */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="ngay_sinh">Ngày sinh</label>
+            <div className={styles.inputGlow}>
+              <input 
+                type="date" 
+                id="ngay_sinh"
+                className={styles.inputField} 
+                value={formData?.ngay_sinh || ''}
+                onChange={onChange}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Email chuyên môn */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Email chuyên môn</label>
-          <div className={styles.inputGlow}>
-            <input 
-              type="email" 
-              name="email"
-              className={styles.inputField} 
-              placeholder="example@academic.edu.vn"
-              value={formData.email}
-              onChange={handleChange}
-            />
+          {/* Giới tính */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="gioi_tinh">Giới tính</label>
+            <div className={styles.inputGlow}>
+              <select 
+                id="gioi_tinh"
+                className={styles.inputField}
+                value={formData?.gioi_tinh || ''}
+                onChange={onChange}
+              >
+                <option value="">-- Chọn giới tính --</option>
+                <option value="nam">Nam</option>
+                <option value="nu">Nữ</option>
+                <option value="khac">Khác</option>
+              </select>
+              <span className={`material-symbols-outlined ${styles.inputIconRight}`}>expand_more</span>
+            </div>
           </div>
-        </div>
 
-        {/* Lĩnh vực nghiên cứu */}
-        <div className={styles.formGroupFull}>
-          <label className={styles.label}>Lĩnh vực nghiên cứu</label>
-          <div className={styles.inputGlow} style={{ paddingRight: '0.5rem' }}>
-            <textarea 
-              name="researchArea"
-              className={styles.textareaField} 
-              rows={4}
-              placeholder="Mô tả các hướng nghiên cứu chính..."
-              value={formData.researchArea}
-              onChange={handleChange}
-            />
+          {/* Số CCCD / CMND */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="cccd">Số CCCD / CMND</label>
+            <div className={styles.inputGlow}>
+              <input 
+                type="text" 
+                id="cccd"
+                className={styles.inputField} 
+                value={formData?.cccd || ''}
+                onChange={onChange}
+              />
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className={styles.securityInfo}>
-        <span className={`material-symbols-outlined ${styles.securityIcon}`}>info</span>
-        <p className={styles.securityText}>
-          Thông tin mã giảng viên và ngày tham gia chỉ có thể được thay đổi bởi Quản trị viên hệ thống. Vui lòng liên hệ phòng nhân sự nếu có sai sót.
-        </p>
-      </div>
-    </form>
+          {/* Bộ môn (Readonly) */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="bo_mon">Bộ môn</label>
+            <div className={`${styles.inputGlow} ${styles.inputDisabled}`}>
+              <input 
+                type="text" 
+                id="bo_mon"
+                className={styles.inputField} 
+                value={profileData?.giang_vien?.bo_mon?.ten_bo_mon || ''}
+                disabled
+                readOnly
+              />
+              <span className={`material-symbols-outlined ${styles.inputIconRight}`}>lock</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section className={styles.glassCard}>
+        <div className={styles.formHeader}>
+          <span className={`material-symbols-outlined ${styles.formIcon}`}>contact_mail</span>
+          <h2 className={styles.formTitle}>Thông tin liên lạc</h2>
+        </div>
+        <div className={styles.formGrid}>
+          
+          {/* Email */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="email">Email liên hệ</label>
+            <div className={styles.inputGlow}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>alternate_email</span>
+              <input 
+                type="email" 
+                id="email"
+                className={styles.inputField} 
+                value={formData?.email || ''}
+                onChange={onChange}
+              />
+            </div>
+          </div>
+
+          {/* Số điện thoại */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="so_dien_thoai">Số điện thoại</label>
+            <div className={styles.inputGlow}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>smartphone</span>
+              <input 
+                type="tel" 
+                id="so_dien_thoai"
+                className={styles.inputField} 
+                value={formData?.so_dien_thoai || ''}
+                onChange={onChange}
+              />
+            </div>
+          </div>
+
+          {/* Địa chỉ */}
+          <div className={styles.formGroupFull}>
+            <label className={styles.label} htmlFor="dia_chi">Địa chỉ liên hệ</label>
+            <div className={styles.inputGlow}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>location_on</span>
+              <input 
+                type="text" 
+                id="dia_chi"
+                className={styles.inputField} 
+                value={formData?.dia_chi || ''}
+                onChange={onChange}
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </>
   );
 }

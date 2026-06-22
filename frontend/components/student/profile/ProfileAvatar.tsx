@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './StudentProfile.module.css';
 
-export default function ProfileAvatar() {
+export default function ProfileAvatar({ profileData }: { profileData?: any }) {
   const hasPhoto = false; // Set to true to display photo, false to display "SV"
-  const studentName = "Nguyễn Văn A";
-  const studentId = "2021604532";
+  const studentName = profileData?.ho_ten || "";
+  const studentId = profileData?.sinh_vien?.ma_sinh_vien || "";
 
   return (
     <div className={`${styles.glassCard} ${styles.avatarSection}`}>
@@ -18,24 +18,21 @@ export default function ProfileAvatar() {
           />
         ) : (
           <div className={styles.avatarFallback}>
-            SV
+            {studentName ? studentName.charAt(0).toUpperCase() : 'SV'}
           </div>
         )}
       </div>
-      <button className={styles.avatarEditBtn}>
-        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit</span>
-      </button>
       <h3 className={styles.avatarName}>{studentName}</h3>
       <p className={styles.avatarMssv}>MSSV: {studentId}</p>
       
       <div className={styles.statsGrid}>
         <div className={styles.statItem}>
-          <p className={styles.statLabel}>Tiến độ học tập</p>
-          <p className={styles.statValuePrimary}>78%</p>
+          <p className={styles.statLabel}>Ngày tạo</p>
+          <p className={styles.statValuePrimary}>{profileData?.ngay_tao ? new Date(profileData.ngay_tao).toLocaleDateString('vi-VN') : ''}</p>
         </div>
         <div className={styles.statItem}>
-          <p className={styles.statLabel}>GPA hiện tại</p>
-          <p className={styles.statValueSecondary}>3.85/4.0</p>
+          <p className={styles.statLabel}>Ngày cập nhật</p>
+          <p className={styles.statValueSecondary}>{profileData?.ngay_cap_nhat ? new Date(profileData.ngay_cap_nhat).toLocaleDateString('vi-VN') : ''}</p>
         </div>
       </div>
     </div>
