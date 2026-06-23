@@ -1,23 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './AdminCreateFaculties.module.css';
+import { createFaculty, getLecturers } from '@/app/actions/faculty';
 
 export default function CreateFacultyForm() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [lecturers, setLecturers] = useState<{id: number, ho_ten: string}[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    dean: '',
+    status: 'active'
+  });
+
+  useEffect(() => {
+    async function loadLecturers() {
+      try {
+        const data = await getLecturers();
+        setLecturers(data);
+      } catch (err) {
+        console.error("Failed to load lecturers", err);
+      }
+    }
+    loadLecturers();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg('');
 
-    setTimeout(() => {
+    try {
+      await createFaculty(formData);
       setSubmitStatus('success');
+      
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-      }, 2000);
-    }, 1500);
+        router.push('/admin/faculties');
+        router.refresh();
+      }, 1500);
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Có lỗi xảy ra khi thêm khoa.');
+      setSubmitStatus('idle');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -38,6 +69,8 @@ export default function CreateFacultyForm() {
                   type="text" 
                   className={styles.formInput} 
                   placeholder="Ví dụ: Khoa Công nghệ thông tin" 
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
                   required
                 />
               </div>
@@ -47,6 +80,8 @@ export default function CreateFacultyForm() {
                   type="text" 
                   className={styles.formInput} 
                   placeholder="e.g. FIT-01" 
+                  value={formData.code}
+                  onChange={e => setFormData({...formData, code: e.target.value})}
                   required
                 />
               </div>
@@ -55,53 +90,43 @@ export default function CreateFacultyForm() {
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trưởng Khoa</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option>Chọn một Giảng viên</option>
-                  <option>Dr. John Doe</option>
-                  <option>Prof. Sarah Williams</option>
-                  <option>Dr. Alan Smith</option>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.dean}
+                  onChange={e => setFormData({...formData, dean: e.target.value})}
+                >
+                  <option value="">Chọn một Giảng viên</option>
+                  {lecturers.map(lecturer => (
+                    <option key={lecturer.id} value={lecturer.ho_ten}>{lecturer.ho_ten}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái hoạt động</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
+                <select 
+                  className={`${styles.formInput} ${styles.formSelect}`}
+                  value={formData.status}
+                  onChange={e => setFormData({...formData, status: e.target.value})}
+                >
                   <option value="active">Đang hoạt động</option>
                   <option value="inactive">Tạm ngưng</option>
-                  <option value="planning">Đang lên kế hoạch</option>
+                  <option value="pending">Chờ phê duyệt</option>
                 </select>
               </div>
             </div>
 
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Số lượng sinh viên</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="0" 
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>group</span>
-                </div>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Số lượng giảng viên</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="0" 
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>badge</span>
-                </div>
-              </div>
-            </div>
+
           </form>
         </div>
 
         {/* Submission Actions */}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary}>
+          {errorMsg && <div style={{ color: '#ef4444', marginRight: 'auto', fontWeight: '500' }}>{errorMsg}</div>}
+          <button 
+            type="button" 
+            className={styles.btnSecondary}
+            onClick={() => router.push('/admin/faculties')}
+          >
             Hủy bỏ
           </button>
           <button 

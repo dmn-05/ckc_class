@@ -623,3 +623,63 @@
   color: #777587;
   grid-column: 1 / -1;
 }
+
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 16px 0;
+}
+
+.paginationText {
+  font-size: 12px;
+  color: #464555;
+}
+
+.paginationControls {
+  display: flex;
+  gap: 8px;
+}
+
+.pageBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e0e3e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #464555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageBtn:not(:disabled):hover {
+  background-color: #eceef0;
+}
+
+.pageBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pageBtnActive {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #3525cd;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.rightColumn { grid-column: span 12 / span 12; display: flex; flex-direction: column; min-height: 80vh; }
+@media (min-width: 1024px) { .rightColumn { grid-column: span 8 / span 12; } }
+.classCardContainer { flex: 1; display: flex; flex-direction: column; gap: 1rem; }

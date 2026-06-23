@@ -1,16 +1,19 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import styles from './AdminDepartments.module.css';
 
-export type DepartmentStatus = 'active' | 'pending';
+export type DepartmentStatus = 'active' | 'pending' | 'inactive';
 export type DepartmentTheme = 'primary' | 'secondary' | 'tertiary' | 'error';
 
 export interface DepartmentData {
   id: string;
   name: string;
   code: string;
+  facultyId: string;
   facultyName: string;
+  head?: string;
   status: DepartmentStatus;
   theme: DepartmentTheme;
   icon: string;
@@ -18,11 +21,10 @@ export interface DepartmentData {
 
 interface DepartmentCardProps {
   department: DepartmentData;
-  onEdit: (department: DepartmentData) => void;
   onDelete: (id: string) => void;
 }
 
-export default function DepartmentCard({ department, onEdit, onDelete }: DepartmentCardProps) {
+export default function DepartmentCard({ department, onDelete }: DepartmentCardProps) {
   // Theme mappings
   const cardBorderClass = 
     department.theme === 'primary' ? styles.departmentCardPrimary : 
@@ -57,21 +59,33 @@ export default function DepartmentCard({ department, onEdit, onDelete }: Departm
             </span>
           </div>
           
-          <div className={styles.departmentDetailsRow}>
+          <div className={styles.departmentDetailsGrid}>
             <div className={styles.detailItem}>
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>domain</span>
               Khoa: {department.facultyName}
             </div>
             
+            <div className={styles.detailItem}>
+              <span className={`material-symbols-outlined ${styles.detailIcon}`}>person</span>
+              {department.head ? `Trưởng bộ môn: ${department.head}` : 'Chưa bổ nhiệm Trưởng bộ môn'}
+            </div>
+          </div>
+          
+          <div className={styles.departmentStatusRow}>
             {department.status === 'active' ? (
               <div className={`${styles.detailItem} ${styles.statusActive}`}>
                 <span className={`material-symbols-outlined ${styles.detailIcon}`}>check_circle</span>
                 Đang hoạt động
               </div>
-            ) : (
+            ) : department.status === 'pending' ? (
               <div className={`${styles.detailItem} ${styles.statusPending}`}>
                 <span className={`material-symbols-outlined ${styles.detailIcon}`}>info</span>
                 Đang chờ phê duyệt
+              </div>
+            ) : (
+              <div className={`${styles.detailItem} ${styles.statusPending}`}>
+                <span className={`material-symbols-outlined ${styles.detailIcon}`}>cancel</span>
+                Ngừng hoạt động
               </div>
             )}
           </div>
@@ -79,13 +93,13 @@ export default function DepartmentCard({ department, onEdit, onDelete }: Departm
       </div>
 
       <div className={styles.departmentCardRight}>
-        <button 
+        <Link 
+          href={`/admin/departments/${department.id}/edit`}
           className={styles.btnActionSmall} 
           title="Chỉnh sửa"
-          onClick={() => onEdit(department)}
         >
           <span className="material-symbols-outlined">edit</span>
-        </button>
+        </Link>
         <button 
           className={`${styles.btnActionSmall} ${styles.btnActionDelete}`} 
           title="Xóa"

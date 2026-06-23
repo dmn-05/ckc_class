@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import styles from './AdminClasses.module.css';
 import ClassCard, { ClassData } from './ClassCard';
+import ClassesPagination from './ClassesPagination';
 
 interface ClassListProps {
   classes: ClassData[];
@@ -13,11 +14,24 @@ interface ClassListProps {
 
 export default function ClassList({ classes, onEdit, onViewStats, onDelete }: ClassListProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4; // Adjust as needed
 
   const filteredClasses = classes.filter(sec => 
-    sec.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sec.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sec.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
+  const currentClasses = filteredClasses.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <div className={styles.rightColumn}>
@@ -29,28 +43,41 @@ export default function ClassList({ classes, onEdit, onViewStats, onDelete }: Cl
           <input 
             type="text"
             className={styles.searchInputMain}
-            placeholder="Tìm theo mã lớp hoặc tên học phần..."
+            placeholder="Tìm theo mã lớp hoặc tên lớp..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      {filteredClasses.map(classItem => (
-        <ClassCard 
-          key={classItem.id} 
-          classItem={classItem} 
-          onEdit={onEdit} 
-          onViewStats={onViewStats}
-          onDelete={onDelete}
-        />
-      ))}
+      <div className={styles.classCardContainer}>
+        {currentClasses.map(classItem => (
+          <ClassCard 
+            key={classItem.id} 
+            classItem={classItem} 
+            onEdit={onEdit} 
+            onViewStats={onViewStats}
+            onDelete={onDelete}
+          />
+        ))}
 
-      {filteredClasses.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#777587', backgroundColor: '#ffffff', borderRadius: '1.5rem', border: '1px dashed #c7c4d8' }}>
-          Không tìm thấy lớp học phần nào phù hợp.
-        </div>
+        {filteredClasses.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#777587', backgroundColor: '#ffffff', borderRadius: '1.5rem', border: '1px dashed #c7c4d8' }}>
+            Không tìm thấy lớp nào phù hợp.
+          </div>
+        )}
+      </div>
+
+      {filteredClasses.length > 0 && (
+        <ClassesPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredClasses.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       )}
+
     </div>
   );
 }

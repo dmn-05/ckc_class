@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from '@/components/admin/classes/AdminClasses.module.css';
 import ClassDashboard from '@/components/admin/classes/ClassDashboard';
 import ClassList from '@/components/admin/classes/ClassList';
@@ -8,86 +8,53 @@ import ClassFormModal from '@/components/admin/classes/ClassFormModal';
 import ClassStatsModal from '@/components/admin/classes/ClassStatsModal';
 import { ClassData } from '@/components/admin/classes/ClassCard';
 import Link from 'next/link';
-
-const INITIAL_CLASSES: ClassData[] = [
-  {
-    id: 's1',
-    code: 'FLUTTER-K1',
-    subjectName: 'Lập trình Flutter',
-    semester: 'HK1',
-    academicYear: '2023-2024',
-    room: 'Lab 1, Cơ sở A',
-    schedule: 'Thứ 3, Ca 1-3',
-    maxStudents: 40,
-    enrolledStudents: 38,
-    status: 'active'
-  },
-  {
-    id: 's2',
-    code: 'CSDL-K1',
-    subjectName: 'Cơ sở dữ liệu',
-    semester: 'HK1',
-    academicYear: '2023-2024',
-    room: 'Phòng 204, Cơ sở B',
-    schedule: 'Thứ 5, Ca 4-6',
-    maxStudents: 50,
-    enrolledStudents: 50,
-    status: 'upcoming'
-  },
-  {
-    id: 's3',
-    code: 'MKT-K2',
-    subjectName: 'Marketing căn bản',
-    semester: 'HK2',
-    academicYear: '2022-2023',
-    room: 'Phòng 101, Cơ sở A',
-    schedule: 'Thứ 2, Ca 1-3',
-    maxStudents: 60,
-    enrolledStudents: 55,
-    status: 'completed'
-  }
-];
+import { useRouter } from 'next/navigation';
+import { getClasses } from '@/app/actions/student';
 
 export default function LecturerClassesPage() {
-  const [classes, setClasses] = useState<ClassData[]>(INITIAL_CLASSES);
+  const [classes, setClasses] = useState<ClassData[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // Modals state
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassData | null>(null);
   const [statsClassId, setStatsClassId] = useState<string | null>(null);
 
-  // Derived dashboard stats
-  const activeCount = classes.filter(s => s.status === 'active').length;
+  const activeCount = classes.filter(s => s.status === 'dang_hoc').length;
   // Mock logic for pending assignments/quizzes just for visual
-  const pendingAssignments = classes.length > 0 ? 12 : 0;
-  const upcomingQuizzes = classes.length > 0 ? 2 : 0;
+  const pendingAssignments = classes.filter(s => s.status === 'da_tot_nghiep').length;
 
-  const handleOpenCreate = () => {
-    setEditingClass(null);
-    setIsFormOpen(true);
-  };
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getClasses();
+      const formattedClasses: ClassData[] = data.map((item: any) => ({
+        id: item.id.toString(),
+        code: item.ma_lop,
+        name: item.ten_lop,
+        faculty: item.khoa?.ten_khoa || 'Không rõ',
+        enrollmentYear: item.nam_nhap_hoc || 2024,
+        studentCount: item.sinh_viens_count || 0,
+        status: item.trang_thai || 'dang_hoc'
+      }));
+      setClasses(formattedClasses);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleOpenEdit = (classItem: ClassData) => {
-    setEditingClass(classItem);
-    setIsFormOpen(true);
-  };
-
-  const handleSaveClass = (data: any) => {
-    if (editingClass) {
-      setClasses(prev => prev.map(s => s.id === data.id ? { ...s, ...data } : s));
-    } else {
-      const newClass: ClassData = {
-        ...data,
-        id: `s_${Date.now()}`
-      };
-      setClasses(prev => [newClass, ...prev]);
-    }
-    setIsFormOpen(false);
+    router.push(`/admin/classes/${classItem.id}/edit`);
   };
 
   const handleDeleteClass = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa lớp học phần này?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa lớp này?')) {
       setClasses(prev => prev.filter(s => s.id !== id));
     }
   };
@@ -95,11 +62,11 @@ export default function LecturerClassesPage() {
   // Stats mock data generator
   const activeStatsClass = classes.find(s => s.id === statsClassId);
   const mockStats = activeStatsClass ? {
-    enrolled: activeStatsClass.enrolledStudents,
-    max: activeStatsClass.maxStudents,
-    assignments: 5,
-    quizzes: 2,
-    pendingGrading: activeStatsClass.status === 'active' ? 12 : 0
+    enrolled: activeStatsClass.studentCount,
+    max: 100,
+    assignments: 0,
+    quizzes: 0,
+    pendingGrading: 0
   } : null;
 
   const filteredClasses = filter === 'all' ? classes : classes.filter(s => s.status === filter);
@@ -124,30 +91,25 @@ export default function LecturerClassesPage() {
         <ClassDashboard
           activeCount={activeCount}
           pendingAssignments={pendingAssignments}
-          upcomingQuizzes={upcomingQuizzes}
           currentFilter={filter}
           onFilterChange={setFilter}
         />
 
-        <ClassList
-          classes={filteredClasses}
-          onEdit={handleOpenEdit}
-          onViewStats={setStatsClassId}
-          onDelete={handleDeleteClass}
-        />
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+        ) : (
+          <ClassList
+            classes={filteredClasses}
+            onEdit={handleOpenEdit}
+            onViewStats={setStatsClassId}
+            onDelete={handleDeleteClass}
+          />
+        )}
       </div>
-
-      {isFormOpen && (
-        <ClassFormModal
-          initialData={editingClass}
-          onSave={handleSaveClass}
-          onClose={() => setIsFormOpen(false)}
-        />
-      )}
 
       {statsClassId && activeStatsClass && (
         <ClassStatsModal
-          classTitle={activeStatsClass.subjectName}
+          classTitle={activeStatsClass.name}
           stats={mockStats}
           onClose={() => setStatsClassId(null)}
         />

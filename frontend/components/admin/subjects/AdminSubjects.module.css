@@ -181,13 +181,13 @@
 .subStatValueActive {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #7e3000; /* tertiary */
+  color: #4648d4; /* primary/blue */
 }
 
 .subStatValuePaused {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #4648d4; /* secondary */
+  color: #ba1a1a; /* error/red */
 }
 
 /* Distribution Chart */
@@ -558,6 +558,7 @@
   padding-top: 1.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  margin-top: auto;
 }
 
 .paginationText {
@@ -601,3 +602,10 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.subjectCardInactive { border-left-color: #ba1a1a; }
+.subjectCardInactive:hover { border-left-color: #4648d4; }
+
+.subjectIconInactive { background-color: rgba(186, 26, 26, 0.1); color: #ba1a1a; }
+.subjectCard:hover .subjectIconInactive { background-color: #ba1a1a; color: #ffffff; }
+.subjectCodeInactive { background-color: rgba(186, 26, 26, 0.1); color: #ba1a1a; }

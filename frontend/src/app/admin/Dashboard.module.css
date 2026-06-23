@@ -1,0 +1,88 @@
+.pageContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: var(--font-inter, system-ui, -apple-system, sans-serif);
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #191c1e;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.pageSubtitle {
+  color: #464555;
+  font-size: 0.875rem;
+  max-width: 32rem;
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e3e5;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.statIconBox {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statIconPrimary { background-color: rgba(53, 37, 205, 0.1); color: #3525cd; }
+.statIconSecondary { background-color: rgba(70, 72, 212, 0.1); color: #4648d4; }
+.statIconTertiary { background-color: rgba(126, 48, 0, 0.1); color: #7e3000; }
+.statIconQuaternary { background-color: rgba(5, 150, 105, 0.1); color: #059669; }
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #777587;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #191c1e;
+  line-height: 1;
+}

@@ -229,6 +229,38 @@
   text-align: left;
 }
 
+.statsGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(199, 196, 215, 0.3);
+}
+
+.statItem {
+  text-align: left;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #464554;
+  font-weight: 500;
+}
+
+.statValuePrimary {
+  color: #494bd6;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.statValueSecondary {
+  color: #6750a4;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
 .statItem {
   display: flex;
   align-items: center;
@@ -294,6 +326,23 @@
 }
 
 /* Forms */
+.formHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.formIcon {
+  color: #494bd6;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #171f33;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -375,6 +424,12 @@
   width: 100%;
   outline: none;
   resize: none;
+}
+
+.inputIcon {
+  color: #464554;
+  margin-right: 0.75rem;
+  font-size: 1.125rem;
 }
 
 .inputIconRight {

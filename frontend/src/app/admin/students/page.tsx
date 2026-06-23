@@ -1,3 +1,6 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import StudentsHeader from '@/components/admin/students/StudentsHeader';
 import StudentsStats from '@/components/admin/students/StudentsStats';
 import StudentsFilter from '@/components/admin/students/StudentsFilter';
@@ -5,8 +8,91 @@ import StudentsToolbar from '@/components/admin/students/StudentsToolbar';
 import StudentsList from '@/components/admin/students/StudentsList';
 import StudentsPagination from '@/components/admin/students/StudentsPagination';
 import styles from '@/components/admin/students/AdminStudents.module.css';
+import { getStudents } from '@/app/actions/student';
+import { getFaculties } from '@/app/actions/faculty';
+import { StudentData } from '@/components/admin/students/StudentCard';
 
 export default function AdminStudentsPage() {
+  const [students, setStudents] = useState<StudentData[]>([]);
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filters & Pagination State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [facultyFilter, setFacultyFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string[]>(['active', 'graduated', 'reserved']); // array of selected statuses
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [studentsData, facultiesData] = await Promise.all([
+        getStudents(),
+        getFaculties()
+      ]);
+      setStudents(studentsData);
+      setFaculties(facultiesData);
+    } catch (error) {
+      console.error('Error loading students data:', error);
+      alert('Không thể tải dữ liệu sinh viên. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, facultyFilter, statusFilter]);
+
+  // Apply filters
+  const filteredStudents = students.filter(student => {
+    // Search Term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      if (!student.name.toLowerCase().includes(term) && 
+          !student.code.toLowerCase().includes(term) &&
+          !(student.classCode && student.classCode.toLowerCase().includes(term))) {
+        return false;
+      }
+    }
+
+    // Faculty Filter
+    if (facultyFilter !== 'all') {
+      if (!student.faculty || student.faculty.toLowerCase() !== facultyFilter.toLowerCase()) {
+        return false;
+      }
+    }
+
+    // Status Filter
+    if (statusFilter.length === 0) return false;
+    
+    const allowedStatuses: string[] = statusFilter.map(s => {
+      if (s === 'active') return 'dang_hoc';
+      if (s === 'graduated') return 'da_tot_nghiep';
+      if (s === 'reserved') return 'tam_nghi';
+      return '';
+    });
+    
+    if (student.status && !allowedStatuses.includes(student.status)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+  const currentStudents = filteredStudents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className={styles.container}>
       <StudentsHeader />
@@ -14,15 +100,39 @@ export default function AdminStudentsPage() {
       <div className={styles.grid}>
         {/* Left Column: Statistics & Filters */}
         <div className={styles.leftColumn}>
-          <StudentsStats />
-          <StudentsFilter />
+          <StudentsStats students={students} />
+          <StudentsFilter 
+            facultyFilter={facultyFilter}
+            onFacultyChange={setFacultyFilter}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            faculties={faculties}
+          />
         </div>
         
         {/* Right Column: Student List */}
         <div className={styles.rightColumn}>
-          <StudentsToolbar />
-          <StudentsList />
-          <StudentsPagination />
+          <StudentsToolbar 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            facultyFilter={facultyFilter}
+            onFacultyChange={setFacultyFilter}
+            faculties={faculties}
+          />
+          {loading ? (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+          ) : (
+            <>
+              <StudentsList students={currentStudents} />
+              <StudentsPagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredStudents.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

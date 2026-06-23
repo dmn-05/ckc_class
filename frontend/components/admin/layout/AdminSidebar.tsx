@@ -36,6 +36,11 @@ export default function AdminSidebar() {
       icon: <span className="material-symbols-outlined">book</span>
     },
     {
+      name: 'Lớp học phần',
+      href: '/admin/course-sections',
+      icon: <span className="material-symbols-outlined">collections_bookmark</span>
+    },
+    {
       name: 'Sinh Viên',
       href: '/admin/students',
       icon: <span className="material-symbols-outlined">school</span>
@@ -66,7 +71,7 @@ export default function AdminSidebar() {
       </div>
       <nav className={styles.navMenu}>
         {navLinks.map((link) => {
-          const isActive = pathname === link.href || (link.href !== '/lecturer' && pathname?.startsWith(link.href));
+          const isActive = pathname === link.href || (link.href !== '/admin' && pathname?.startsWith(link.href));
           return (
             <Link
               key={link.href}

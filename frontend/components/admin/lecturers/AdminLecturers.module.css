@@ -76,7 +76,7 @@
   border: 1px solid #e0e3e5;
   border-radius: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .glassCard:hover {
@@ -158,7 +158,9 @@
   font-weight: 600;
 }
 
-.statValuePrimary { color: #3525cd; }
+.statValuePrimary {
+  color: #3525cd;
+}
 
 .subStatsList {
   display: flex;
@@ -205,7 +207,8 @@
 .filterTitle {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #4648d4; /* Secondary from light mode */
+  color: #4648d4;
+  /* Secondary from light mode */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1.5rem;
@@ -314,7 +317,8 @@
 
 .bannerSubtitle {
   font-size: 0.75rem;
-  color: #e1e0ff; /* light primary */
+  color: #e1e0ff;
+  /* light primary */
 }
 
 /* Right Column */
@@ -351,7 +355,7 @@
   align-items: center;
   padding: 0.25rem 1rem;
   border: 1px solid #e0e3e5;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .searchIconMain {
@@ -439,9 +443,17 @@
   border-left-style: solid;
 }
 
-.lecturerCardPrimary { border-left-color: #3525cd; }
-.lecturerCardSecondary { border-left-color: #4648d4; }
-.lecturerCardTertiary { border-left-color: #7e3000; }
+.lecturerCardPrimary {
+  border-left-color: #3525cd;
+}
+
+.lecturerCardSecondary {
+  border-left-color: #4648d4;
+}
+
+.lecturerCardTertiary {
+  border-left-color: #7e3000;
+}
 
 .lecturerCardLeft {
   display: flex;
@@ -489,12 +501,14 @@
 }
 
 .statusIndicatorActive {
-  background-color: #7e3000; /* tertiary */
+  background-color: #7e3000;
+  /* tertiary */
   box-shadow: 0 0 8px rgba(126, 48, 0, 0.4);
 }
 
 .statusIndicatorInactive {
-  background-color: #ba1a1a; /* error */
+  background-color: #ba1a1a;
+  /* error */
   box-shadow: 0 0 8px rgba(186, 26, 26, 0.4);
 }
 
@@ -525,9 +539,20 @@
   text-transform: uppercase;
 }
 
-.lecturerCodePrimary { background-color: rgba(53, 37, 205, 0.1); color: #3525cd; }
-.lecturerCodeSecondary { background-color: rgba(70, 72, 212, 0.1); color: #4648d4; }
-.lecturerCodeTertiary { background-color: rgba(126, 48, 0, 0.1); color: #7e3000; }
+.lecturerCodePrimary {
+  background-color: rgba(53, 37, 205, 0.1);
+  color: #3525cd;
+}
+
+.lecturerCodeSecondary {
+  background-color: rgba(70, 72, 212, 0.1);
+  color: #4648d4;
+}
+
+.lecturerCodeTertiary {
+  background-color: rgba(126, 48, 0, 0.1);
+  color: #7e3000;
+}
 
 .lecturerDetailsRow {
   display: flex;
@@ -604,9 +629,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 1.5rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 1rem 1.5rem;
+  bottom: 0;
+  background-color: #f7f9fb;
+  border-top: 1px solid rgba(199, 196, 216, 0.5);
+  border-radius: 0 0 1.5rem 1.5rem;
+  margin-top: auto;
+  z-index: 10;
 }
 
 .paginationText {

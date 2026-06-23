@@ -181,6 +181,14 @@
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e0e3e5;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  z-index: 100;
 }
 
 .btnSecondary {

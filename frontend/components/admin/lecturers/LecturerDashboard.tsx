@@ -5,20 +5,28 @@ import styles from './AdminLecturers.module.css';
 
 interface LecturerDashboardProps {
   totalCount: number;
-  professorsCount: number;
-  seniorLecturersCount: number;
-  lecturersCount: number;
+  teachingCount: number;
+  stoppedTeachingCount: number;
   facultyFilter: string;
   onFacultyFilterChange: (val: string) => void;
+  showTeaching: boolean;
+  showStopped: boolean;
+  onShowTeachingChange: (val: boolean) => void;
+  onShowStoppedChange: (val: boolean) => void;
+  faculties?: any[];
 }
 
 export default function LecturerDashboard({
   totalCount,
-  professorsCount,
-  seniorLecturersCount,
-  lecturersCount,
+  teachingCount,
+  stoppedTeachingCount,
   facultyFilter,
-  onFacultyFilterChange
+  onFacultyFilterChange,
+  showTeaching,
+  showStopped,
+  onShowTeachingChange,
+  onShowStoppedChange,
+  faculties = []
 }: LecturerDashboardProps) {
   return (
     <div className={styles.leftColumn}>
@@ -40,16 +48,12 @@ export default function LecturerDashboard({
 
           <div className={styles.subStatsList}>
             <div className={styles.subStatItem}>
-              <span className={styles.subStatLabel}>Giáo sư</span>
-              <span className={styles.subStatValueTertiary}>{professorsCount}</span>
+              <span className={styles.subStatLabel}>Đang giảng dạy</span>
+              <span className={styles.subStatValuePrimary}>{teachingCount}</span>
             </div>
             <div className={styles.subStatItem}>
-              <span className={styles.subStatLabel}>Giảng viên cao cấp</span>
-              <span className={styles.subStatValueSecondary}>{seniorLecturersCount}</span>
-            </div>
-            <div className={styles.subStatItem}>
-              <span className={styles.subStatLabel}>Giảng viên</span>
-              <span className={styles.subStatValuePrimary}>{lecturersCount}</span>
+              <span className={styles.subStatLabel}>Ngừng giảng dạy</span>
+              <span className={styles.subStatValueSecondary}>{stoppedTeachingCount}</span>
             </div>
           </div>
         </div>
@@ -70,9 +74,9 @@ export default function LecturerDashboard({
             onChange={(e) => onFacultyFilterChange(e.target.value)}
           >
             <option value="all">Tất cả các khoa</option>
-            <option value="CNTT">Công nghệ thông tin</option>
-            <option value="CK">Cơ khí</option>
-            <option value="DD">Điện - Điện tử</option>
+            {faculties.map((f: any) => (
+              <option key={f.id} value={f.code}>{f.name}</option>
+            ))}
           </select>
         </div>
 
@@ -80,11 +84,21 @@ export default function LecturerDashboard({
           <label className={styles.filterLabel}>TRẠNG THÁI</label>
           <div className={styles.checkboxGroup}>
             <label className={styles.checkboxLabel}>
-              <input type="checkbox" className={styles.checkboxInput} defaultChecked />
+              <input 
+                type="checkbox" 
+                className={styles.checkboxInput} 
+                checked={showTeaching}
+                onChange={(e) => onShowTeachingChange(e.target.checked)} 
+              />
               <span className={styles.checkboxText}>Đang giảng dạy</span>
             </label>
             <label className={styles.checkboxLabel}>
-              <input type="checkbox" className={styles.checkboxInput} />
+              <input 
+                type="checkbox" 
+                className={styles.checkboxInput} 
+                checked={showStopped}
+                onChange={(e) => onShowStoppedChange(e.target.checked)} 
+              />
               <span className={styles.checkboxText}>Đang nghỉ phép</span>
             </label>
           </div>

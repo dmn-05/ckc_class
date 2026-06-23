@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/container-queries";
 @source "../../components";
+@source "../../src";
 
 
 @theme {

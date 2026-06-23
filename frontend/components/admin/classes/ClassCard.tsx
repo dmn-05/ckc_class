@@ -1,22 +1,18 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import styles from './AdminClasses.module.css';
 
-export type ClassStatus = 'upcoming' | 'active' | 'completed' | 'cancelled';
+export type ClassStatus = 'dang_hoc' | 'da_tot_nghiep';
 
 export interface ClassData {
   id: string;
-  code: string;
-  subjectName: string;
-  semester: string;
-  academicYear: string;
-  room: string;
-  schedule: string;
-  maxStudents: number;
-  enrolledStudents: number;
+  code: string; // ma_lop
+  name: string; // ten_lop
+  faculty: string; // khoa.ten_khoa
+  enrollmentYear: number; // nam_nhap_hoc
+  studentCount: number; // sinh_viens_count
   status: ClassStatus;
-  description?: string;
 }
 
 interface ClassCardProps {
@@ -30,7 +26,7 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
   let cardClass = styles.classCardPrimary;
   let iconClass = styles.classIconPrimary;
   let codeClass = styles.classCodePrimary;
-  let statusText = 'Đang mở';
+  let statusText = 'Đang học';
   let statusClass = styles.statusActive;
   let statusIcon = (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
@@ -38,22 +34,11 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
     </svg>
   );
 
-  if (classItem.status === 'upcoming') {
-    cardClass = styles.classCardSecondary;
-    iconClass = styles.classIconSecondary;
-    codeClass = styles.classCodeSecondary;
-    statusText = 'Sắp diễn ra';
-    statusClass = styles.statusUpcoming;
-    statusIcon = (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
-  } else if (classItem.status === 'completed' || classItem.status === 'cancelled') {
+  if (classItem.status === 'da_tot_nghiep') {
     cardClass = styles.classCardCompleted;
     iconClass = styles.classIconCompleted;
     codeClass = styles.classCodeCompleted;
-    statusText = classItem.status === 'completed' ? 'Đã kết thúc' : 'Đã hủy';
+    statusText = 'Đã tốt nghiệp';
     statusClass = styles.statusCompleted;
     statusIcon = (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
@@ -73,7 +58,7 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
 
         <div className={styles.classInfo}>
           <div className={styles.classTitleRow}>
-            <h4 className={styles.classTitle}>{classItem.subjectName}</h4>
+            <h4 className={styles.classTitle}>{classItem.name}</h4>
             <span className={`${styles.classCodeBadge} ${codeClass}`}>{classItem.code}</span>
           </div>
 
@@ -82,21 +67,21 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              {classItem.enrolledStudents}/{classItem.maxStudents} SV
+              {classItem.studentCount} SV
             </div>
 
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              {classItem.room}
+              {classItem.faculty}
             </div>
 
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {classItem.schedule}
+              Khóa {classItem.enrollmentYear}
             </div>
 
             <div className={`${styles.statusLabel} ${statusClass}`}>

@@ -1,23 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './AdminCreateClasses.module.css';
+import { createClass, getFaculties } from '@/app/actions/class';
 
 export default function CreateClassForm() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    ma_lop: '',
+    ten_lop: '',
+    khoa_id: '',
+    nam_nhap_hoc: new Date().getFullYear(),
+    trang_thai: 'dang_hoc'
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    getFaculties().then(data => {
+      setFaculties(data);
+      if (data.length > 0) {
+        setFormData(prev => ({ ...prev, khoa_id: data[0].id.toString() }));
+      }
+    }).catch(console.error);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: name === 'nam_nhap_hoc' ? parseInt(value) || new Date().getFullYear() : value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
 
-    setTimeout(() => {
+    try {
+      await createClass(formData);
       setSubmitStatus('success');
       setTimeout(() => {
-        setSubmitStatus('idle');
-        setIsSubmitting(false);
-      }, 2000);
-    }, 1500);
+        router.push('/admin/classes');
+      }, 1500);
+    } catch (err: any) {
+      setSubmitStatus('error');
+      setErrorMessage(err.message || 'Có lỗi xảy ra');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -27,93 +60,81 @@ export default function CreateClassForm() {
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>
             <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>info</span>
-            Thông tin Lớp Học Phần
+            Thông tin Lớp
           </h2>
           
           <form onSubmit={handleSubmit}>
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Mã Lớp Học Phần</label>
+                <label className={styles.formLabel}>Mã Lớp</label>
                 <input 
                   type="text" 
+                  name="ma_lop"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: INT101.1" 
+                  placeholder="Ví dụ: CDTH24A" 
+                  value={formData.ma_lop}
+                  onChange={handleChange}
                   required
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Môn Học</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option>Chọn Môn học</option>
-                  <option>Lập trình hướng đối tượng</option>
-                  <option>Cơ sở dữ liệu</option>
-                  <option>Mạng máy tính</option>
-                </select>
+                <label className={styles.formLabel}>Tên Lớp</label>
+                <input 
+                  type="text" 
+                  name="ten_lop"
+                  className={styles.formInput} 
+                  placeholder="Ví dụ: Cao đẳng Tin học 24A" 
+                  value={formData.ten_lop}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Giảng viên phụ trách</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option>Chọn Giảng viên</option>
-                  <option>Dr. Nguyễn Văn A</option>
-                  <option>ThS. Trần Thị B</option>
-                  <option>GS. Lê Hoàng C</option>
+                <label className={styles.formLabel}>Khoa</label>
+                <select name="khoa_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.khoa_id} onChange={handleChange} required>
+                  <option value="">Chọn Khoa</option>
+                  {faculties.map(f => (
+                    <option key={f.id} value={f.id}>{f.ten_khoa}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Học kỳ - Năm học</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option>HK1 2023-2024</option>
-                  <option>HK2 2023-2024</option>
-                  <option>HK1 2024-2025</option>
-                </select>
+                <label className={styles.formLabel}>Khóa (Năm nhập học)</label>
+                <input 
+                  type="number" 
+                  name="nam_nhap_hoc"
+                  className={styles.formInput} 
+                  placeholder="Ví dụ: 2024" 
+                  value={formData.nam_nhap_hoc}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tình trạng đăng ký</label>
-                <select className={`${styles.formInput} ${styles.formSelect}`}>
-                  <option value="open">Đang mở đăng ký</option>
-                  <option value="locked">Đã khóa</option>
-                  <option value="learning">Đang học</option>
-                  <option value="finished">Đã kết thúc</option>
+                <label className={styles.formLabel}>Trạng thái</label>
+                <select name="trang_thai" className={`${styles.formInput} ${styles.formSelect}`} value={formData.trang_thai} onChange={handleChange}>
+                  <option value="dang_hoc">Đang học</option>
+                  <option value="da_tot_nghiep">Đã tốt nghiệp</option>
                 </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Sĩ số tối đa</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="number" 
-                    className={styles.formInput} 
-                    placeholder="Ví dụ: 50" 
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>group</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Lịch học dự kiến</label>
-                <div className={styles.inputWithIcon}>
-                  <input 
-                    type="text" 
-                    className={styles.formInput} 
-                    placeholder="Ví dụ: Thứ 2 (Tiết 1-3) - Phòng A1.01" 
-                  />
-                  <span className={`material-symbols-outlined ${styles.inputIcon}`}>calendar_today</span>
-                </div>
               </div>
             </div>
           </form>
         </div>
 
         {/* Submission Actions */}
+        {submitStatus === 'error' && (
+          <div style={{ color: '#ba1a1a', marginBottom: '1rem', padding: '0.75rem', backgroundColor: 'rgba(186,26,26,0.1)', borderRadius: '0.5rem' }}>
+            {errorMessage}
+          </div>
+        )}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary}>
+          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/classes')}>
             Hủy bỏ
           </button>
           <button 
@@ -136,7 +157,7 @@ export default function CreateClassForm() {
             ) : (
               <>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
-                Thêm Lớp Học Phần
+                Thêm Lớp
               </>
             )}
           </button>
@@ -154,9 +175,9 @@ export default function CreateClassForm() {
             </div>
             <h3 className={styles.suggestionTitle}>Gợi ý đặt mã lớp</h3>
             <p className={styles.suggestionDesc}>
-              Mã Lớp Học Phần nên bao gồm Mã Môn Học và số thứ tự lớp. 
+              Mã Lớp nên ngắn gọn, dễ nhớ và thể hiện được ngành học cũng như năm nhập học. 
               <br/><br/>
-              Ví dụ: Môn Lập trình hướng đối tượng có mã "INT101", thì Lớp học phần 1 sẽ có mã "INT101.1" hoặc "INT101.L01".
+              Ví dụ: Lớp Cao đẳng Tin học nhập học năm 2024 có mã là "CDTH24A".
             </p>
             <div className={styles.suggestionLink}>
               <span style={{ fontSize: '0.75rem' }}>Xem quy định</span>
@@ -181,15 +202,11 @@ export default function CreateClassForm() {
             </li>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconPending}`}>radio_button_unchecked</span>
-              <span style={{ color: '#191c1e' }}>Phân công Giảng viên</span>
+              <span style={{ color: '#191c1e' }}>Cập nhật Khoa quản lý</span>
             </li>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconPending}`}>radio_button_unchecked</span>
-              <span style={{ color: '#191c1e' }}>Thiết lập Sĩ số tối đa</span>
-            </li>
-            <li className={styles.progressItem}>
-              <span className={`material-symbols-outlined ${styles.progressIconPending}`}>radio_button_unchecked</span>
-              <span style={{ color: '#191c1e' }}>Lịch học & Phòng học</span>
+              <span style={{ color: '#191c1e' }}>Thiết lập Trạng thái</span>
             </li>
           </ul>
         </div>

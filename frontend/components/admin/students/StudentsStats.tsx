@@ -1,7 +1,18 @@
 import React from 'react';
 import styles from './AdminStudents.module.css';
+import { StudentData } from './StudentCard';
 
-export default function StudentsStats() {
+interface StudentsStatsProps {
+  students: StudentData[];
+}
+
+export default function StudentsStats({ students }: StudentsStatsProps) {
+  const total = students.length;
+
+  const activeCount = students.filter(s => s.status === 'dang_hoc').length;
+  const reservedCount = students.filter(s => s.status === 'tam_nghi').length;
+  const graduatedCount = students.filter(s => s.status === 'da_tot_nghiep').length;
+
   return (
     <div className={`${styles.card} ${styles.statsRelative}`}>
       <div className={styles.statsBgGlow}></div>
@@ -15,25 +26,21 @@ export default function StudentsStats() {
             </div>
             <span className={styles.statsTotalLabel}>Tổng sinh viên</span>
           </div>
-          <span className={styles.statsTotalValue}>1,248</span>
+          <span className={styles.statsTotalValue}>{total}</span>
         </div>
         
         <div className={styles.statsGrid}>
           <div className={styles.statsItem}>
-            <span className={styles.statsItemLabel}>Năm 1</span>
-            <span className={styles.statsItemValue}>320</span>
+            <span className={styles.statsItemLabel}>Đang học</span>
+            <span className={styles.statsItemValue} style={{ color: '#4648d4' }}>{activeCount}</span>
           </div>
           <div className={styles.statsItem}>
-            <span className={styles.statsItemLabel}>Năm 2</span>
-            <span className={styles.statsItemValue}>312</span>
+            <span className={styles.statsItemLabel}>Bảo lưu</span>
+            <span className={styles.statsItemValue} style={{ color: '#ba1a1a' }}>{reservedCount}</span>
           </div>
-          <div className={styles.statsItem}>
-            <span className={styles.statsItemLabel}>Năm 3</span>
-            <span className={styles.statsItemValue}>308</span>
-          </div>
-          <div className={styles.statsItem}>
-            <span className={styles.statsItemLabel}>Năm 4</span>
-            <span className={styles.statsItemValue}>308</span>
+          <div className={styles.statsItem} style={{ gridColumn: 'span 2' }}>
+            <span className={styles.statsItemLabel}>Đã tốt nghiệp</span>
+            <span className={styles.statsItemValue} style={{ color: '#22c55e' }}>{graduatedCount}</span>
           </div>
         </div>
       </div>
