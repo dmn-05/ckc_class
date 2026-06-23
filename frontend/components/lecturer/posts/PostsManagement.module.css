@@ -158,6 +158,119 @@
   transform: scale(1);
 }
 
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.btnClose {
+  background: transparent;
+  border: none;
+  color: #464555;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.btnClose:hover {
+  background-color: #e6e8ea;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #c7c4d8;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.modalInput:focus {
+  border-color: #3525cd;
+  box-shadow: 0 0 0 2px rgba(53, 37, 205, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btnCancel {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  color: #464555;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnCancel:hover {
+  background-color: #f2f4f6;
+}
+
+.btnSubmitPrimary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #3525cd;
+  color: #ffffff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.btnSubmitPrimary:hover {
+  background-color: #4f46e5;
+  transform: scale(0.98);
+}
+
+.cardAttachment {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f1f3f4;
+  padding: 4px 12px;
+  border-radius: 16px;
+  margin-top: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.cardAttachment:hover {
+  background-color: #e8eaed;
+  border-color: #dadce0;
+}
+
+.cardAttachmentName {
+  font-size: 13px;
+  color: #3c4043;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
 /* --- LECTURER POSTS LIST PURE CSS LAYOUT --- */
 
 /* The main container wrapping the filter bar, grid, and pagination */
