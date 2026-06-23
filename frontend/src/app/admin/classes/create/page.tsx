@@ -9,8 +9,8 @@ export default function CreateClassPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Thêm Mới Lớp Học Phần</h1>
-        <p className={styles.pageSubtitle}>Tạo lớp học mới cho môn học, chỉ định giảng viên và thời khóa biểu trong học kỳ.</p>
+        <h1 className={styles.pageTitle}>Thêm Mới Lớp</h1>
+        <p className={styles.pageSubtitle}>Tạo lớp danh nghĩa mới, thiết lập mã lớp và khoa quản lý.</p>
       </div>
 
       <CreateClassForm />

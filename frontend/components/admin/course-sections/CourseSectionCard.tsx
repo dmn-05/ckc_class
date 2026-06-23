@@ -1,44 +1,65 @@
 'use client';
 
 import React from 'react';
-import styles from './AdminClasses.module.css';
+import styles from './AdminCourseSections.module.css';
 
-export type ClassStatus = 'dang_hoc' | 'da_tot_nghiep';
+export type CourseSectionStatus = 'dang_mo' | 'da_khoa' | 'da_ket_thuc';
 
-export interface ClassData {
+export interface CourseSectionData {
   id: string;
-  code: string; // ma_lop
-  name: string; // ten_lop
-  faculty: string; // khoa.ten_khoa
-  enrollmentYear: number; // nam_nhap_hoc
-  studentCount: number; // sinh_viens_count
-  status: ClassStatus;
+  code: string;
+  name: string;
+  subjectName: string;
+  lecturerName: string;
+  semester: string;
+  academicYear: string;
+  faculty: string;
+  maxStudents: number;
+  status: CourseSectionStatus;
 }
 
-interface ClassCardProps {
-  classItem: ClassData;
-  onEdit: (classItem: ClassData) => void;
-  onViewStats: (classId: string) => void;
-  onDelete: (classId: string) => void;
+interface CourseSectionCardProps {
+  section: CourseSectionData;
+  onEdit: (section: CourseSectionData) => void;
+  onViewStats: (sectionId: string) => void;
+  onDelete: (sectionId: string) => void;
 }
 
-export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: ClassCardProps) {
-  let cardClass = styles.classCardPrimary;
-  let iconClass = styles.classIconPrimary;
-  let codeClass = styles.classCodePrimary;
-  let statusText = 'Đang học';
-  let statusClass = styles.statusActive;
-  let statusIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
+export default function CourseSectionCard({ section, onEdit, onViewStats, onDelete }: CourseSectionCardProps) {
+  let statusClass = '';
+  let statusText = '';
+  let cardClass = '';
+  let iconClass = '';
+  let codeClass = '';
+  let statusIcon = null;
 
-  if (classItem.status === 'da_tot_nghiep') {
+  if (section.status === 'dang_mo') {
+    cardClass = styles.classCardPrimary;
+    iconClass = styles.classIconPrimary;
+    codeClass = styles.classCodePrimary;
+    statusText = 'Đang mở';
+    statusClass = styles.statusActive;
+    statusIcon = (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    );
+  } else if (section.status === 'da_khoa') {
+    cardClass = styles.classCardSecondary;
+    iconClass = styles.classIconSecondary;
+    codeClass = styles.classCodeSecondary;
+    statusText = 'Đã khóa';
+    statusClass = styles.statusUpcoming;
+    statusIcon = (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    );
+  } else if (section.status === 'da_ket_thuc') {
     cardClass = styles.classCardCompleted;
     iconClass = styles.classIconCompleted;
     codeClass = styles.classCodeCompleted;
-    statusText = 'Đã tốt nghiệp';
+    statusText = 'Đã kết thúc';
     statusClass = styles.statusCompleted;
     statusIcon = (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
@@ -58,30 +79,30 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
 
         <div className={styles.classInfo}>
           <div className={styles.classTitleRow}>
-            <h4 className={styles.classTitle}>{classItem.name}</h4>
-            <span className={`${styles.classCodeBadge} ${codeClass}`}>{classItem.code}</span>
+            <h4 className={styles.classTitle}>{section.name || section.subjectName}</h4>
+            <span className={`${styles.classCodeBadge} ${codeClass}`}>{section.code}</span>
           </div>
-
+          
           <div className={styles.classDetailsRow}>
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              {classItem.studentCount} SV
+              {section.maxStudents} SV
             </div>
 
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              {classItem.faculty}
+              {section.faculty}
             </div>
 
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Khóa {classItem.enrollmentYear}
+              Khóa {section.academicYear ? section.academicYear.substring(0, 4) : '2024'}
             </div>
 
             <div className={`${styles.statusLabel} ${statusClass}`}>
@@ -93,28 +114,28 @@ export default function ClassCard({ classItem, onEdit, onViewStats, onDelete }: 
       </div>
 
       <div className={styles.classCardRight}>
-        <button
+        <button 
           className={`${styles.btnActionSmall} ${styles.btnActionStats}`}
-          title="Xem thống kê"
-          onClick={() => onViewStats(classItem.id)}
+          onClick={() => onViewStats(section.id)}
+          title="Thống kê"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </button>
-        <button
+        <button 
           className={styles.btnActionSmall}
-          title="Chỉnh sửa"
-          onClick={() => onEdit(classItem)}
+          onClick={() => onEdit(section)}
+          title="Sửa thông tin"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </button>
-        <button
+        <button 
           className={`${styles.btnActionSmall} ${styles.btnActionDelete}`}
-          title="Xóa"
-          onClick={() => onDelete(classItem.id)}
+          onClick={() => onDelete(section.id)}
+          title="Xóa lớp học phần"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

@@ -6,13 +6,15 @@ interface StudentsFilterProps {
   onFacultyChange: (value: string) => void;
   statusFilter: string[];
   onStatusChange: (value: string[]) => void;
+  faculties: any[];
 }
 
 export default function StudentsFilter({
   facultyFilter,
   onFacultyChange,
   statusFilter,
-  onStatusChange
+  onStatusChange,
+  faculties
 }: StudentsFilterProps) {
   const handleStatusToggle = (status: string) => {
     if (statusFilter.includes(status)) {
@@ -38,9 +40,9 @@ export default function StudentsFilter({
             onChange={(e) => onFacultyChange(e.target.value)}
           >
             <option value="all">Tất cả các khoa</option>
-            <option value="công nghệ thông tin">Công nghệ thông tin</option>
-            <option value="cơ khí">Cơ khí</option>
-            <option value="điện">Điện - Điện tử</option>
+            {faculties.map(f => (
+              <option key={f.id} value={f.name}>{f.name}</option>
+            ))}
           </select>
         </div>
         

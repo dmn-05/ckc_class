@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class.':1')->group(function () {
         // User routes
         Route::get('/lecturers', [UserController::class, 'getLecturers']);
+        Route::get('/lecturers/{id}', [UserController::class, 'getLecturerById']);
+        Route::post('/lecturers', [UserController::class, 'storeLecturer']);
+        Route::put('/lecturers/{id}', [UserController::class, 'updateLecturer']);
+
         Route::get('/students', [UserController::class, 'getStudents']);
         Route::get('/students/{id}', [UserController::class, 'getStudentById']);
         Route::post('/students', [UserController::class, 'storeStudent']);
@@ -34,6 +38,17 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Class routes
         Route::get('/classes', [ClassController::class, 'index']);
+        Route::post('/classes', [ClassController::class, 'store']);
+        Route::get('/classes/{id}', [ClassController::class, 'show']);
+        Route::put('/classes/{id}', [ClassController::class, 'update']);
+        Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
+        
+        // Course Section routes
+        Route::get('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'index']);
+        Route::post('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'store']);
+        Route::get('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'show']);
+        Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
+        Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
         // Subject routes
         Route::get('/subjects/stats', [SubjectController::class, 'stats']);

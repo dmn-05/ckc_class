@@ -6,7 +6,6 @@ import styles from './AdminClasses.module.css';
 interface ClassDashboardProps {
   activeCount: number;
   pendingAssignments: number;
-  upcomingQuizzes: number;
   currentFilter: string;
   onFilterChange: (filter: string) => void;
 }
@@ -14,7 +13,6 @@ interface ClassDashboardProps {
 export default function ClassDashboard({
   activeCount,
   pendingAssignments,
-  upcomingQuizzes,
   currentFilter,
   onFilterChange
 }: ClassDashboardProps) {
@@ -23,7 +21,7 @@ export default function ClassDashboard({
       {/* System Overview */}
       <div className={`${styles.glassCard} ${styles.overviewCard}`}>
         <div className={styles.overviewGlow}></div>
-        <h3 className={styles.overviewTitle}>TỔNG QUAN HỌC PHẦN</h3>
+        <h3 className={styles.overviewTitle}>TỔNG QUAN LỚP HỌC</h3>
         
         <div className={styles.statList}>
           <div className={styles.statItem}>
@@ -33,9 +31,9 @@ export default function ClassDashboard({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className={styles.statLabel}>Học phần đang mở</span>
+              <span className={styles.statLabel}>Lớp đang học</span>
             </div>
-            <span className={`${styles.statValue} ${styles.statValuePrimary}`}>12</span>
+            <span className={`${styles.statValue} ${styles.statValuePrimary}`}>{activeCount.toString().padStart(2, '0')}</span>
           </div>
 
           <div className={styles.statItem}>
@@ -47,9 +45,9 @@ export default function ClassDashboard({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 14v2l1.5 1.5M16 11a5 5 0 100 10 5 5 0 000-10z" />
                 </svg>
               </div>
-              <span className={styles.statLabel}>Chờ phê duyệt</span>
+              <span className={styles.statLabel}>Lớp đã tốt nghiệp</span>
             </div>
-            <span className={`${styles.statValue} ${styles.statValueError}`}>03</span>
+            <span className={`${styles.statValue} ${styles.statValueError}`}>{pendingAssignments.toString().padStart(2, '0')}</span>
           </div>
         </div>
       </div>
@@ -67,22 +65,16 @@ export default function ClassDashboard({
               Tất cả
             </button>
             <button 
-              className={`${styles.filterTag} ${currentFilter === 'active' ? styles.filterTagActive : ''}`}
-              onClick={() => onFilterChange('active')}
+              className={`${styles.filterTag} ${currentFilter === 'dang_hoc' ? styles.filterTagActive : ''}`}
+              onClick={() => onFilterChange('dang_hoc')}
             >
-              Đang mở
+              Đang học
             </button>
             <button 
-              className={`${styles.filterTag} ${currentFilter === 'upcoming' ? styles.filterTagActive : ''}`}
-              onClick={() => onFilterChange('upcoming')}
+              className={`${styles.filterTag} ${currentFilter === 'da_tot_nghiep' ? styles.filterTagActive : ''}`}
+              onClick={() => onFilterChange('da_tot_nghiep')}
             >
-              Sắp diễn ra
-            </button>
-            <button 
-              className={`${styles.filterTag} ${currentFilter === 'completed' ? styles.filterTagActive : ''}`}
-              onClick={() => onFilterChange('completed')}
-            >
-              Đã kết thúc
+              Đã tốt nghiệp
             </button>
           </div>
         </div>

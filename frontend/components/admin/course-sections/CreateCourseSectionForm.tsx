@@ -2,36 +2,42 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './AdminCreateClasses.module.css';
-import { createClass, getFaculties } from '@/app/actions/class';
+import styles from './AdminCreateCourseSections.module.css';
+import { createCourseSection, getSubjects, getLecturers } from '@/app/actions/course-section';
 
-export default function CreateClassForm() {
+export default function CreateCourseSectionForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   
-  const [faculties, setFaculties] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [lecturers, setLecturers] = useState<any[]>([]);
+
   const [formData, setFormData] = useState({
-    ma_lop: '',
+    ma_lop_hoc_phan: '',
     ten_lop: '',
-    khoa_id: '',
-    nam_nhap_hoc: new Date().getFullYear(),
-    trang_thai: 'dang_hoc'
+    mon_hoc_id: '',
+    giang_vien_id: '',
+    hoc_ky: 'HK1',
+    nam_hoc: '2024-2025',
+    si_so_toi_da: 40,
+    trang_thai: 'dang_mo'
   });
 
   useEffect(() => {
-    getFaculties().then(data => {
-      setFaculties(data);
-      if (data.length > 0) {
-        setFormData(prev => ({ ...prev, khoa_id: data[0].id.toString() }));
-      }
+    Promise.all([getSubjects(), getLecturers()]).then(([subs, lecs]) => {
+      setSubjects(subs);
+      setLecturers(lecs);
     }).catch(console.error);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'nam_nhap_hoc' ? parseInt(value) || new Date().getFullYear() : value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'si_so_toi_da' ? parseInt(value) || 0 : value 
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,10 +47,10 @@ export default function CreateClassForm() {
     setErrorMessage('');
 
     try {
-      await createClass(formData);
+      await createCourseSection(formData);
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/admin/classes');
+        router.push('/admin/course-sections');
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -60,55 +66,74 @@ export default function CreateClassForm() {
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>
             <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>info</span>
-            Thông tin Lớp
+            Thông tin Lớp Học Phần
           </h2>
           
           <form onSubmit={handleSubmit}>
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Mã Lớp</label>
+                <label className={styles.formLabel}>Mã Lớp học phần <span style={{color:'red'}}>*</span></label>
                 <input 
                   type="text" 
-                  name="ma_lop"
+                  name="ma_lop_hoc_phan"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: CDTH24A" 
-                  value={formData.ma_lop}
+                  placeholder="Ví dụ: CDTH24A_LTrWeb" 
+                  value={formData.ma_lop_hoc_phan}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên Lớp</label>
+                <label className={styles.formLabel}>Tên Lớp (Tuỳ chọn)</label>
                 <input 
                   type="text" 
                   name="ten_lop"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: Cao đẳng Tin học 24A" 
+                  placeholder="Ví dụ: Lập trình Web - Nhóm 1" 
                   value={formData.ten_lop}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Khoa</label>
-                <select name="khoa_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.khoa_id} onChange={handleChange} required>
-                  <option value="">Chọn Khoa</option>
-                  {faculties.map(f => (
-                    <option key={f.id} value={f.id}>{f.ten_khoa}</option>
+                <label className={styles.formLabel}>Môn học <span style={{color:'red'}}>*</span></label>
+                <select name="mon_hoc_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.mon_hoc_id} onChange={handleChange} required>
+                  <option value="">Chọn Môn học</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>{s.ten_mon} - {s.ma_mon}</option>
                   ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Khóa (Năm nhập học)</label>
+                <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>
+                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required>
+                  <option value="">Chọn Giảng viên</option>
+                  {lecturers.map(l => (
+                    <option key={l.id} value={l.id}>{l.ho_ten} ({l.giang_vien?.ma_giang_vien || 'N/A'})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Học kỳ</label>
+                <select name="hoc_ky" className={`${styles.formInput} ${styles.formSelect}`} value={formData.hoc_ky} onChange={handleChange}>
+                  <option value="HK1">Học kỳ 1</option>
+                  <option value="HK2">Học kỳ 2</option>
+                  <option value="HK3">Học kỳ 3</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Năm học <span style={{color:'red'}}>*</span></label>
                 <input 
-                  type="number" 
-                  name="nam_nhap_hoc"
+                  type="text" 
+                  name="nam_hoc"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: 2024" 
-                  value={formData.nam_nhap_hoc}
+                  placeholder="Ví dụ: 2024-2025" 
+                  value={formData.nam_hoc}
                   onChange={handleChange}
                   required
                 />
@@ -117,10 +142,23 @@ export default function CreateClassForm() {
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Sĩ số tối đa</label>
+                <input 
+                  type="number" 
+                  name="si_so_toi_da"
+                  className={styles.formInput} 
+                  value={formData.si_so_toi_da}
+                  onChange={handleChange}
+                  min="1"
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái</label>
                 <select name="trang_thai" className={`${styles.formInput} ${styles.formSelect}`} value={formData.trang_thai} onChange={handleChange}>
-                  <option value="dang_hoc">Đang học</option>
-                  <option value="da_tot_nghiep">Đã tốt nghiệp</option>
+                  <option value="dang_mo">Đang mở</option>
+                  <option value="da_khoa">Đã khóa</option>
+                  <option value="da_ket_thuc">Đã kết thúc</option>
                 </select>
               </div>
             </div>
@@ -134,7 +172,7 @@ export default function CreateClassForm() {
           </div>
         )}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/classes')}>
+          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/course-sections')}>
             Hủy bỏ
           </button>
           <button 
@@ -175,9 +213,9 @@ export default function CreateClassForm() {
             </div>
             <h3 className={styles.suggestionTitle}>Gợi ý đặt mã lớp</h3>
             <p className={styles.suggestionDesc}>
-              Mã Lớp nên ngắn gọn, dễ nhớ và thể hiện được ngành học cũng như năm nhập học. 
+              Mã Lớp Học Phần nên bao gồm <strong>Mã Môn học</strong> và <strong>Nhóm/Ca</strong> để dễ dàng phân biệt.
               <br/><br/>
-              Ví dụ: Lớp Cao đẳng Tin học nhập học năm 2024 có mã là "CDTH24A".
+              Ví dụ: LTrWeb_N1 (Lập trình Web - Nhóm 1).
             </p>
             <div className={styles.suggestionLink}>
               <span style={{ fontSize: '0.75rem' }}>Xem quy định</span>
@@ -202,7 +240,7 @@ export default function CreateClassForm() {
             </li>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconPending}`}>radio_button_unchecked</span>
-              <span style={{ color: '#191c1e' }}>Cập nhật Khoa quản lý</span>
+              <span style={{ color: '#191c1e' }}>Cập nhật Học phần quản lý</span>
             </li>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconPending}`}>radio_button_unchecked</span>

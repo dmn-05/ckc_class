@@ -1,4 +1,4 @@
-﻿/* ClassesManagement.module.css */
+/* ClassesManagement.module.css */
 
 .pageContainer {
   max-width: 1440px;
@@ -145,6 +145,13 @@
   border-radius: 0.5rem;
 }
 
+.statIconBoxSecondary {
+  padding: 0.5rem;
+  background-color: rgba(68, 71, 73, 0.1);
+  color: #191c1e;
+  border-radius: 0.5rem;
+}
+
 .statIconBoxError {
   padding: 0.5rem;
   background-color: rgba(186, 26, 26, 0.1);
@@ -171,6 +178,7 @@
 }
 
 .statValuePrimary { color: #3525cd; }
+.statValueSecondary { color: #191c1e; }
 .statValueError { color: #ba1a1a; }
 .statValueWarn { color: #a44100; }
 
@@ -346,6 +354,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .classIconPrimary { background-color: rgba(53, 37, 205, 0.05); color: #3525cd; }
@@ -679,6 +688,10 @@
   border: none;
   cursor: pointer;
 }
+
+.rightColumn { grid-column: span 12 / span 12; display: flex; flex-direction: column; min-height: 80vh; }
+@media (min-width: 1024px) { .rightColumn { grid-column: span 8 / span 12; } }
+.classCardContainer { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
 
 .rightColumn { grid-column: span 12 / span 12; display: flex; flex-direction: column; min-height: 80vh; }
 @media (min-width: 1024px) { .rightColumn { grid-column: span 8 / span 12; } }
