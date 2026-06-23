@@ -135,7 +135,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           </div>
           <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
-            Tải lên ảnh chân dung. Max size 10MB. JPG or PNG.
+            Tải lên ảnh chân dung. Tối đa 10MB. Định dạng JPG hoặc PNG.
           </p>
           <button className={styles.btnUpload} type="button">Thay đổi ảnh</button>
         </section>

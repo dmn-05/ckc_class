@@ -2,64 +2,76 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './AdminUpdateClasses.module.css';
-import { updateClass, getClassById, getFaculties } from '@/app/actions/class';
+import styles from './AdminUpdateCourseSections.module.css';
+import { updateCourseSection, getCourseSectionById, getSubjects, getLecturers } from '@/app/actions/course-section';
 
-interface UpdateClassFormProps {
-  classId?: string;
+interface UpdateCourseSectionFormProps {
+  sectionId?: string;
 }
 
-export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
+export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSectionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   
-  const [faculties, setFaculties] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [lecturers, setLecturers] = useState<any[]>([]);
+
   const [formData, setFormData] = useState({
-    ma_lop: '',
+    ma_lop_hoc_phan: '',
     ten_lop: '',
-    khoa_id: '',
-    nam_nhap_hoc: new Date().getFullYear(),
-    trang_thai: 'dang_hoc'
+    mon_hoc_id: '',
+    giang_vien_id: '',
+    hoc_ky: 'HK1',
+    nam_hoc: '2024-2025',
+    si_so_toi_da: 40,
+    trang_thai: 'dang_mo'
   });
 
   useEffect(() => {
-    getFaculties().then(data => {
-      setFaculties(data);
+    Promise.all([getSubjects(), getLecturers()]).then(([subs, lecs]) => {
+      setSubjects(subs);
+      setLecturers(lecs);
     }).catch(console.error);
 
-    if (classId) {
-      getClassById(classId).then(data => {
+    if (sectionId) {
+      getCourseSectionById(sectionId).then(data => {
         setFormData({
-          ma_lop: data.ma_lop || '',
+          ma_lop_hoc_phan: data.ma_lop_hoc_phan || '',
           ten_lop: data.ten_lop || '',
-          khoa_id: data.khoa_id ? data.khoa_id.toString() : '',
-          nam_nhap_hoc: data.nam_nhap_hoc || new Date().getFullYear(),
-          trang_thai: data.trang_thai || 'dang_hoc'
+          mon_hoc_id: data.mon_hoc_id ? data.mon_hoc_id.toString() : '',
+          giang_vien_id: data.giang_vien_id ? data.giang_vien_id.toString() : '',
+          hoc_ky: data.hoc_ky || 'HK1',
+          nam_hoc: data.nam_hoc || '2024-2025',
+          si_so_toi_da: data.si_so_toi_da || 40,
+          trang_thai: data.trang_thai || 'dang_mo'
         });
       }).catch(console.error);
     }
-  }, [classId]);
+  }, [sectionId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'nam_nhap_hoc' ? parseInt(value) || new Date().getFullYear() : value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'si_so_toi_da' ? parseInt(value) || 0 : value 
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!classId) return;
-    
+    if (!sectionId) return;
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
     setErrorMessage('');
 
     try {
-      await updateClass(classId, formData);
+      await updateCourseSection(sectionId, formData);
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/admin/classes');
+        router.push('/admin/course-sections');
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -74,56 +86,72 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
       <div className={styles.mainCol}>
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>
-            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>info</span>
-            Thông tin Lớp
+            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>edit_document</span>
+            Thông tin Lớp Học Phần
           </h2>
           
           <form onSubmit={handleSubmit}>
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Mã Lớp</label>
+                <label className={styles.formLabel}>Mã Lớp học phần <span style={{color:'red'}}>*</span></label>
                 <input 
                   type="text" 
-                  name="ma_lop"
+                  name="ma_lop_hoc_phan"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: CDTH24A" 
-                  value={formData.ma_lop}
+                  value={formData.ma_lop_hoc_phan}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên Lớp</label>
+                <label className={styles.formLabel}>Tên Lớp (Tuỳ chọn)</label>
                 <input 
                   type="text" 
                   name="ten_lop"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: Cao đẳng Tin học 24A" 
                   value={formData.ten_lop}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Khoa</label>
-                <select name="khoa_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.khoa_id} onChange={handleChange} required>
-                  <option value="">Chọn Khoa</option>
-                  {faculties.map(f => (
-                    <option key={f.id} value={f.id}>{f.ten_khoa}</option>
+                <label className={styles.formLabel}>Môn học <span style={{color:'red'}}>*</span></label>
+                <select name="mon_hoc_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.mon_hoc_id} onChange={handleChange} required>
+                  <option value="">Chọn Môn học</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>{s.ten_mon} - {s.ma_mon}</option>
                   ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Khóa (Năm nhập học)</label>
+                <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>
+                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required>
+                  <option value="">Chọn Giảng viên</option>
+                  {lecturers.map(l => (
+                    <option key={l.id} value={l.id}>{l.ho_ten} ({l.giang_vien?.ma_giang_vien || 'N/A'})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Học kỳ</label>
+                <select name="hoc_ky" className={`${styles.formInput} ${styles.formSelect}`} value={formData.hoc_ky} onChange={handleChange}>
+                  <option value="HK1">Học kỳ 1</option>
+                  <option value="HK2">Học kỳ 2</option>
+                  <option value="HK3">Học kỳ 3</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Năm học <span style={{color:'red'}}>*</span></label>
                 <input 
-                  type="number" 
-                  name="nam_nhap_hoc"
+                  type="text" 
+                  name="nam_hoc"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: 2024" 
-                  value={formData.nam_nhap_hoc}
+                  value={formData.nam_hoc}
                   onChange={handleChange}
                   required
                 />
@@ -132,10 +160,23 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
 
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Sĩ số tối đa</label>
+                <input 
+                  type="number" 
+                  name="si_so_toi_da"
+                  className={styles.formInput} 
+                  value={formData.si_so_toi_da}
+                  onChange={handleChange}
+                  min="1"
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Trạng thái</label>
                 <select name="trang_thai" className={`${styles.formInput} ${styles.formSelect}`} value={formData.trang_thai} onChange={handleChange}>
-                  <option value="dang_hoc">Đang học</option>
-                  <option value="da_tot_nghiep">Đã tốt nghiệp</option>
+                  <option value="dang_mo">Đang mở</option>
+                  <option value="da_khoa">Đã khóa</option>
+                  <option value="da_ket_thuc">Đã kết thúc</option>
                 </select>
               </div>
             </div>
@@ -149,7 +190,7 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
           </div>
         )}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/classes')}>
+          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/course-sections')}>
             Hủy bỏ
           </button>
           <button 
@@ -172,7 +213,7 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
             ) : (
               <>
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
-                Cập Nhật Lớp
+                Lưu Thay Đổi
               </>
             )}
           </button>
@@ -186,14 +227,14 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
           <div className={styles.suggestionGlow}></div>
           <div className={styles.suggestionContent}>
             <div className={styles.suggestionIcon}>
-              <span className="material-symbols-outlined">lightbulb</span>
+              <span className="material-symbols-outlined">warning</span>
             </div>
             <h3 className={styles.suggestionTitle}>Lưu ý cập nhật</h3>
             <p className={styles.suggestionDesc}>
-              Thay đổi Tình trạng sang "Đã tốt nghiệp" sẽ ảnh hưởng đến việc hiển thị lớp. Mã Lớp được thay đổi có thể ảnh hưởng tới các tài khoản sinh viên đang thuộc lớp này.
+              Thay đổi Tình trạng sang "Đã kết thúc" sẽ tự động chặn sinh viên mới đăng ký. Đổi "Môn học" có thể ảnh hưởng tới các dữ liệu đã tạo bên trong lớp.
             </p>
             <div className={styles.suggestionLink}>
-              <span style={{ fontSize: '0.75rem' }}>Xem quy định quản lý lớp</span>
+              <span style={{ fontSize: '0.75rem' }}>Xem quy định</span>
               <span className={`material-symbols-outlined ${styles.linkIcon}`}>arrow_forward</span>
             </div>
           </div>
@@ -202,24 +243,20 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
         {/* Progress/Validation */}
         <div className={styles.card}>
           <div className={styles.progressHeader}>
-            <span className={styles.progressLabel}>Mức độ hoàn thiện</span>
-            <span className={styles.progressValue}>100%</span>
+            <span className={styles.progressLabel}>Trạng thái hệ thống</span>
+            <span className={styles.progressValue}>Active</span>
           </div>
           <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: '100%' }}></div>
+            <div className={styles.progressFill} style={{ width: '100%', backgroundColor: '#059669' }}></div>
           </div>
           <ul className={styles.progressList}>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconSuccess}`} style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              <span style={{ color: '#777587' }}>Thông tin cơ bản</span>
+              <span style={{ color: '#777587' }}>Dữ liệu đồng bộ</span>
             </li>
             <li className={styles.progressItem}>
               <span className={`material-symbols-outlined ${styles.progressIconSuccess}`} style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              <span style={{ color: '#777587' }}>Cập nhật Khoa quản lý</span>
-            </li>
-            <li className={styles.progressItem}>
-              <span className={`material-symbols-outlined ${styles.progressIconSuccess}`} style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              <span style={{ color: '#777587' }}>Thiết lập Trạng thái</span>
+              <span style={{ color: '#777587' }}>Liên kết bảng Môn học ổn định</span>
             </li>
           </ul>
         </div>

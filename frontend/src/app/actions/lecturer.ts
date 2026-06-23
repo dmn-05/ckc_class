@@ -39,3 +39,108 @@ export async function getLecturers() {
         throw error;
     }
 }
+
+export async function getLecturerById(id: string) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers/${id}`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+        },
+        cache: 'no-store'
+    });
+
+    if (!response.ok) throw new Error(`Failed to fetch lecturer: ${response.statusText}`);
+
+    const item = await response.json();
+    return {
+        id: item.id.toString(),
+        name: item.ho_ten,
+        email: item.email || '',
+        code: item.giang_vien ? item.giang_vien.ma_giang_vien : '',
+        cccd: item.giang_vien ? item.giang_vien.cccd : '',
+        dob: item.giang_vien ? item.giang_vien.ngay_sinh : '',
+        gender: item.giang_vien ? item.giang_vien.gioi_tinh : 'nam',
+        phone: item.giang_vien ? item.giang_vien.so_dien_thoai : '',
+        address: item.giang_vien ? item.giang_vien.dia_chi : '',
+        departmentId: item.giang_vien ? item.giang_vien.bo_mon_id?.toString() : '',
+        facultyId: item.giang_vien?.bo_mon ? item.giang_vien.bo_mon.khoa_id?.toString() : '',
+        status: item.giang_vien ? item.giang_vien.trang_thai : 'dang_day'
+    };
+}
+
+export async function createLecturer(data: any) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        body: JSON.stringify({
+            ho_ten: data.name,
+            email: data.email,
+            ma_giang_vien: data.code,
+            cccd: data.cccd,
+            ngay_sinh: data.dob,
+            gioi_tinh: data.gender,
+            so_dien_thoai: data.phone,
+            dia_chi: data.address,
+            bo_mon_id: data.departmentId,
+            trang_thai: data.status,
+            mat_khau: data.password || '123456'
+        })
+    });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.message || `Failed to create lecturer: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
+
+export async function updateLecturer(id: string, data: any) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers/${id}`, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        body: JSON.stringify({
+            ho_ten: data.name,
+            email: data.email,
+            ma_giang_vien: data.code,
+            cccd: data.cccd,
+            ngay_sinh: data.dob,
+            gioi_tinh: data.gender,
+            so_dien_thoai: data.phone,
+            dia_chi: data.address,
+            bo_mon_id: data.departmentId,
+            trang_thai: data.status
+        })
+    });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData ? JSON.stringify(errData) : `Failed to update lecturer: ${response.statusText}`);
+    }
+
+    return await response.json();
+}

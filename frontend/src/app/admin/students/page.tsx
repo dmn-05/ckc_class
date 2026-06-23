@@ -9,10 +9,12 @@ import StudentsList from '@/components/admin/students/StudentsList';
 import StudentsPagination from '@/components/admin/students/StudentsPagination';
 import styles from '@/components/admin/students/AdminStudents.module.css';
 import { getStudents } from '@/app/actions/student';
+import { getFaculties } from '@/app/actions/faculty';
 import { StudentData } from '@/components/admin/students/StudentCard';
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<StudentData[]>([]);
+  const [faculties, setFaculties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters & Pagination State
@@ -26,8 +28,12 @@ export default function AdminStudentsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const studentsData = await getStudents();
+      const [studentsData, facultiesData] = await Promise.all([
+        getStudents(),
+        getFaculties()
+      ]);
       setStudents(studentsData);
+      setFaculties(facultiesData);
     } catch (error) {
       console.error('Error loading students data:', error);
       alert('Không thể tải dữ liệu sinh viên. Vui lòng thử lại.');
@@ -50,14 +56,16 @@ export default function AdminStudentsPage() {
     // Search Term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      if (!student.name.toLowerCase().includes(term) && !student.code.toLowerCase().includes(term)) {
+      if (!student.name.toLowerCase().includes(term) && 
+          !student.code.toLowerCase().includes(term) &&
+          !(student.classCode && student.classCode.toLowerCase().includes(term))) {
         return false;
       }
     }
 
     // Faculty Filter
     if (facultyFilter !== 'all') {
-      if (!student.faculty || !student.faculty.toLowerCase().includes(facultyFilter.toLowerCase())) {
+      if (!student.faculty || student.faculty.toLowerCase() !== facultyFilter.toLowerCase()) {
         return false;
       }
     }
@@ -98,6 +106,7 @@ export default function AdminStudentsPage() {
             onFacultyChange={setFacultyFilter}
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
+            faculties={faculties}
           />
         </div>
         
@@ -108,6 +117,7 @@ export default function AdminStudentsPage() {
             onSearchChange={setSearchTerm}
             facultyFilter={facultyFilter}
             onFacultyChange={setFacultyFilter}
+            faculties={faculties}
           />
           {loading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>

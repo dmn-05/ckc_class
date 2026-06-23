@@ -1,29 +1,29 @@
 'use client';
 
 import React, { useState } from 'react';
-import styles from './AdminClasses.module.css';
-import ClassCard, { ClassData } from './ClassCard';
-import ClassesPagination from './ClassesPagination';
+import styles from './AdminCourseSections.module.css';
+import CourseSectionCard, { CourseSectionData } from './CourseSectionCard';
+import CourseSectionsPagination from './CourseSectionsPagination';
 
-interface ClassListProps {
-  classes: ClassData[];
-  onEdit: (classItem: ClassData) => void;
-  onViewStats: (classId: string) => void;
-  onDelete: (classId: string) => void;
+interface CourseSectionListProps {
+  sections: CourseSectionData[];
+  onEdit: (section: CourseSectionData) => void;
+  onViewStats: (sectionId: string) => void;
+  onDelete: (sectionId: string) => void;
 }
 
-export default function ClassList({ classes, onEdit, onViewStats, onDelete }: ClassListProps) {
+export default function CourseSectionList({ sections, onEdit, onViewStats, onDelete }: CourseSectionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // Adjust as needed
 
-  const filteredClasses = classes.filter(sec => 
-    sec.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sec.code.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSections = sections.filter(sec => 
+    sec.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sec.code?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
-  const currentClasses = filteredClasses.slice(
+  const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
+  const currentSections = filteredSections.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -43,7 +43,7 @@ export default function ClassList({ classes, onEdit, onViewStats, onDelete }: Cl
           <input 
             type="text"
             className={styles.searchInputMain}
-            placeholder="Tìm theo mã lớp hoặc tên lớp..."
+            placeholder="Tìm theo mã lớp học phần hoặc tên..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -51,33 +51,32 @@ export default function ClassList({ classes, onEdit, onViewStats, onDelete }: Cl
       </div>
 
       <div className={styles.classCardContainer}>
-        {currentClasses.map(classItem => (
-          <ClassCard 
-            key={classItem.id} 
-            classItem={classItem} 
+        {currentSections.map(section => (
+          <CourseSectionCard 
+            key={section.id} 
+            section={section} 
             onEdit={onEdit} 
             onViewStats={onViewStats}
             onDelete={onDelete}
           />
         ))}
 
-        {filteredClasses.length === 0 && (
+        {filteredSections.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#777587', backgroundColor: '#ffffff', borderRadius: '1.5rem', border: '1px dashed #c7c4d8' }}>
-            Không tìm thấy lớp nào phù hợp.
+            Không tìm thấy lớp học phần nào phù hợp.
           </div>
         )}
       </div>
 
-      {filteredClasses.length > 0 && (
-        <ClassesPagination
+      {filteredSections.length > 0 && (
+        <CourseSectionsPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredClasses.length}
+          totalItems={filteredSections.length}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
         />
       )}
-
     </div>
   );
 }

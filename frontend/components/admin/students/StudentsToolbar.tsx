@@ -6,13 +6,15 @@ interface StudentsToolbarProps {
   onSearchChange: (value: string) => void;
   facultyFilter: string;
   onFacultyChange: (value: string) => void;
+  faculties: any[];
 }
 
 export default function StudentsToolbar({
   searchTerm,
   onSearchChange,
   facultyFilter,
-  onFacultyChange
+  onFacultyChange,
+  faculties
 }: StudentsToolbarProps) {
   return (
     <div>
@@ -38,24 +40,15 @@ export default function StudentsToolbar({
         >
           Tất cả
         </button>
-        <button 
-          className={facultyFilter === 'công nghệ thông tin' ? styles.tabActive : styles.tabInactive}
-          onClick={() => onFacultyChange('công nghệ thông tin')}
-        >
-          Khoa CNTT
-        </button>
-        <button 
-          className={facultyFilter === 'cơ khí' ? styles.tabActive : styles.tabInactive}
-          onClick={() => onFacultyChange('cơ khí')}
-        >
-          Khoa Cơ Khí
-        </button>
-        <button 
-          className={facultyFilter === 'điện' ? styles.tabActive : styles.tabInactive}
-          onClick={() => onFacultyChange('điện')}
-        >
-          Khoa Điện
-        </button>
+        {faculties.map(f => (
+          <button 
+            key={f.id}
+            className={facultyFilter === f.name ? styles.tabActive : styles.tabInactive}
+            onClick={() => onFacultyChange(f.name)}
+          >
+            {f.name}
+          </button>
+        ))}
       </div>
     </div>
   );

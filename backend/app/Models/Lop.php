@@ -16,8 +16,11 @@ class Lop extends Model
     const UPDATED_AT = 'ngay_cap_nhat';
 
     protected $fillable = [
+        'ma_lop',
         'ten_lop',
         'khoa_id',
+        'nam_nhap_hoc',
+        'trang_thai'
     ];
 
     public function khoa()

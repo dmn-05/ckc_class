@@ -12,8 +12,8 @@ export default function UpdateClassPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Chỉnh Sửa Lớp Học Phần ({classId || 'INT101.1'})</h1>
-        <p className={styles.pageSubtitle}>Cập nhật thông tin giảng viên, lịch học và trạng thái lớp học phần.</p>
+        <h1 className={styles.pageTitle}>Chỉnh Sửa Lớp ({classId || 'CDTH24A'})</h1>
+        <p className={styles.pageSubtitle}>Cập nhật thông tin lớp, khoa quản lý và trạng thái hoạt động.</p>
       </div>
 
       <UpdateClassForm classId={classId} />

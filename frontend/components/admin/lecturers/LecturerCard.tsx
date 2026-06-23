@@ -54,6 +54,12 @@ export default function LecturerCard({ lecturer, onEdit, onDelete }: LecturerCar
             <span className={`${styles.lecturerCodeBadge} ${codeBadgeClass}`}>
               {lecturer.code}
             </span>
+            <span 
+              className={`${styles.lecturerCodeBadge} ${lecturer.isActive ? styles.lecturerCodeSecondary : styles.lecturerCodeTertiary}`}
+              style={{ backgroundColor: lecturer.isActive ? 'rgba(70, 72, 212, 0.1)' : 'rgba(186, 26, 26, 0.1)', color: lecturer.isActive ? '#4648d4' : '#ba1a1a' }}
+            >
+              {lecturer.isActive ? 'Đang giảng dạy' : 'Ngừng giảng dạy'}
+            </span>
           </div>
           
           <div className={styles.lecturerDetailsRow}>

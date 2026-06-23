@@ -36,6 +36,11 @@ export default function AdminSidebar() {
       icon: <span className="material-symbols-outlined">book</span>
     },
     {
+      name: 'Lớp học phần',
+      href: '/admin/course-sections',
+      icon: <span className="material-symbols-outlined">collections_bookmark</span>
+    },
+    {
       name: 'Sinh Viên',
       href: '/admin/students',
       icon: <span className="material-symbols-outlined">school</span>
