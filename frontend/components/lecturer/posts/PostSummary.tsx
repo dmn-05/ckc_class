@@ -3,26 +3,39 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
-export default function PostSummary() {
+interface PostSummaryProps {
+  post: {
+    title: string;
+    content: string;
+    date: string;
+    authorName: string;
+    authorAvatar?: string;
+    category: string;
+    attachment?: { name: string, url: string };
+  };
+}
+
+export default function PostSummary({ post }: PostSummaryProps) {
+  if (!post) return null;
   return (
     <section className={styles.sectionBox}>
       <div className={styles.postSummaryHeader}>
         <div>
           <div className={styles.postTags}>
-            <span className={styles.tagBadge}>Kiến trúc phần mềm</span>
-            <span className={styles.postDate}>• 15 tháng 10, 2023</span>
+            <span className={styles.tagBadge}>{post.category}</span>
+            <span className={styles.postDate}>• {post.date}</span>
           </div>
-          <h3 className={styles.postTitle}>Phân tích ưu nhược điểm của Microservices trong hệ thống quản lý đào tạo</h3>
+          <h3 className={styles.postTitle}>{post.title}</h3>
           
           <div className={styles.authorInfo}>
             <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLjhx4Q2PaQiT2ncDj3RABa0263YBCgk_4kG4-UlmvpMMUNdOpgN88LHJyE4zmHKDhGXsSlmEJ-PQbICdUokejTOs60a6sd0hcqdFv2AMgSdT9gkh0g8zUqpZU8vh045JSVie6xnlwtxMtODQjavL3TnhAnj_llLSOTguIEeCd_ep_U9tuMGpq82B6g43SU-1hG0sbNteAn2jz24XUVeil5UYcgtGSA-3dnUi6DyjWTUFyytiZZVvfUyET1DjhroCdBALWmdClQHE" 
+              src={post.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=random`} 
               alt="Author" 
               className={styles.authorAvatar} 
             />
             <div>
-              <p className={styles.authorName}>ThS. Nguyễn Văn A</p>
-              <p className={styles.authorRole}>Giảng viên khoa Công nghệ Thông tin</p>
+              <p className={styles.authorName}>{post.authorName}</p>
+              <p className={styles.authorRole}>Giảng viên</p>
             </div>
           </div>
         </div>
@@ -36,9 +49,18 @@ export default function PostSummary() {
         </button>
       </div>
       <div className={styles.postContentBody}>
-        <p>Hệ thống quản lý đào tạo hiện đại yêu cầu sự linh hoạt và khả năng mở rộng cao. Bài viết này sẽ phân tích chi tiết về việc áp dụng kiến trúc Microservices so với Monolith truyền thống.</p>
-        <p>1. Ưu điểm: Tách biệt module, dễ dàng scale các dịch vụ có tải cao (vd: đăng ký môn học).</p>
-        <p>2. Nhược điểm: Chi phí vận hành hạ tầng cao, khó khăn trong việc quản lý transaction phân tán.</p>
+        <p>{post.content}</p>
+        
+        {post.attachment && (
+          <div style={{ marginTop: '1rem' }}>
+            <a href={`http://localhost:8000${post.attachment.url}`} target="_blank" rel="noopener noreferrer" className={styles.cardAttachment}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              <span className={styles.cardAttachmentName}>{post.attachment.name}</span>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

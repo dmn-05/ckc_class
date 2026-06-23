@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PostData } from './PostCard';
 import styles from './PostsManagement.module.css';
 
-interface PostFormModalProps {
+interface StudentPostFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (post: Omit<PostData, 'id' | 'views_count' | 'commentsCount' | 'date'> & { file?: File | null, lop_hoc_phan_id: number }) => void;
-  initialData?: PostData | null;
+  onSubmit: (post: { title: string; category: string; isPublished: boolean; content: string; lopHocPhanId: number; file?: File | null }) => void;
 }
 
-export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }: PostFormModalProps) {
+export default function StudentPostFormModal({ isOpen, onClose, onSubmit }: StudentPostFormModalProps) {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<'thong_bao' | 'tai_lieu' | 'bai_tap' | 'bai_viet'>('thong_bao');
-  const [status, setStatus] = useState<'hien_thi' | 'an'>('hien_thi');
+  const [category, setCategory] = useState('bai_viet');
+  const [isPublished, setIsPublished] = useState(true);
   const [lopHocPhanId, setLopHocPhanId] = useState<number>(1);
   const [content, setContent] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -26,46 +24,33 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
     if (isOpen) {
       setIsRendered(true);
       setTimeout(() => setIsAnimating(true), 10);
-      
-      if (initialData) {
-        setTitle(initialData.title);
-        // Map old data if necessary, here we assume it matches
-        setCategory((initialData.category as any) || 'thong_bao');
-        setStatus(initialData.is_published ? 'hien_thi' : 'an');
-        setLopHocPhanId(1); // Mặc định
-        setContent(initialData.title + ' content details...');
-        setAttachedFile(null);
-      } else {
-        setTitle('');
-        setCategory('thong_bao');
-        setStatus('hien_thi');
-        setLopHocPhanId(1);
-        setContent('');
-        setAttachedFile(null);
-      }
+      setTitle('');
+      setCategory('bai_viet');
+      setIsPublished(true);
+      setLopHocPhanId(1);
+      setContent('');
+      setAttachedFile(null);
     } else {
       setIsAnimating(false);
       const timer = setTimeout(() => setIsRendered(false), 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, initialData]);
+  }, [isOpen]);
 
   if (!isRendered) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !content.trim()) return;
     
     onSubmit({
       title,
       category,
-      is_published: status === 'hien_thi',
-      is_pinned: initialData ? initialData.is_pinned : false,
-      authorName: initialData ? initialData.authorName : 'Nguyễn Văn Giảng Viên',
-      lop_hoc_phan_id: lopHocPhanId,
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o',
+      isPublished,
+      content,
+      lopHocPhanId,
       file: attachedFile
-    } as any);
+    });
   };
 
   return (
@@ -73,7 +58,7 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
       <div className={`${styles.modalContent} ${isAnimating ? styles.modalContentOpen : ''} transition-transform duration-200`}>
         <div className="flex justify-between items-center mb-6" style={{ display: 'flex', justifyContent: 'space-between' }}>
           <h3 className="text-[20px] font-bold text-[#191c1e]" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-            {initialData ? 'Chỉnh sửa bài viết' : 'Thêm bài viết mới'}
+            Đăng câu hỏi / thảo luận
           </h3>
           <button 
             onClick={onClose}
@@ -87,13 +72,13 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Tiêu đề</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Tiêu đề câu hỏi / thảo luận</label>
             <input 
               type="text" 
               value={title}
               onChange={e => setTitle(e.target.value)}
               className={styles.modalInput}
-              placeholder="Nhập tiêu đề bài viết"
+              placeholder="Nhập tiêu đề..."
               required
             />
           </div>
@@ -103,10 +88,10 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Loại bài viết</label>
               <select 
                 value={category}
-                onChange={e => setCategory(e.target.value as any)}
+                onChange={e => setCategory(e.target.value)}
                 className={styles.modalInput}
               >
-                <option value="bai_viet">Bài viết</option>
+                <option value="bai_viet">Thảo luận / Hỏi đáp</option>
                 <option value="thong_bao">Thông báo</option>
                 <option value="tai_lieu">Tài liệu</option>
                 <option value="bai_tap">Bài tập</option>
@@ -115,12 +100,12 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
             <div>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Trạng thái</label>
               <select 
-                value={status}
-                onChange={e => setStatus(e.target.value as any)}
+                value={isPublished ? 'hien_thi' : 'an'}
+                onChange={e => setIsPublished(e.target.value === 'hien_thi')}
                 className={styles.modalInput}
               >
-                <option value="hien_thi">Hiển thị</option>
-                <option value="an">Ẩn</option>
+                <option value="hien_thi">Hiển thị (Public)</option>
+                <option value="an">Ẩn (Draft)</option>
               </select>
             </div>
           </div>
@@ -139,19 +124,20 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Nội dung</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Nội dung chi tiết</label>
             <textarea 
               value={content}
               onChange={e => setContent(e.target.value)}
               rows={5}
               className={styles.modalInput}
               style={{ resize: 'none' }}
-              placeholder="Nội dung bài viết..."
+              placeholder="Mô tả chi tiết nội dung..."
+              required
             ></textarea>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Tệp đính kèm</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Tệp đính kèm (Tùy chọn)</label>
             <input 
               type="file" 
               onChange={e => setAttachedFile(e.target.files?.[0] || null)}
@@ -172,7 +158,7 @@ export default function PostFormModal({ isOpen, onClose, onSubmit, initialData }
               type="submit"
               className={styles.btnSubmitPrimary}
             >
-              {initialData ? 'Cập nhật' : 'Đăng bài'}
+              Đăng bài
             </button>
           </div>
         </form>

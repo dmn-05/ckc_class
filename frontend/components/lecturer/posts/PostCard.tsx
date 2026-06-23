@@ -7,7 +7,7 @@ import styles from './PostsManagement.module.css';
 export interface PostData {
   id: string;
   title: string;
-  category: 'announcement' | 'discussion' | 'material' | 'question';
+  category: 'thong_bao' | 'tai_lieu' | 'bai_tap' | 'bai_viet';
   date: string;
   is_published: boolean;
   is_pinned: boolean;
@@ -15,6 +15,7 @@ export interface PostData {
   views_count: number;
   commentsCount: number;
   image: string;
+  attachment?: { name: string, url: string };
 }
 
 interface PostCardProps {
@@ -38,15 +39,15 @@ export default function PostCard({
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
-      case 'announcement':
-        return { styleClass: 'bg-[#3525cd]', label: 'HÀNH CHÍNH' };
-      case 'material':
-        return { styleClass: 'bg-[#6063ee]', label: 'ĐÀO TẠO' };
-      case 'discussion':
-        return { styleClass: 'bg-[#a44100]', label: 'SỰ KIỆN' };
-      case 'question':
+      case 'thong_bao':
+        return { styleClass: 'bg-[#3525cd]', label: 'THÔNG BÁO' };
+      case 'tai_lieu':
+        return { styleClass: 'bg-[#6063ee]', label: 'TÀI LIỆU' };
+      case 'bai_tap':
+        return { styleClass: 'bg-[#a44100]', label: 'BÀI TẬP' };
+      case 'bai_viet':
       default:
-        return { styleClass: 'bg-[#4648d4]', label: 'HỎI ĐÁP' };
+        return { styleClass: 'bg-[#4648d4]', label: 'BÀI VIẾT' };
     }
   };
 
@@ -77,7 +78,7 @@ export default function PostCard({
             </span>
             {post.is_published ? (
               <span className={`${styles.cardStatusBadge} ${styles.cardStatusPublished}`}>Đã đăng</span>
-            ) : post.category === 'discussion' ? (
+            ) : post.category === 'bai_tap' ? (
               <span className={`${styles.cardStatusBadge} ${styles.cardStatusScheduled}`}>Lên lịch</span>
             ) : (
               <span className={`${styles.cardStatusBadge} ${styles.cardStatusDraft}`}>Bản nháp</span>
@@ -96,6 +97,21 @@ export default function PostCard({
             </div>
             <span className={styles.cardAuthorName}>{post.authorName}</span>
           </div>
+
+          {/* Attachment */}
+          {post.attachment && (
+            <div 
+              className={styles.cardAttachment} 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                window.open(`http://localhost:8000${post.attachment?.url}`, '_blank');
+              }}
+              title="Nhấn để xem / tải về"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '6px', color: '#5f6368' }}>attach_file</span>
+              <span className={styles.cardAttachmentName}>{post.attachment.name}</span>
+            </div>
+          )}
         </div>
 
         {/* Footer (Stats & Actions) */}

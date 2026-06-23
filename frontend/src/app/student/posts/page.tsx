@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import styles from '@/components/student/posts/PostsManagement.module.css';
 import Link from 'next/link';
+import StudentPostFormModal from '@/components/student/posts/StudentPostFormModal';
 
 interface PostData {
   id: string;
@@ -17,66 +18,84 @@ interface PostData {
   isQuestion?: boolean;
 }
 
-const MOCK_POSTS: PostData[] = [
-  {
-    id: 'p1',
-    title: 'Thông báo nghỉ lễ Quốc khánh 2/9 dành cho Cán bộ - Giảng viên - Sinh viên',
-    category: 'Hành chính',
-    date: '25 Thg 08, 2024',
-    status: 'Đã đăng',
-    authorName: 'Phòng Hành chính - Quản trị',
-    views: 1200,
-    commentsCount: 12,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o'
-  },
-  {
-    id: 'p2',
-    title: 'Lịch thi kết thúc học kỳ 1 - Năm học 2024-2025 (Chính thức)',
-    category: 'Đào tạo',
-    date: '22 Thg 08, 2024',
-    status: 'Đã đăng',
-    authorName: 'Phòng Đào tạo',
-    views: 3500,
-    commentsCount: 45,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC32z3XOi0PMPEhh8_edGAXa5Mt-C_EncIM50zRI6j7hlb5UXGuOlOZLOjW6LdMLDXQXHtKejlbieVdH47MmbEeepY4hE5bwogzM4kRL5rnkuUJdvtU0HpXLcNWpOOW8ZBCWhjspw4VM1U2pu_T-TxSqqspnau9IOFfnFE4wGnusIonpnqPSGIcvs6N1fRa11fhy9Mla5BOOUxl1InjNahfmNYFY0Zn-djxCKwql0oOFRHvCUwVbuFfQeCuJSnlWCWcI6XzeSlBUYE'
-  },
-  {
-    id: 'p3',
-    title: 'Hội thảo định hướng nghề nghiệp 2024: "Chinh phục nhà tuyển dụng"',
-    category: 'Sự kiện',
-    date: '20 Thg 08, 2024',
-    status: 'Lên lịch',
-    authorName: 'Trung tâm Hỗ trợ HSSV',
-    views: 0,
-    commentsCount: 0,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAe9J9iPr6e2C-U99NRQnifggovalC5mlCZvg5N-reu0gTtgDeDdP3TgW5Zu15y5QIKOfYtAVPVyMtBPLzFwSSdn0_8ZSdKdxn4acdhjqKw4yFUkxMyDviS-VOrTDkDI_w6_XGqPdmW2QyhGwG54rpO_-1MwsjN86lnvtRjGFACzzg_bi81LtW9WNsoqhBXoe_3dToUNZiovBEUJ0cjbioajlUVu-cELO1OJj-_a6IWL9EPpK4DjyOY2jRF58kETSYHICeF1vSfVCw'
-  }
-];
+const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function StudentPostsList() {
-  const [posts, setPosts] = useState<PostData[]>(MOCK_POSTS);
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newContent, setNewContent] = useState('');
 
-  const handlePostSubmit = () => {
-    if (newTitle.trim() && newContent.trim()) {
-      const newPost: PostData = {
-        id: `q-${Date.now()}`,
-        title: newTitle,
-        category: 'Hỏi đáp',
-        date: 'Vừa xong',
-        status: 'Mới',
-        authorName: 'Nguyễn Văn Sinh Viên',
-        views: 0,
-        commentsCount: 0,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDN8fBc31mXpjXfIUWzQUz7ydSBdlRfCPFq2JzIezn6hCqbNV_0BkfjHJU4-YMMpf8ZkSS6sc9ikYDxX5HbSyhtez5-oJPZnXpab6zkHtGKKRO1UTvp5W_hrYEGNQ23HS3uJX4WjopfZV25FKUVWkCT060l-NwmaLKKS6165wLgpimw18EvyjEW67X6s1u4s97A1qNP6_594w9EUDHb7EEE_mDGjYLCo6wVgJ33Firdxa4_ZweR_1Av7P_3d4dV_PKVVjoERknSupg', // Use avatar as fallback image for questions
-        isQuestion: true
-      };
-      setPosts([newPost, ...posts]);
-      setNewTitle('');
-      setNewContent('');
+  React.useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/student/posts?lop_hoc_phan_id=1`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      const json = await response.json();
+      if (json.data) {
+        const mappedPosts = json.data.map((item: any) => {
+          let attachment = undefined;
+          if (item.tep_tin_bai_viet && item.tep_tin_bai_viet.length > 0) {
+            const fileData = item.tep_tin_bai_viet[0].tep_tin;
+            attachment = { name: fileData.ten_file, url: fileData.duong_dan };
+          }
+          
+          return {
+            id: item.id.toString(),
+            authorName: item.nguoi_tao?.ho_ten || 'Unknown',
+            category: item.loai_bai_viet === 'thong_bao' ? 'Thông báo' : 
+                      item.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
+                      item.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
+            date: new Date(item.ngay_tao).toLocaleDateString('vi-VN'),
+            status: 'Đã đăng',
+            title: item.tieu_de,
+            views: item.luot_xem || 0, 
+            commentsCount: item.binh_luan?.length || 0,
+            image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o',
+            isQuestion: item.loai_bai_viet === 'bai_viet',
+            attachment: attachment
+          };
+        });
+        setPosts(mappedPosts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    }
+  };
+
+  const handlePostSubmit = async (postData: { title: string; category: string; isPublished: boolean; content: string; lopHocPhanId: number; file?: File | null }) => {
+    try {
+      const formData = new FormData();
+      formData.append('tieu_de', postData.title);
+      formData.append('noi_dung', postData.content);
+      formData.append('loai_bai_viet', postData.category);
+      formData.append('trang_thai', postData.isPublished ? 'hien_thi' : 'an');
+      formData.append('lop_hoc_phan_id', postData.lopHocPhanId.toString());
+      
+      if (postData.file) {
+        formData.append('file', postData.file);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/student/posts`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        alert('Lỗi khi đăng bài: ' + (errData.message || 'Vui lòng kiểm tra lại thông tin.'));
+        return;
+      }
+
       setIsModalOpen(false);
+      alert('Đăng bài viết thành công!');
+      fetchPosts(); // Reload after submit
+    } catch (error) {
+      console.error('Failed to submit question', error);
+      alert('Lỗi kết nối mạng, vui lòng thử lại.');
     }
   };
 
@@ -167,51 +186,11 @@ export default function StudentPostsList() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className={styles.modalBackdrop}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Đăng câu hỏi / thảo luận</h3>
-              <button className={styles.btnClose} onClick={() => setIsModalOpen(false)}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Tiêu đề câu hỏi</label>
-                <input 
-                  type="text" 
-                  className={styles.modalInput} 
-                  placeholder="Ví dụ: Cần hỗ trợ bài tập lớn môn Cấu trúc dữ liệu..." 
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem', color: '#191c1e' }}>Nội dung chi tiết</label>
-                <textarea 
-                  className={styles.modalInput} 
-                  rows={5} 
-                  placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải..."
-                  value={newContent}
-                  onChange={(e) => setNewContent(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className={styles.modalActions}>
-              <button className={styles.btnCancel} onClick={() => setIsModalOpen(false)}>Hủy</button>
-              <button className={styles.btnSubmitPrimary} onClick={handlePostSubmit}>
-                Đăng bài
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <StudentPostFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handlePostSubmit}
+      />
     </div>
   );
 }

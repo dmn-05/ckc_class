@@ -3,16 +3,27 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
-export default function PostSummary() {
+interface PostSummaryProps {
+  post: {
+    title: string;
+    content: string;
+    date: string;
+    authorName: string;
+    category: string;
+  };
+}
+
+export default function PostSummary({ post }: PostSummaryProps) {
+  if (!post) return null;
   return (
     <section className={styles.sectionBox}>
       <div className={styles.postSummaryHeader}>
         <div>
           <div className={styles.postTags}>
-            <span className={styles.tagBadge}>Kiến trúc phần mềm</span>
-            <span className={styles.postDate}>• 15 tháng 10, 2023</span>
+            <span className={styles.tagBadge}>{post.category}</span>
+            <span className={styles.postDate}>• {post.date}</span>
           </div>
-          <h3 className={styles.postTitle}>Phân tích ưu nhược điểm của Microservices trong hệ thống quản lý đào tạo</h3>
+          <h3 className={styles.postTitle}>{post.title}</h3>
           
           <div className={styles.authorInfo}>
             <img 
@@ -21,8 +32,8 @@ export default function PostSummary() {
               className={styles.authorAvatar} 
             />
             <div>
-              <p className={styles.authorName}>ThS. Nguyễn Văn A</p>
-              <p className={styles.authorRole}>Giảng viên khoa Công nghệ Thông tin</p>
+              <p className={styles.authorName}>{post.authorName}</p>
+              <p className={styles.authorRole}>Giảng viên</p>
             </div>
           </div>
         </div>
@@ -36,9 +47,7 @@ export default function PostSummary() {
         </button>
       </div>
       <div className={styles.postContentBody}>
-        <p>Hệ thống quản lý đào tạo hiện đại yêu cầu sự linh hoạt và khả năng mở rộng cao. Bài viết này sẽ phân tích chi tiết về việc áp dụng kiến trúc Microservices so với Monolith truyền thống.</p>
-        <p>1. Ưu điểm: Tách biệt module, dễ dàng scale các dịch vụ có tải cao (vd: đăng ký môn học).</p>
-        <p>2. Nhược điểm: Chi phí vận hành hạ tầng cao, khó khăn trong việc quản lý transaction phân tán.</p>
+        <p>{post.content}</p>
       </div>
     </section>
   );
