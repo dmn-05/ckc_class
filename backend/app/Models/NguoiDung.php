@@ -22,6 +22,7 @@ class NguoiDung extends Authenticatable
         'mat_khau',
         'vai_tro_id',
         'trang_thai',
+        'avatar',
     ];
 
     protected $hidden = [

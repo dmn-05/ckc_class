@@ -50,4 +50,43 @@ class AuthController extends Controller
             'user' => $request->user(),
         ]);
     }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|max:5120', // 5MB
+        ]);
+
+        $user = $request->user();
+
+        if (!env('CLOUDINARY_URL')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chưa cấu hình CLOUDINARY_URL'
+            ], 500);
+        }
+
+        try {
+            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+            
+            $result = $cloudinary->uploadApi()->upload(
+                $request->file('avatar')->getRealPath(),
+                ['folder' => 'avatars']
+            );
+
+            $user->avatar = $result['secure_url'];
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật avatar thành công',
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi upload ảnh: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
