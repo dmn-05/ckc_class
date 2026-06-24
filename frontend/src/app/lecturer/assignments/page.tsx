@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '@/components/lecturer/assignments/AssignmentsManagement.module.css';
 import AssignmentDashboard from '@/components/lecturer/assignments/AssignmentDashboard';
 import AssignmentGrid, { AssignmentData } from '@/components/lecturer/assignments/AssignmentGrid';
@@ -8,74 +8,28 @@ import AssignmentFormModal from '@/components/lecturer/assignments/AssignmentFor
 import SubmissionsView, { SubmissionData } from '@/components/lecturer/assignments/SubmissionsView';
 import GradingModal from '@/components/lecturer/assignments/GradingModal';
 import ScoresReportModal from '@/components/lecturer/assignments/ScoresReportModal';
+import {
+  getLecturerAssignments,
+  createLecturerAssignment,
+  updateLecturerAssignment,
+  deleteLecturerAssignment,
+} from '@/app/actions/lecturer-assignment';
+import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
 
-// Mock Initial Data
-const INITIAL_ASSIGNMENTS: AssignmentData[] = [
-  {
-    id: 'asg1',
-    title: 'Bài tập thực hành 1: Cấu trúc điều khiển',
-    description: 'Thực hành vòng lặp và câu lệnh rẽ nhánh',
-    instructions: 'Viết chương trình C++ giải quyết 5 bài tập trong file đính kèm.',
-    maxScore: 10,
-    dueDate: '25/10/2023 23:59',
-    allowLate: true,
-    latePenaltyPct: 10,
-    isPublished: true,
-    sectionId: 'sec1',
-    sectionName: 'Lập trình hướng đối tượng',
-    status: 'open',
-    stats: { submitted: 32, total: 40, needsGrading: 32 }
-  },
-  {
-    id: 'asg2',
-    title: 'Đồ án cuối kỳ: Thiết kế Mobile App',
-    description: 'Thiết kế UI/UX cho ứng dụng bán hàng',
-    instructions: 'Sử dụng Figma để tạo prototype có tính tương tác.',
-    maxScore: 10,
-    dueDate: '20/10/2023 23:59',
-    allowLate: false,
-    latePenaltyPct: 10,
-    isPublished: true,
-    sectionId: 'sec2',
-    sectionName: 'Thiết kế Giao diện',
-    status: 'grading',
-    stats: { submitted: 38, total: 40, needsGrading: 38 }
-  },
-  {
-    id: 'asg3',
-    title: 'Lab 2: Truy vấn SQL nâng cao',
-    description: 'Thực hành lệnh JOIN và Subquery',
-    instructions: 'Viết câu lệnh SQL cho 10 yêu cầu trong file doc.',
-    maxScore: 10,
-    dueDate: '30/10/2023 23:59',
-    allowLate: true,
-    latePenaltyPct: 10,
-    isPublished: false,
-    sectionId: 'sec3',
-    sectionName: 'Cơ sở dữ liệu',
-    status: 'draft',
-    stats: { submitted: 0, total: 42, needsGrading: 0 }
-  }
-];
-
-const MOCK_SUBMISSIONS: Record<string, SubmissionData[]> = {
-  'asg1': [
-    { id: 'sub1', studentId: 'sv1', studentName: 'Nguyễn Văn An', studentCode: 'SV001', submittedAt: '24/10/2023 10:20', fileUrl: '#', status: 'submitted' },
-    { id: 'sub2', studentId: 'sv2', studentName: 'Trần Thị Bình', studentCode: 'SV002', submittedAt: '26/10/2023 08:15', fileUrl: '#', status: 'late' },
-    { id: 'sub3', studentId: 'sv3', studentName: 'Lê Hoàng Cường', studentCode: 'SV003', submittedAt: '', fileUrl: '', status: 'missing' },
-    { id: 'sub4', studentId: 'sv4', studentName: 'Phạm Văn Dũng', studentCode: 'SV004', submittedAt: '20/10/2023 15:30', fileUrl: '#', status: 'returned', score: 8.5, feedback: 'Làm bài tốt.' },
-  ],
-  'asg2': [
-    { id: 'sub5', studentId: 'sv1', studentName: 'Nguyễn Văn An', studentCode: 'SV001', submittedAt: '19/10/2023 11:20', fileUrl: '#', status: 'submitted' },
-  ]
-};
+interface SectionOption {
+  id: string;
+  name: string;
+  code: string;
+}
 
 export default function LecturerAssignmentsPage() {
   const [viewState, setViewState] = useState<'list' | 'submissions'>('list');
   const [activeAssignment, setActiveAssignment] = useState<AssignmentData | null>(null);
   
-  const [assignments, setAssignments] = useState<AssignmentData[]>(INITIAL_ASSIGNMENTS);
-  const [allSubmissions, setAllSubmissions] = useState<Record<string, SubmissionData[]>>(MOCK_SUBMISSIONS);
+  const [assignments, setAssignments] = useState<AssignmentData[]>([]);
+  const [sections, setSections] = useState<SectionOption[]>([]);
+  const [allSubmissions, setAllSubmissions] = useState<Record<string, SubmissionData[]>>({});
+  const [loading, setLoading] = useState(true);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -87,6 +41,30 @@ export default function LecturerAssignmentsPage() {
   const [editingAssignment, setEditingAssignment] = useState<AssignmentData | undefined>(undefined);
   const [isScoresReportOpen, setIsScoresReportOpen] = useState(false);
   const [gradingSubmission, setGradingSubmission] = useState<SubmissionData | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [assignmentsData, sectionsData] = await Promise.all([
+          getLecturerAssignments(),
+          getLecturerCourseSections(),
+        ]);
+        setAssignments(assignmentsData);
+        setSections(
+          (sectionsData || []).map((s: any) => ({
+            id: s.id.toString(),
+            name: s.ten_lop || s.mon_hoc?.ten_mon || '',
+            code: s.ma_lop_hoc_phan || '',
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load assignments', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   // Derived Stats
   const totalCount = assignments.length;
@@ -111,41 +89,49 @@ export default function LecturerAssignmentsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa bài tập này?")) {
-      setAssignments(prev => prev.filter(a => a.id !== id));
-      setAllSubmissions(prev => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
+      try {
+        await deleteLecturerAssignment(id);
+        setAssignments(prev => prev.filter(a => a.id !== id));
+      } catch (error) {
+        alert('Có lỗi xảy ra khi xóa bài tập.');
+        console.error(error);
+      }
     }
   };
 
-  const handleSaveAssignment = (data: Partial<AssignmentData>) => {
-    if (editingAssignment) {
-      setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? { ...a, ...data } as AssignmentData : a));
-    } else {
-      const newAssignment: AssignmentData = {
-        id: `asg_${Date.now()}`,
-        title: data.title || '',
-        description: data.description || '',
-        instructions: data.instructions || '',
-        maxScore: data.maxScore || 10,
-        dueDate: data.dueDate || '',
-        allowLate: data.allowLate || false,
-        latePenaltyPct: data.latePenaltyPct || 10,
-        isPublished: data.isPublished ?? true,
-        sectionId: data.sectionId || '',
-        sectionName: data.sectionName || '',
-        status: data.isPublished ? 'open' : 'draft',
-        stats: { submitted: 0, total: 40, needsGrading: 0 }
-      };
-      setAssignments(prev => [...prev, newAssignment]);
-      // Initialize empty submissions
-      setAllSubmissions(prev => ({ ...prev, [newAssignment.id]: [] }));
+  const handleSaveAssignment = async (data: Partial<AssignmentData>) => {
+    try {
+      if (editingAssignment) {
+        const updated = await updateLecturerAssignment(editingAssignment.id, {
+          tieu_de: data.title,
+          noi_dung: data.description || data.instructions,
+          diem_toi_da: data.maxScore,
+          han_nop: data.dueDate || null,
+          cho_phep_nop_tre: data.allowLate,
+          tyle_phat_tre: data.latePenaltyPct,
+          trang_thai: data.isPublished ? 'hien_thi' : 'an',
+        });
+        setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? updated : a));
+      } else {
+        const created = await createLecturerAssignment({
+          tieu_de: data.title,
+          noi_dung: data.description || data.instructions || '',
+          lop_hoc_phan_id: parseInt(data.sectionId || '0'),
+          diem_toi_da: data.maxScore || 10,
+          han_nop: data.dueDate || null,
+          cho_phep_nop_tre: data.allowLate || false,
+          tyle_phat_tre: data.latePenaltyPct || 10,
+          trang_thai: data.isPublished ? 'hien_thi' : 'an',
+        });
+        setAssignments(prev => [...prev, created]);
+      }
+      setIsFormModalOpen(false);
+    } catch (error) {
+      alert('Có lỗi xảy ra khi lưu bài tập.');
+      console.error(error);
     }
-    setIsFormModalOpen(false);
   };
 
   // Actions for Submissions View
@@ -186,7 +172,6 @@ export default function LecturerAssignmentsPage() {
         return { ...prev, [activeAssignment.id]: newSubs };
       });
       
-      // Update assignment stats (needsGrading count decreases)
       setAssignments(prev => prev.map(a => {
         if (a.id === activeAssignment.id) {
           return { ...a, stats: { ...a.stats, needsGrading: Math.max(0, a.stats.needsGrading - submissionIds.length) } };
@@ -241,9 +226,9 @@ export default function LecturerAssignmentsPage() {
                   onChange={(e) => setSectionFilter(e.target.value)}
                 >
                   <option value="">Tất cả Lớp học phần</option>
-                  <option value="sec1">Lập trình hướng đối tượng</option>
-                  <option value="sec2">Thiết kế Giao diện</option>
-                  <option value="sec3">Cơ sở dữ liệu</option>
+                  {sections.map(sec => (
+                    <option key={sec.id} value={sec.id}>{sec.name} ({sec.code})</option>
+                  ))}
                 </select>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -269,12 +254,18 @@ export default function LecturerAssignmentsPage() {
             </div>
           </div>
 
-          <AssignmentGrid 
-            assignments={filteredAssignments}
-            onEdit={handleOpenEdit}
-            onDelete={handleDelete}
-            onViewSubmissions={handleViewSubmissions}
-          />
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#777587' }}>
+              <p>Đang tải bài tập...</p>
+            </div>
+          ) : (
+            <AssignmentGrid 
+              assignments={filteredAssignments}
+              onEdit={handleOpenEdit}
+              onDelete={handleDelete}
+              onViewSubmissions={handleViewSubmissions}
+            />
+          )}
         </>
       )}
 
@@ -292,6 +283,7 @@ export default function LecturerAssignmentsPage() {
       {isFormModalOpen && (
         <AssignmentFormModal 
           initialData={editingAssignment}
+          sections={sections}
           onSave={handleSaveAssignment}
           onClose={() => setIsFormModalOpen(false)}
         />

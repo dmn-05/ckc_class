@@ -1,152 +1,116 @@
 'use client';
 
-import React, { useState } from 'react';
-import styles from '@/components/lecturer/sections/SectionsManagement.module.css';
-import SectionDashboard from '@/components/lecturer/sections/SectionDashboard';
-import SectionList from '@/components/lecturer/sections/SectionList';
-import SectionFormModal from '@/components/lecturer/sections/SectionFormModal';
-import SectionStatsModal from '@/components/lecturer/sections/SectionStatsModal';
-import { SectionData } from '@/components/lecturer/sections/SectionCard';
-
-const INITIAL_SECTIONS: SectionData[] = [
-  {
-    id: 's1',
-    code: 'FLUTTER-K1',
-    subjectName: 'Lập trình Flutter',
-    semester: 'HK1',
-    academicYear: '2023-2024',
-    room: 'Lab 1, Cơ sở A',
-    schedule: 'Thứ 3, Ca 1-3',
-    maxStudents: 40,
-    enrolledStudents: 38,
-    status: 'active'
-  },
-  {
-    id: 's2',
-    code: 'CSDL-K1',
-    subjectName: 'Cơ sở dữ liệu',
-    semester: 'HK1',
-    academicYear: '2023-2024',
-    room: 'Phòng 204, Cơ sở B',
-    schedule: 'Thứ 5, Ca 4-6',
-    maxStudents: 50,
-    enrolledStudents: 50,
-    status: 'upcoming'
-  },
-  {
-    id: 's3',
-    code: 'MKT-K2',
-    subjectName: 'Marketing căn bản',
-    semester: 'HK2',
-    academicYear: '2022-2023',
-    room: 'Phòng 101, Cơ sở A',
-    schedule: 'Thứ 2, Ca 1-3',
-    maxStudents: 60,
-    enrolledStudents: 55,
-    status: 'completed'
-  }
-];
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import styles from '@/components/admin/course-sections/AdminCourseSections.module.css';
+import CourseSectionList from '@/components/admin/course-sections/CourseSectionList';
+import CourseSectionDashboard from '@/components/admin/course-sections/CourseSectionDashboard';
+import CourseSectionStatsModal from '@/components/admin/course-sections/CourseSectionStatsModal';
+import { CourseSectionData } from '@/components/admin/course-sections/CourseSectionCard';
+import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
 
 export default function LecturerSectionsPage() {
-  const [sections, setSections] = useState<SectionData[]>(INITIAL_SECTIONS);
+  const [sections, setSections] = useState<CourseSectionData[]>([]);
   const [filter, setFilter] = useState<string>('all');
-  
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
   // Modals state
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingSection, setEditingSection] = useState<SectionData | null>(null);
   const [statsSectionId, setStatsSectionId] = useState<string | null>(null);
 
-  // Derived dashboard stats
-  const activeCount = sections.filter(s => s.status === 'active').length;
-  // Mock logic for pending assignments/quizzes just for visual
-  const pendingAssignments = sections.length > 0 ? 12 : 0;
-  const upcomingQuizzes = sections.length > 0 ? 2 : 0;
+  const activeCount = sections.filter(s => s.status === 'dang_mo').length;
+  const lockedCount = sections.filter(s => s.status === 'da_khoa').length;
+  const completedCount = sections.filter(s => s.status === 'da_ket_thuc').length;
 
-  const handleOpenCreate = () => {
-    setEditingSection(null);
-    setIsFormOpen(true);
-  };
-
-  const handleOpenEdit = (section: SectionData) => {
-    setEditingSection(section);
-    setIsFormOpen(true);
-  };
-
-  const handleSaveSection = (data: any) => {
-    if (editingSection) {
-      setSections(prev => prev.map(s => s.id === data.id ? { ...s, ...data } : s));
-    } else {
-      const newSection: SectionData = {
-        ...data,
-        id: `s_${Date.now()}`
-      };
-      setSections(prev => [newSection, ...prev]);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getLecturerCourseSections();
+      const formattedSections: CourseSectionData[] = data.map((item: any) => ({
+        id: item.id.toString(),
+        code: item.ma_lop_hoc_phan,
+        name: item.ten_lop || '',
+        subjectName: item.mon_hoc?.ten_mon || 'Không rõ',
+        lecturerName: item.giang_vien?.nguoi_dung?.ho_ten || 'Chưa phân công',
+        semester: item.hoc_ky || 'HK1',
+        academicYear: item.nam_hoc || '',
+        faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
+        maxStudents: item.si_so_toi_da || 0,
+        status: item.trang_thai || 'dang_mo'
+      }));
+      setSections(formattedSections);
+    } catch (error) {
+      console.error('Failed to load course sections', error);
+    } finally {
+      setLoading(false);
     }
-    setIsFormOpen(false);
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleOpenEdit = (section: CourseSectionData) => {
+    router.push(`/lecturer/sections/${section.id}/edit`);
   };
 
-  const handleDeleteSection = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa lớp học phần này?')) {
-      setSections(prev => prev.filter(s => s.id !== id));
-    }
-  };
+  const filteredSections = sections.filter(s => {
+    if (filter === 'all') return true;
+    return s.status === filter;
+  });
 
   // Stats mock data generator
   const activeStatsSection = sections.find(s => s.id === statsSectionId);
   const mockStats = activeStatsSection ? {
-    enrolled: activeStatsSection.enrolledStudents,
-    max: activeStatsSection.maxStudents,
-    assignments: 5,
-    quizzes: 2,
-    pendingGrading: activeStatsSection.status === 'active' ? 12 : 0
+    enrolled: Math.floor(Math.random() * activeStatsSection.maxStudents),
+    max: activeStatsSection.maxStudents || 40,
+    assignments: Math.floor(Math.random() * 5),
+    quizzes: Math.floor(Math.random() * 3),
+    pendingGrading: Math.floor(Math.random() * 10)
   } : null;
-
-  const filteredSections = filter === 'all' ? sections : sections.filter(s => s.status === filter);
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>Quản lý Học Phần</h1>
-          <p className={styles.pageSubtitle}>Quản lý danh sách các lớp học phần trong học kỳ hiện tại.</p>
+          <h1 className={styles.pageTitle}>Quản Lý Lớp Học Phần</h1>
+          <p className={styles.pageSubtitle}>Quản lý danh sách các lớp học phần được phân công cho bạn.</p>
         </div>
-        
-        <button className={styles.btnAddSection} onClick={handleOpenCreate}>
+
+        <Link href="/lecturer/sections/create" className={styles.btnAddClass}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Thêm Học Phần
-        </button>
+          Thêm lớp học phần
+        </Link>
       </div>
 
       <div className={styles.layoutGrid}>
-        <SectionDashboard 
+        <CourseSectionDashboard
           activeCount={activeCount}
-          pendingAssignments={pendingAssignments}
-          upcomingQuizzes={upcomingQuizzes}
+          lockedCount={lockedCount}
+          completedCount={completedCount}
           currentFilter={filter}
           onFilterChange={setFilter}
         />
-        
-        <SectionList 
-          sections={filteredSections}
-          onEdit={handleOpenEdit}
-          onViewStats={setStatsSectionId}
-          onDelete={handleDeleteSection}
-        />
+
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+        ) : (
+          <CourseSectionList
+            sections={filteredSections}
+            onEdit={handleOpenEdit}
+            onViewStats={setStatsSectionId}
+            onDelete={() => {}} // Disabled for lecturer, but passed to prevent error
+            hideDelete={true}
+          />
+        )}
       </div>
 
-      {isFormOpen && (
-        <SectionFormModal 
-          initialData={editingSection}
-          onSave={handleSaveSection}
-          onClose={() => setIsFormOpen(false)}
-        />
-      )}
-
       {statsSectionId && activeStatsSection && (
-        <SectionStatsModal 
-          sectionTitle={activeStatsSection.subjectName}
+        <CourseSectionStatsModal
+          sectionTitle={activeStatsSection.name || activeStatsSection.code}
           stats={mockStats}
           onClose={() => setStatsSectionId(null)}
         />

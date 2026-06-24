@@ -1,60 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '@/components/lecturer/resources/ResourcesManagement.module.css';
 import ResourceDashboard from '@/components/lecturer/resources/ResourceDashboard';
 import ResourceGrid, { ResourceData } from '@/components/lecturer/resources/ResourceGrid';
 import ResourceFormModal from '@/components/lecturer/resources/ResourceFormModal';
+import {
+  getLecturerResources,
+  createLecturerResource,
+  updateLecturerResource,
+  deleteLecturerResource,
+  toggleResourceVisibility,
+} from '@/app/actions/lecturer-resource';
+import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
 
-const INITIAL_RESOURCES: ResourceData[] = [
-  {
-    id: 'res1',
-    title: 'Giáo trình Giải tích 1 - Tập 1',
-    type: 'document',
-    sectionId: 'sec1',
-    sectionName: 'Toán cao cấp',
-    createdAt: '12 Thg 10, 2023',
-    fileSize: '2.4 MB',
-    isVisible: true,
-    orderNum: 1
-  },
-  {
-    id: 'res2',
-    title: 'Chương 3: Cấu trúc điều khiển & Vòng lặp',
-    type: 'image', // mapping 'slide' to 'image' visually
-    sectionId: 'sec2',
-    sectionName: 'Lập trình cơ bản',
-    createdAt: '15 Thg 10, 2023',
-    fileSize: '5.1 MB',
-    isVisible: true,
-    orderNum: 2
-  },
-  {
-    id: 'res3',
-    title: 'Record Buổi 4: Vật chất và ý thức',
-    type: 'video',
-    sectionId: 'sec3',
-    sectionName: 'Triết học Mác - Lênin',
-    createdAt: 'Vừa xong',
-    fileSize: '120 MB',
-    isVisible: false,
-    orderNum: 3
-  },
-  {
-    id: 'res4',
-    title: 'Bài tập thực hành Tuần 3 - Mảng và Chuỗi',
-    type: 'document',
-    sectionId: 'sec2',
-    sectionName: 'Lập trình cơ bản',
-    createdAt: '10 Thg 10, 2023',
-    fileSize: '1.2 MB',
-    isVisible: true,
-    orderNum: 4
-  }
-];
+interface SectionOption {
+  id: string;
+  name: string;
+  code: string;
+}
 
 export default function LecturerResourcesPage() {
-  const [resources, setResources] = useState<ResourceData[]>(INITIAL_RESOURCES);
+  const [resources, setResources] = useState<ResourceData[]>([]);
+  const [sections, setSections] = useState<SectionOption[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -63,9 +32,33 @@ export default function LecturerResourcesPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<ResourceData | undefined>(undefined);
 
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [resourcesData, sectionsData] = await Promise.all([
+          getLecturerResources(),
+          getLecturerCourseSections(),
+        ]);
+        setResources(resourcesData);
+        setSections(
+          (sectionsData || []).map((s: any) => ({
+            id: s.id.toString(),
+            name: s.ten_lop || s.mon_hoc?.ten_mon || '',
+            code: s.ma_lop_hoc_phan || '',
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load resources', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
   // Derived Stats
   const totalCount = resources.length;
-  const newCount = resources.filter(r => r.createdAt === 'Vừa xong' || r.createdAt.includes('Hôm nay')).length || 1; // dummy stat
+  const newCount = resources.filter(r => r.createdAt === 'Vừa xong' || (r.createdAt && r.createdAt.includes('phút trước'))).length || 0;
   const activeCount = resources.filter(r => r.isVisible).length;
 
   // Filter & Search
@@ -74,16 +67,27 @@ export default function LecturerResourcesPage() {
     const matchSection = sectionFilter ? r.sectionId === sectionFilter : true;
     const matchType = typeFilter ? r.type === typeFilter : true;
     return matchSearch && matchSection && matchType;
-  }).sort((a, b) => a.orderNum - b.orderNum);
+  });
 
   // Actions
-  const handleToggleVisibility = (id: string, currentStatus: boolean) => {
-    setResources(prev => prev.map(r => r.id === id ? { ...r, isVisible: !currentStatus } : r));
+  const handleToggleVisibility = async (id: string, currentStatus: boolean) => {
+    try {
+      const updated = await toggleResourceVisibility(id);
+      setResources(prev => prev.map(r => r.id === id ? { ...r, isVisible: updated.isVisible } : r));
+    } catch (error) {
+      console.error('Failed to toggle visibility', error);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa tài nguyên này?")) {
-      setResources(prev => prev.filter(r => r.id !== id));
+      try {
+        await deleteLecturerResource(id);
+        setResources(prev => prev.filter(r => r.id !== id));
+      } catch (error) {
+        alert('Có lỗi xảy ra khi xóa tài nguyên.');
+        console.error(error);
+      }
     }
   };
 
@@ -97,29 +101,35 @@ export default function LecturerResourcesPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleSaveResource = (data: Partial<ResourceData>) => {
-    if (editingResource) {
-      // Update
-      setResources(prev => prev.map(r => r.id === editingResource.id ? { ...r, ...data } as ResourceData : r));
-    } else {
-      // Create
-      const newResource: ResourceData = {
-        id: `res_${Date.now()}`,
-        title: data.title || '',
-        description: data.description,
-        type: data.type || 'document',
-        sectionId: data.sectionId || '',
-        sectionName: data.sectionName || '',
-        createdAt: 'Vừa xong',
-        fileSize: data.externalUrl ? 'Link' : '1.0 MB',
-        fileUrl: data.fileUrl,
-        externalUrl: data.externalUrl,
-        isVisible: data.isVisible ?? true,
-        orderNum: resources.length + 1
-      };
-      setResources(prev => [...prev, newResource]);
+  const handleSaveResource = async (data: Partial<ResourceData>) => {
+    try {
+      if (editingResource) {
+        const updated = await updateLecturerResource(editingResource.id, {
+          tieu_de: data.title,
+          noi_dung: data.description,
+          loai_tai_nguyen: data.type,
+          trang_thai: data.isVisible ? 'hien_thi' : 'an',
+          file_url: data.fileUrl,
+          external_url: data.externalUrl,
+        });
+        setResources(prev => prev.map(r => r.id === editingResource.id ? updated : r));
+      } else {
+        const created = await createLecturerResource({
+          tieu_de: data.title,
+          noi_dung: data.description || '',
+          lop_hoc_phan_id: parseInt(data.sectionId || '0'),
+          loai_tai_nguyen: data.type || 'document',
+          trang_thai: data.isVisible ? 'hien_thi' : 'an',
+          file_url: data.fileUrl || '',
+          external_url: data.externalUrl || '',
+        });
+        setResources(prev => [...prev, created]);
+      }
+      setIsFormModalOpen(false);
+    } catch (error) {
+      alert('Có lỗi xảy ra khi lưu tài nguyên.');
+      console.error(error);
     }
-    setIsFormModalOpen(false);
   };
 
   const handleReorder = (draggedId: string, targetId: string) => {
@@ -130,18 +140,10 @@ export default function LecturerResourcesPage() {
       if (draggedIndex === -1 || targetIndex === -1) return prev;
       
       const newResources = [...prev];
-      const draggedItem = newResources[draggedIndex];
+      const [movedItem] = newResources.splice(draggedIndex, 1);
+      newResources.splice(targetIndex, 0, movedItem);
       
-      // Remove dragged item
-      newResources.splice(draggedIndex, 1);
-      // Insert at target index
-      newResources.splice(targetIndex, 0, draggedItem);
-      
-      // Update orderNum
-      return newResources.map((item, index) => ({
-        ...item,
-        orderNum: index + 1
-      }));
+      return newResources;
     });
   };
 
@@ -177,9 +179,9 @@ export default function LecturerResourcesPage() {
             onChange={(e) => setSectionFilter(e.target.value)}
           >
             <option value="">Tất cả môn học</option>
-            <option value="sec1">Toán cao cấp</option>
-            <option value="sec2">Lập trình cơ bản</option>
-            <option value="sec3">Triết học Mác - Lênin</option>
+            {sections.map(sec => (
+              <option key={sec.id} value={sec.id}>{sec.name} ({sec.code})</option>
+            ))}
           </select>
 
           <select 
@@ -219,18 +221,25 @@ export default function LecturerResourcesPage() {
         </div>
       </div>
 
-      <ResourceGrid 
-        resources={filteredResources}
-        viewMode={viewMode}
-        onToggleVisibility={handleToggleVisibility}
-        onEdit={handleOpenEdit}
-        onDelete={handleDelete}
-        onReorder={handleReorder}
-      />
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#777587' }}>
+          <p>Đang tải tài nguyên...</p>
+        </div>
+      ) : (
+        <ResourceGrid 
+          resources={filteredResources}
+          viewMode={viewMode}
+          onToggleVisibility={handleToggleVisibility}
+          onEdit={handleOpenEdit}
+          onDelete={handleDelete}
+          onReorder={handleReorder}
+        />
+      )}
 
       {isFormModalOpen && (
         <ResourceFormModal 
           initialData={editingResource}
+          sections={sections}
           onSave={handleSaveResource}
           onClose={() => setIsFormModalOpen(false)}
         />

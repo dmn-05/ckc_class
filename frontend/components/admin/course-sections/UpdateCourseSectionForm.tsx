@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './AdminUpdateCourseSections.module.css';
 import { updateCourseSection, getCourseSectionById, getSubjects, getLecturers } from '@/app/actions/course-section';
+import { updateLecturerCourseSection, getLecturerCourseSectionById, getCurrentUser } from '@/app/actions/lecturer-course-section';
 
 interface UpdateCourseSectionFormProps {
   sectionId?: string;
+  isLecturer?: boolean;
 }
 
-export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSectionFormProps) {
+export default function UpdateCourseSectionForm({ sectionId, isLecturer = false }: UpdateCourseSectionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -30,13 +32,21 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
   });
 
   useEffect(() => {
-    Promise.all([getSubjects(), getLecturers()]).then(([subs, lecs]) => {
-      setSubjects(subs);
-      setLecturers(lecs);
-    }).catch(console.error);
+    const fetchData = async () => {
+      try {
+        const subs = await getSubjects();
+        setSubjects(subs);
+        const lecs = await getLecturers();
+        setLecturers(lecs);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchData();
 
     if (sectionId) {
-      getCourseSectionById(sectionId).then(data => {
+      const fetchSection = isLecturer ? getLecturerCourseSectionById : getCourseSectionById;
+      fetchSection(sectionId).then(data => {
         setFormData({
           ma_lop_hoc_phan: data.ma_lop_hoc_phan || '',
           ten_lop: data.ten_lop || '',
@@ -49,7 +59,7 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
         });
       }).catch(console.error);
     }
-  }, [sectionId]);
+  }, [sectionId, isLecturer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -68,10 +78,14 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
     setErrorMessage('');
 
     try {
-      await updateCourseSection(sectionId, formData);
+      if (isLecturer) {
+        await updateLecturerCourseSection(sectionId, formData);
+      } else {
+        await updateCourseSection(sectionId, formData);
+      }
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/admin/course-sections');
+        router.push(isLecturer ? '/lecturer/sections' : '/admin/course-sections');
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -127,12 +141,13 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>
-                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required>
+                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required disabled={isLecturer}>
                   <option value="">Chọn Giảng viên</option>
                   {lecturers.map(l => (
-                    <option key={l.id} value={l.id}>{l.ho_ten} ({l.giang_vien?.ma_giang_vien || 'N/A'})</option>
+                    <option key={l.id} value={l.giang_vien?.id}>{l.ho_ten} - {l.giang_vien?.ma_giang_vien || 'N/A'}</option>
                   ))}
                 </select>
+                {isLecturer && <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Chỉ có thể gán cho chính bạn.</small>}
               </div>
             </div>
 
@@ -143,6 +158,9 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
                   <option value="HK1">Học kỳ 1</option>
                   <option value="HK2">Học kỳ 2</option>
                   <option value="HK3">Học kỳ 3</option>
+                  <option value="HK4">Học kỳ 4</option>
+                  <option value="HK5">Học kỳ 5</option>
+                  <option value="HK6">Học kỳ 6</option>
                 </select>
               </div>
               <div className={styles.formGroup}>
@@ -190,7 +208,7 @@ export default function UpdateCourseSectionForm({ sectionId }: UpdateCourseSecti
           </div>
         )}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/course-sections')}>
+          <button type="button" className={styles.btnSecondary} onClick={() => router.push(isLecturer ? '/lecturer/sections' : '/admin/course-sections')}>
             Hủy bỏ
           </button>
           <button 
