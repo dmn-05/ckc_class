@@ -6,6 +6,7 @@ import CommentInput from './CommentInput';
 
 export interface CommentData {
   id: string;
+  authorId?: number | string;
   authorName: string;
   authorAvatar: string;
   role: 'student' | 'teacher';
@@ -22,7 +23,7 @@ interface CommentThreadProps {
   onReplySubmit?: (parentId: string, content: string) => void;
   onDelete?: (id: string) => void;
   onEdit?: (id: string, newContent: string) => void;
-  currentUser: { name: string, role: string };
+  currentUser: { id?: number | string, name: string, role: string };
 }
 
 export default function CommentThread({ comment, isNested = false, onReplySubmit, onDelete, onEdit, currentUser }: CommentThreadProps) {
@@ -61,9 +62,9 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
     }
   };
 
-  const isOwner = comment.authorName === currentUser.name && comment.role === currentUser.role;
-  // Giảng viên có quyền xóa tất cả bình luận
-  const canDelete = isOwner || currentUser.role === 'teacher';
+  const isOwner = comment.authorId && currentUser.id 
+    ? comment.authorId.toString() === currentUser.id.toString()
+    : comment.authorName === currentUser.name && comment.role === currentUser.role;
 
   return (
     <div className={styles.threadContainer}>
@@ -112,21 +113,20 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
                 </button>
                 
                 {isOwner && (
-                  <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => setIsEditing(true)}>
-                    <svg className={styles.actionBtnIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    <span className={styles.actionBtnText}>Chỉnh sửa</span>
-                  </button>
-                )}
-                
-                {canDelete && (
-                  <button className={`${styles.actionBtn} ${styles.actionBtnDelete}`} onClick={() => onDelete && onDelete(comment.id)}>
-                    <svg className={styles.actionBtnIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span className={styles.actionBtnText}>Xóa</span>
-                  </button>
+                  <>
+                    <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => setIsEditing(true)}>
+                      <svg className={styles.actionBtnIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      <span className={styles.actionBtnText}>Chỉnh sửa</span>
+                    </button>
+                    <button className={`${styles.actionBtn} ${styles.actionBtnDelete}`} onClick={() => onDelete && onDelete(comment.id)}>
+                      <svg className={styles.actionBtnIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span className={styles.actionBtnText}>Xóa</span>
+                    </button>
+                  </>
                 )}
               </div>
             </>
@@ -139,6 +139,7 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
                 onCancel={() => setIsReplying(false)} 
                 placeholder={`Phản hồi ${comment.authorName}...`}
                 submitText="Gửi phản hồi"
+                userAvatar={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=3525cd&color=fff`}
                 autoFocus 
               />
             </div>
@@ -153,7 +154,7 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
               key={reply.id} 
               comment={reply} 
               isNested={true} 
-              onReplySubmit={onReplySubmit} 
+              onReplySubmit={(childId, content) => onReplySubmit && onReplySubmit(comment.id, content)} 
               onDelete={onDelete} 
               onEdit={onEdit}
               currentUser={currentUser}

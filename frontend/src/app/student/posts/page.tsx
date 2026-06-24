@@ -9,6 +9,7 @@ interface PostData {
   id: string;
   title: string;
   category: string;
+  rawCategory: string;
   date: string;
   status: string;
   authorName: string;
@@ -23,6 +24,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 export default function StudentPostsList() {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('');
 
   React.useEffect(() => {
     fetchPosts();
@@ -48,6 +50,7 @@ export default function StudentPostsList() {
             category: item.loai_bai_viet === 'thong_bao' ? 'Thông báo' : 
                       item.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
                       item.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
+            rawCategory: item.loai_bai_viet || 'bai_viet',
             date: new Date(item.ngay_tao).toLocaleDateString('vi-VN'),
             status: 'Đã đăng',
             title: item.tieu_de,
@@ -100,11 +103,13 @@ export default function StudentPostsList() {
   };
 
   const getBadgeClass = (category: string) => {
-    if (category === 'Đào tạo') return styles.badgeDTT;
-    if (category === 'Hành chính') return styles.badgeHC;
-    if (category === 'Sự kiện') return styles.postCardBadge + ' bg-[#a44100]';
+    if (category === 'Thông báo') return styles.badgeDTT;
+    if (category === 'Tài liệu') return styles.badgeHC;
+    if (category === 'Bài tập') return styles.postCardBadge + ' bg-[#a44100] text-white';
     return styles.badgeQuestion;
   };
+
+  const displayedPosts = filterCategory ? posts.filter(p => p.rawCategory === filterCategory) : posts;
 
   return (
     <div className={styles.pageContainerList}>
@@ -123,17 +128,22 @@ export default function StudentPostsList() {
 
       <div className={styles.sectionBox} style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e0e3e5', display: 'flex', gap: '1rem', backgroundColor: '#f2f4f6' }}>
-          <select className={styles.sortSelect} style={{ backgroundColor: '#ffffff', border: '1px solid #e0e3e5', padding: '0.5rem', borderRadius: '0.5rem', color: '#191c1e' }}>
-            <option>Tất cả danh mục</option>
-            <option>Đào tạo</option>
-            <option>Hành chính</option>
-            <option>Sự kiện</option>
-            <option>Hỏi đáp</option>
+          <select 
+            className={styles.sortSelect} 
+            style={{ backgroundColor: '#ffffff', border: '1px solid #e0e3e5', padding: '0.5rem', borderRadius: '0.5rem', color: '#191c1e' }}
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">Tất cả danh mục</option>
+            <option value="thong_bao">Thông báo</option>
+            <option value="tai_lieu">Tài liệu</option>
+            <option value="bai_tap">Bài tập</option>
+            <option value="bai_viet">Thảo luận</option>
           </select>
         </div>
 
         <div className={styles.gridContainer} style={{ padding: '1.5rem' }}>
-          {posts.map(post => (
+          {displayedPosts.map(post => (
             <Link href={`/student/posts/${post.id}`} key={post.id} className={styles.postCard} style={{ textDecoration: 'none' }}>
               <div className={styles.postCardImageContainer}>
                 <img src={post.image} alt={post.title} className={styles.postCardImage} />

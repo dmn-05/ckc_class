@@ -6,6 +6,7 @@ import CommentInput from './CommentInput';
 
 export interface CommentData {
   id: string;
+  authorId?: number | string;
   authorName: string;
   authorAvatar: string;
   role: 'student' | 'teacher';
@@ -22,7 +23,7 @@ interface CommentThreadProps {
   onReplySubmit?: (parentId: string, content: string) => void;
   onDelete?: (id: string) => void;
   onEdit?: (id: string, newContent: string) => void;
-  currentUser: { name: string, role: string };
+  currentUser: { id?: number | string, name: string, role: string };
 }
 
 export default function CommentThread({ comment, isNested = false, onReplySubmit, onDelete, onEdit, currentUser }: CommentThreadProps) {
@@ -61,7 +62,9 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
     }
   };
 
-  const isOwner = comment.authorName === currentUser.name && comment.role === currentUser.role;
+  const isOwner = comment.authorId && currentUser.id 
+    ? comment.authorId.toString() === currentUser.id.toString()
+    : comment.authorName === currentUser.name && comment.role === currentUser.role;
 
   return (
     <div className={styles.threadContainer}>
@@ -136,6 +139,7 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
                 onCancel={() => setIsReplying(false)} 
                 placeholder={`Phản hồi ${comment.authorName}...`}
                 submitText="Gửi phản hồi"
+                userAvatar={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=3525cd&color=fff`}
                 autoFocus 
               />
             </div>
@@ -150,7 +154,7 @@ export default function CommentThread({ comment, isNested = false, onReplySubmit
               key={reply.id} 
               comment={reply} 
               isNested={true} 
-              onReplySubmit={onReplySubmit} 
+              onReplySubmit={(childId, content) => onReplySubmit && onReplySubmit(comment.id, content)} 
               onDelete={onDelete} 
               onEdit={onEdit}
               currentUser={currentUser}

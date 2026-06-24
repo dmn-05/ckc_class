@@ -69,10 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
     });
     
-    // Shared Comment Routes
-    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
-    Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+    // Shared Comment Routes (Moved to public for testing)
 });
+
+Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
 
 // Temporary public routes for testing UI without login token
 // Profile Routes

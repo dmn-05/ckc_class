@@ -37,18 +37,12 @@ export default function StudentHeader({ profileData }: { profileData?: any }) {
         </button>
 
         <div className={styles.userProfile} ref={dropdownRef} onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer', position: 'relative' }}>
-          {hasPhoto ? (
-            <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcNSQXs5-LbQJDOQbKGq1BFmI1eYpdaflsF67_AjsQxpMC-G6H6ercthK9v35xQ4iGLsJG7j0k2CIuH8CeP2Osj27FoHd2cX4vcKQ-JzZ_0AaDpqckd5k09eTQh63s-hxDjjOx0M6Q1CW-a3SWGyKEtnLkubsSE3xkB_PkZ4FLiM6N9zdY-ukYH1x2YhayxUdBjcpyn3JH1XoMP3i3c2uxIHp9XqVHrP3LBOb9rlMgGr6Uf3mZzVACiXoMzLw2vH2Fov6MyUgYiUs" 
-              alt={studentName}
-              className={styles.userAvatar} 
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <div className={styles.userAvatar}>
-              {studentName.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <img 
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(studentName)}&background=3525cd&color=fff`}
+            alt={studentName}
+            className={styles.userAvatar} 
+            style={{ objectFit: 'cover' }}
+          />
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             {studentName}
             <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: '#64748b' }}>arrow_drop_down</span>

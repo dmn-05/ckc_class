@@ -24,7 +24,13 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $post = BaiViet::with(['nguoiTao', 'binhLuan.nguoiDung', 'tepTinBaiViet.tepTin'])
+        $post = BaiViet::with([
+                'nguoiTao', 
+                'binhLuan' => function($q) {
+                    $q->whereNull('binh_luan_cha_id')->with('nguoiDung', 'replies.nguoiDung');
+                }, 
+                'tepTinBaiViet.tepTin'
+            ])
             ->where('trang_thai', 'hien_thi')
             ->findOrFail($id);
             
