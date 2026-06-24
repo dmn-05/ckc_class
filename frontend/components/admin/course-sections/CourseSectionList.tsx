@@ -10,9 +10,10 @@ interface CourseSectionListProps {
   onEdit: (section: CourseSectionData) => void;
   onViewStats: (sectionId: string) => void;
   onDelete: (sectionId: string) => void;
+  hideDelete?: boolean;
 }
 
-export default function CourseSectionList({ sections, onEdit, onViewStats, onDelete }: CourseSectionListProps) {
+export default function CourseSectionList({ sections, onEdit, onViewStats, onDelete, hideDelete }: CourseSectionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // Adjust as needed
@@ -58,6 +59,7 @@ export default function CourseSectionList({ sections, onEdit, onViewStats, onDel
             onEdit={onEdit} 
             onViewStats={onViewStats}
             onDelete={onDelete}
+            hideDelete={hideDelete}
           />
         ))}
 

@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ClassController;
+use App\Http\Controllers\Student\EnrollmentController;
+use App\Http\Controllers\Lecturer\EnrollmentController as LecturerEnrollmentController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -23,9 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Only Routes
     Route::middleware(\App\Http\Middleware\CheckRole::class.':1')->group(function () {
-        // User routes
-        Route::get('/lecturers', [UserController::class, 'getLecturers']);
-        Route::get('/lecturers/{id}', [UserController::class, 'getLecturerById']);
+        // User routes (Create/Update/Delete)
         Route::post('/lecturers', [UserController::class, 'storeLecturer']);
         Route::put('/lecturers/{id}', [UserController::class, 'updateLecturer']);
 
@@ -50,9 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
         Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
-        // Subject routes
+        // Subject routes (Create/Update/Delete)
         Route::get('/subjects/stats', [SubjectController::class, 'stats']);
-        Route::apiResource('subjects', SubjectController::class);
+        Route::apiResource('subjects', SubjectController::class)->except(['index', 'show']);
         
         // Faculty routes
         Route::get('/faculties', [FacultyController::class, 'index']);
@@ -69,6 +69,45 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
     });
     
+    // Lecturer Only Routes
+    Route::middleware(\App\Http\Middleware\CheckRole::class.':2')->group(function () {
+        Route::get('/lecturer/course-sections', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'index']);
+        Route::post('/lecturer/course-sections', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'store']);
+        Route::get('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'show']);
+        Route::put('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'update']);
+        // Enrollment management by lecturer
+        Route::get('/lecturer/enrollments/{sectionId}', [LecturerEnrollmentController::class, 'bySection']);
+        Route::patch('/lecturer/enrollments/{id}/cancel', [LecturerEnrollmentController::class, 'cancelByLecturer']);
+        // Resource management by lecturer
+        Route::get('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'index']);
+        Route::post('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'store']);
+        Route::get('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'show']);
+        Route::put('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'update']);
+        Route::delete('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'destroy']);
+        Route::patch('/lecturer/resources/{id}/toggle-visibility', [\App\Http\Controllers\Lecturer\ResourceController::class, 'toggleVisibility']);
+        // Assignment management by lecturer
+        Route::get('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'index']);
+        Route::post('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'store']);
+        Route::get('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'show']);
+        Route::put('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']);
+        Route::delete('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'destroy']);
+    });
+
+    // Student Only Routes
+    Route::middleware(\App\Http\Middleware\CheckRole::class.':3')->group(function () {
+        Route::get('/student/available-sections', [EnrollmentController::class, 'availableSections']);
+        Route::get('/student/enrollments', [EnrollmentController::class, 'myEnrollments']);
+        Route::post('/student/enrollments', [EnrollmentController::class, 'enroll']);
+        Route::delete('/student/enrollments/{id}', [EnrollmentController::class, 'cancel']);
+    });
+
+
+    // Common Authenticated Routes
+    Route::get('/lecturers', [UserController::class, 'getLecturers']);
+    Route::get('/lecturers/{id}', [UserController::class, 'getLecturerById']);
+    Route::get('/subjects', [SubjectController::class, 'index']);
+    Route::get('/subjects/{id}', [SubjectController::class, 'show']);
+
     // Shared Comment Routes (Moved to public for testing)
 });
 
@@ -105,4 +144,13 @@ Route::get('/add-luot-xem', function() {
 
 Route::get('/dump-users', function() {
     return response()->json(\App\Models\NguoiDung::all());
+});
+
+Route::get('/fix-hoc-ky', function() {
+    try {
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE lop_hoc_phan MODIFY hoc_ky ENUM('HK1', 'HK2', 'HK3', 'HK4', 'HK5', 'HK6') NOT NULL DEFAULT 'HK1'");
+        return 'Updated hoc_ky successfully';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });

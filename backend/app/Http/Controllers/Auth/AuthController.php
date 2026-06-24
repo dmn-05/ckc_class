@@ -46,8 +46,14 @@ class AuthController extends Controller
     
     public function me(Request $request)
     {
+        $user = $request->user();
+        if ($user->vai_tro_id == 2) {
+            $user->load('giangVien.boMon');
+        } elseif ($user->vai_tro_id == 3) {
+            $user->load('sinhVien');
+        }
         return response()->json([
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 }

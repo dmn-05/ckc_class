@@ -4,25 +4,31 @@ import React, { useState, useEffect } from 'react';
 import styles from './ResourcesManagement.module.css';
 import { ResourceData, ResourceType } from './ResourceGrid';
 
-// Mock list of sections for the dropdown
-const AVAILABLE_SECTIONS = [
-  { id: 'sec1', name: 'Toán cao cấp', code: 'TOAN-01' },
-  { id: 'sec2', name: 'Lập trình cơ bản', code: 'LT-02' },
-  { id: 'sec3', name: 'Triết học Mác - Lênin', code: 'TRIET-03' }
-];
+interface SectionOption {
+  id: string;
+  name: string;
+  code: string;
+}
 
 interface ResourceFormModalProps {
   initialData?: ResourceData;
+  sections?: SectionOption[];
   onSave: (data: Partial<ResourceData>) => void;
   onClose: () => void;
 }
 
-export default function ResourceFormModal({ initialData, onSave, onClose }: ResourceFormModalProps) {
+export default function ResourceFormModal({ initialData, sections = [], onSave, onClose }: ResourceFormModalProps) {
+  const availableSections = sections.length > 0 ? sections : [
+    { id: 'sec1', name: 'Toán cao cấp', code: 'TOAN-01' },
+    { id: 'sec2', name: 'Lập trình cơ bản', code: 'LT-02' },
+    { id: 'sec3', name: 'Triết học Mác - Lênin', code: 'TRIET-03' },
+  ];
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     type: 'document' as ResourceType,
-    sectionId: AVAILABLE_SECTIONS[0].id,
+    sectionId: availableSections[0]?.id || '',
     fileUrl: '',
     externalUrl: '',
     isVisible: true
@@ -42,6 +48,12 @@ export default function ResourceFormModal({ initialData, onSave, onClose }: Reso
     }
   }, [initialData]);
 
+  useEffect(() => {
+    if (sections.length > 0 && !formData.sectionId) {
+      setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
+    }
+  }, [sections, formData.sectionId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -53,7 +65,7 @@ export default function ResourceFormModal({ initialData, onSave, onClose }: Reso
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const section = AVAILABLE_SECTIONS.find(s => s.id === formData.sectionId);
+    const section = availableSections.find(s => s.id === formData.sectionId);
     
     onSave({
       ...formData,
@@ -87,7 +99,7 @@ export default function ResourceFormModal({ initialData, onSave, onClose }: Reso
                 onChange={handleChange}
                 required
               >
-                {AVAILABLE_SECTIONS.map(sec => (
+                {availableSections.map(sec => (
                   <option key={sec.id} value={sec.id}>{sec.name} ({sec.code})</option>
                 ))}
               </select>

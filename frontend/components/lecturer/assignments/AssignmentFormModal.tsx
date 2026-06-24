@@ -4,30 +4,43 @@ import React, { useState, useEffect } from 'react';
 import styles from './AssignmentsManagement.module.css';
 import { AssignmentData } from './AssignmentGrid';
 
-const AVAILABLE_SECTIONS = [
-  { id: 'sec1', name: 'Lập trình hướng đối tượng' },
-  { id: 'sec2', name: 'Thiết kế Giao diện' },
-  { id: 'sec3', name: 'Cơ sở dữ liệu' },
-];
+interface SectionOption {
+  id: string;
+  name: string;
+  code?: string;
+}
 
 interface AssignmentFormModalProps {
   initialData?: AssignmentData;
+  sections?: SectionOption[];
   onSave: (data: Partial<AssignmentData>) => void;
   onClose: () => void;
 }
 
-export default function AssignmentFormModal({ initialData, onSave, onClose }: AssignmentFormModalProps) {
+export default function AssignmentFormModal({ initialData, sections = [], onSave, onClose }: AssignmentFormModalProps) {
+  const availableSections = sections.length > 0 ? sections : [
+    { id: 'sec1', name: 'Lập trình hướng đối tượng' },
+    { id: 'sec2', name: 'Thiết kế Giao diện' },
+    { id: 'sec3', name: 'Cơ sở dữ liệu' },
+  ];
+
   const [formData, setFormData] = useState({
     title: '',
-    sectionId: AVAILABLE_SECTIONS[0].id,
+    sectionId: availableSections[0]?.id || '',
     description: '',
     instructions: '',
-    maxScore: 10, // Default 10 scale
+    maxScore: 10,
     dueDate: '',
     allowLate: false,
-    latePenaltyPct: 10, // Fixed 10% penalty
+    latePenaltyPct: 10,
     isPublished: true
   });
+
+  useEffect(() => {
+    if (sections.length > 0 && !formData.sectionId) {
+      setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
+    }
+  }, [sections, formData.sectionId]);
 
   useEffect(() => {
     if (initialData) {
@@ -66,7 +79,7 @@ export default function AssignmentFormModal({ initialData, onSave, onClose }: As
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const section = AVAILABLE_SECTIONS.find(s => s.id === formData.sectionId);
+    const section = availableSections.find(s => s.id === formData.sectionId);
     
     onSave({
       ...formData,
@@ -101,7 +114,7 @@ export default function AssignmentFormModal({ initialData, onSave, onClose }: As
                   onChange={handleChange}
                   required
                 >
-                  {AVAILABLE_SECTIONS.map(sec => (
+                  {availableSections.map(sec => (
                     <option key={sec.id} value={sec.id}>{sec.name}</option>
                   ))}
                 </select>
