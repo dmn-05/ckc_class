@@ -41,6 +41,7 @@ class UserController extends Controller
             'dia_chi' => 'nullable|string',
             'bo_mon_id' => 'required|exists:bo_mon,id',
             'trang_thai' => 'required|in:dang_day,ngung_day',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
         \DB::beginTransaction();
@@ -52,6 +53,16 @@ class UserController extends Controller
                 'vai_tro_id' => 2,
                 'trang_thai' => 'dang_hoat_dong',
             ]);
+
+            if ($request->hasFile('avatar') && env('CLOUDINARY_URL')) {
+                $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+                $result = $cloudinary->uploadApi()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    ['folder' => 'avatars']
+                );
+                $user->avatar = $result['secure_url'];
+                $user->save();
+            }
 
             \App\Models\GiangVien::create([
                 'nguoi_dung_id' => $user->id,
@@ -88,6 +99,7 @@ class UserController extends Controller
             'dia_chi' => 'nullable|string',
             'bo_mon_id' => 'required|exists:bo_mon,id',
             'trang_thai' => 'required|in:dang_day,ngung_day',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
         \DB::beginTransaction();
@@ -96,6 +108,16 @@ class UserController extends Controller
                 'ho_ten' => $validated['ho_ten'],
                 'email' => $validated['email'],
             ]);
+
+            if ($request->hasFile('avatar') && env('CLOUDINARY_URL')) {
+                $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+                $result = $cloudinary->uploadApi()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    ['folder' => 'avatars']
+                );
+                $user->avatar = $result['secure_url'];
+                $user->save();
+            }
 
             $user->giangVien()->update([
                 'ma_giang_vien' => $validated['ma_giang_vien'],
@@ -148,6 +170,7 @@ class UserController extends Controller
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
         \DB::beginTransaction();
@@ -159,6 +182,16 @@ class UserController extends Controller
                 'vai_tro_id' => 3,
                 'trang_thai' => 'dang_hoat_dong',
             ]);
+
+            if ($request->hasFile('avatar') && env('CLOUDINARY_URL')) {
+                $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+                $result = $cloudinary->uploadApi()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    ['folder' => 'avatars']
+                );
+                $user->avatar = $result['secure_url'];
+                $user->save();
+            }
 
             \App\Models\SinhVien::create([
                 'nguoi_dung_id' => $user->id,
@@ -193,6 +226,7 @@ class UserController extends Controller
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
         \DB::beginTransaction();
@@ -201,6 +235,16 @@ class UserController extends Controller
                 'ho_ten' => $validated['ho_ten'],
                 'email' => $validated['email'],
             ]);
+
+            if ($request->hasFile('avatar') && env('CLOUDINARY_URL')) {
+                $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+                $result = $cloudinary->uploadApi()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    ['folder' => 'avatars']
+                );
+                $user->avatar = $result['secure_url'];
+                $user->save();
+            }
 
             $user->sinhVien()->update([
                 'ma_sinh_vien' => $validated['ma_sinh_vien'],

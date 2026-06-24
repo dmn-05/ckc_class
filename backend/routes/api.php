@@ -19,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/user/avatar', [AuthController::class, 'updateAvatar']);
     
     // Dashboard stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);

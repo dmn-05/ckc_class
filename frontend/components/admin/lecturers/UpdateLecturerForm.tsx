@@ -20,6 +20,10 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedFaculty, setSelectedFaculty] = useState<string>('');
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     code: '',
     status: 'dang_day',
@@ -31,6 +35,7 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
     phone: '',
     address: '',
     departmentId: '',
+    avatarUrl: '',
   });
 
   useEffect(() => {
@@ -56,6 +61,7 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
             phone: lecturerData.phone || '',
             address: lecturerData.address || '',
             departmentId: lecturerData.departmentId || '',
+            avatarUrl: lecturerData.avatar || '',
           });
           if (lecturerData.facultyId) {
             setSelectedFaculty(lecturerData.facultyId);
@@ -74,14 +80,42 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
 
   const filteredDepartments = departments.filter(d => d.facultyId?.toString() === selectedFaculty?.toString());
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!lecturerId) return;
 
     setIsSubmitting(true);
 
+    const submitData = new FormData();
+    submitData.append('_method', 'PUT'); // For Laravel
+    submitData.append('ho_ten', formData.name);
+    submitData.append('email', formData.email);
+    submitData.append('ma_giang_vien', formData.code);
+    submitData.append('cccd', formData.cccd);
+    submitData.append('ngay_sinh', formData.dob);
+    submitData.append('gioi_tinh', formData.gender);
+    submitData.append('so_dien_thoai', formData.phone);
+    submitData.append('dia_chi', formData.address);
+    submitData.append('bo_mon_id', formData.departmentId);
+    submitData.append('trang_thai', formData.status);
+    if (avatarFile) {
+      submitData.append('avatar', avatarFile);
+    }
+
     try {
-      await updateLecturer(lecturerId, formData);
+      await updateLecturer(lecturerId, submitData);
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');
@@ -99,23 +133,31 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
       {/* Left Column: Profile Picture & Core Info */}
       <div className={styles.leftColumn}>
         <section className={`${styles.card} ${styles.cardCenter}`}>
-          <div className={styles.avatarUploadWrapper}>
+          <div className={styles.avatarUploadWrapper} onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
             <div className={styles.avatarBox}>
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNISFABqVsLgvuamkEPReCzmnSmO7VxRxBXPkL4FySB15KUHHgdK-oxWD3I8iQ0gJpNobKMZvdlN9d6C5WkKIy2u0ShoWgHhqQ4bQlTjAgOM2KJoUzs_CZU5B1COpqUEWG8sb2z7t5VeqlFMnjlhb1lt0iD-n_sCJ-4qYYnIV0QR_VG7XM0PlnAe35pTT3xmyZ7Uzw9wlMZE5HcVVoRsS-UZ23i-tpbZHMqULqQQkkt8w9Y6xOVYxJCxUVM0kLIyJbi3-uZ4gfYUk"
+                src={avatarPreview || formData.avatarUrl || "https://ui-avatars.com/api/?name=User"}
                 alt="Lecturer Profile"
                 className={styles.avatarImg}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
               />
             </div>
             <div className={styles.avatarOverlay}>
-              <span className={`material-symbols-outlined ${styles.avatarIcon}`}>edit</span>
+              <span className={`material-symbols-outlined ${styles.avatarIcon}`} style={{ color: '#fff', opacity: 0.8 }}>edit</span>
             </div>
           </div>
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleAvatarChange} 
+            style={{ display: 'none' }} 
+          />
           <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
-            Tải lên ảnh chân dung sắc nét. Kích thước tối đa 10MB. Định dạng JPG hoặc PNG.
+            Tải lên ảnh chân dung sắc nét. Kích thước tối đa 5MB. Định dạng JPG hoặc PNG.
           </p>
-          <button className={styles.btnUpload} type="button">Thay đổi ảnh</button>
+          <button className={styles.btnUpload} type="button" onClick={triggerFileInput}>Thay đổi ảnh</button>
         </section>
 
         <section className={styles.card}>
