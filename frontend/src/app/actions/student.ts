@@ -8,12 +8,15 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth_token')?.value;
 
-    const headers = {
-        'Content-Type': 'application/json',
+    const headers: any = {
         'Accept': 'application/json',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...options.headers,
     };
+
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     return fetch(`${API_URL}${url}`, { ...options, headers });
 }
@@ -36,7 +39,7 @@ export async function getStudents() {
             classCode: item.sinh_vien?.lop ? item.sinh_vien.lop.ma_lop : '',
             faculty: item.sinh_vien?.khoa ? item.sinh_vien.khoa.ten_khoa : '',
             email: item.email || '',
-            avatar: item.anh_dai_dien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
+            avatar: item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
             statusClassName: item.sinh_vien?.trang_thai === 'dang_hoc' ? 'bg-green-500' : 'bg-red-500',
             borderClassName: item.sinh_vien?.trang_thai === 'dang_hoc' ? 'border-l-primary' : 
                              item.sinh_vien?.trang_thai === 'da_tot_nghiep' ? 'border-l-success' : 'border-l-error',
@@ -62,11 +65,11 @@ export async function getStudentById(id: string) {
     }
 }
 
-export async function createStudent(data: any) {
+export async function createStudent(data: FormData) {
     try {
         const response = await fetchWithAuth('/students', {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: data
         });
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
@@ -79,11 +82,11 @@ export async function createStudent(data: any) {
     }
 }
 
-export async function updateStudent(id: string, data: any) {
+export async function updateStudent(id: string, data: FormData) {
     try {
         const response = await fetchWithAuth(`/students/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
+            method: 'POST', // Changed to POST for FormData
+            body: data
         });
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
