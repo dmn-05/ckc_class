@@ -10,6 +10,7 @@ interface CommentInputProps {
   submitText?: string;
   initialContent?: string;
   autoFocus?: boolean;
+  userAvatar?: string;
 }
 
 export default function CommentInput({ 
@@ -18,7 +19,8 @@ export default function CommentInput({
   placeholder = 'Viết bình luận của bạn...', 
   submitText = 'Gửi bình luận',
   initialContent = '',
-  autoFocus = false 
+  autoFocus = false,
+  userAvatar = 'https://ui-avatars.com/api/?name=User&background=random'
 }: CommentInputProps) {
   const [content, setContent] = useState(initialContent);
 
@@ -34,7 +36,7 @@ export default function CommentInput({
       <div className={styles.commentInputLayout}>
         {!initialContent && (
           <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLjhx4Q2PaQiT2ncDj3RABa0263YBCgk_4kG4-UlmvpMMUNdOpgN88LHJyE4zmHKDhGXsSlmEJ-PQbICdUokejTOs60a6sd0hcqdFv2AMgSdT9gkh0g8zUqpZU8vh045JSVie6xnlwtxMtODQjavL3TnhAnj_llLSOTguIEeCd_ep_U9tuMGpq82B6g43SU-1hG0sbNteAn2jz24XUVeil5UYcgtGSA-3dnUi6DyjWTUFyytiZZVvfUyET1DjhroCdBALWmdClQHE" 
+            src={userAvatar} 
             alt="Current User" 
             className={styles.inputAvatar} 
           />

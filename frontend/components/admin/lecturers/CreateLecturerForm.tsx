@@ -16,6 +16,10 @@ export default function CreateLecturerForm() {
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedFaculty, setSelectedFaculty] = useState<string>('');
   
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     code: '',
     status: 'dang_day',
@@ -50,12 +54,39 @@ export default function CreateLecturerForm() {
 
   const filteredDepartments = departments.filter(d => d.facultyId?.toString() === selectedFaculty?.toString());
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const submitData = new FormData();
+    submitData.append('ho_ten', formData.name);
+    submitData.append('email', formData.email);
+    submitData.append('ma_giang_vien', formData.code);
+    submitData.append('cccd', formData.cccd);
+    submitData.append('ngay_sinh', formData.dob);
+    submitData.append('gioi_tinh', formData.gender);
+    submitData.append('so_dien_thoai', formData.phone);
+    submitData.append('dia_chi', formData.address);
+    submitData.append('bo_mon_id', formData.departmentId);
+    submitData.append('trang_thai', formData.status);
+    if (avatarFile) {
+      submitData.append('avatar', avatarFile);
+    }
+
     try {
-      await createLecturer(formData);
+      await createLecturer(submitData);
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');
@@ -73,19 +104,30 @@ export default function CreateLecturerForm() {
       {/* Left Column: Profile Picture & Core Info */}
       <div className={styles.leftColumn}>
         <section className={`${styles.card} ${styles.cardCenter}`}>
-          <div className={styles.avatarUploadWrapper}>
+          <div className={styles.avatarUploadWrapper} onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
             <div className={styles.avatarBox}>
-              <span className={`material-symbols-outlined ${styles.avatarIcon}`}>add_a_photo</span>
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Preview" className={styles.avatarImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              ) : (
+                <span className={`material-symbols-outlined ${styles.avatarIcon}`}>add_a_photo</span>
+              )}
             </div>
             <div className={styles.avatarOverlay}>
-              {/* Hidden Input Trigger */}
+              <span className={`material-symbols-outlined ${styles.avatarIcon}`} style={{ color: '#fff', opacity: 0.8 }}>edit</span>
             </div>
           </div>
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleAvatarChange} 
+            style={{ display: 'none' }} 
+          />
           <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
-            Tải lên ảnh chân dung sắc nét. Kích thước tối đa 10MB. Định dạng JPG hoặc PNG.
+            Tải lên ảnh chân dung sắc nét. Kích thước tối đa 5MB. Định dạng JPG hoặc PNG.
           </p>
-          <button className={styles.btnUpload} type="button">Tải ảnh lên</button>
+          <button className={styles.btnUpload} type="button" onClick={triggerFileInput}>Tải ảnh lên</button>
         </section>
 
         <section className={styles.card}>

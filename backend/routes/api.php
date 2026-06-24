@@ -17,6 +17,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/user/avatar', [AuthController::class, 'updateAvatar']);
     
     // Dashboard stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
@@ -69,11 +70,40 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
     });
     
-    // Student Routes
-    Route::get('/student/profile', [StudentProfileController::class, 'show']);
-    Route::put('/student/profile', [StudentProfileController::class, 'update']);
+    // Shared Comment Routes (Moved to public for testing)
+});
 
-    // Lecturer Routes
-    Route::get('/lecturer/profile', [LecturerProfileController::class, 'show']);
-    Route::put('/lecturer/profile', [LecturerProfileController::class, 'update']);
+Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+
+// Temporary public routes for testing UI without login token
+// Profile Routes
+Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
+Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
+Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
+Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
+
+// Post Routes
+Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
+Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
+Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
+
+Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
+
+Route::get('/schema-bai-viet', function() {
+    $columns = \Illuminate\Support\Facades\DB::select('SHOW COLUMNS FROM bai_viet');
+    return response()->json($columns);
+});
+
+Route::get('/add-luot-xem', function() {
+    try {
+        \Illuminate\Support\Facades\DB::statement('ALTER TABLE bai_viet ADD COLUMN luot_xem INT DEFAULT 0');
+        return 'Added';
+    } catch (\Exception $e) {
+        return 'Already exists or error: ' . $e->getMessage();
+    }
+});
+
+Route::get('/dump-users', function() {
+    return response()->json(\App\Models\NguoiDung::all());
 });

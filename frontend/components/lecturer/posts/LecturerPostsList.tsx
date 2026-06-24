@@ -5,76 +5,125 @@ import PostCard, { PostData } from './PostCard';
 import PostFormModal from './PostFormModal';
 import styles from './PostsManagement.module.css';
 
-const INITIAL_POSTS: PostData[] = [
-  {
-    id: 'p1',
-    category: 'announcement',
-    date: '25 Thg 08, 2024',
-    is_published: true,
-    is_pinned: true,
-    title: 'Thông báo nghỉ lễ Quốc khánh 2/9 dành cho Cán bộ - Giảng viên - Sinh viên',
-    authorName: 'Phòng Hành chính - Quản trị',
-    views_count: 1200,
-    commentsCount: 12,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o'
-  },
-  {
-    id: 'p2',
-    category: 'material',
-    date: '22 Thg 08, 2024',
-    is_published: true,
-    is_pinned: false,
-    title: 'Lịch thi kết thúc học kỳ 1 - Năm học 2024-2025 (Chính thức)',
-    authorName: 'Phòng Đào tạo',
-    views_count: 3500,
-    commentsCount: 45,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC32z3XOi0PMPEhh8_edGAXa5Mt-C_EncIM50zRI6j7hlb5UXGuOlOZLOjW6LdMLDXQXHtKejlbieVdH47MmbEeepY4hE5bwogzM4kRL5rnkuUJdvtU0HpXLcNWpOOW8ZBCWhjspw4VM1U2pu_T-TxSqqspnau9IOFfnFE4wGnusIonpnqPSGIcvs6N1fRa11fhy9Mla5BOOUxl1InjNahfmNYFY0Zn-djxCKwql0oOFRHvCUwVbuFfQeCuJSnlWCWcI6XzeSlBUYE'
-  },
-  {
-    id: 'p3',
-    category: 'discussion',
-    date: '20 Thg 08, 2024',
-    is_published: false,
-    is_pinned: false,
-    title: 'Hội thảo định hướng nghề nghiệp 2024: "Chinh phục nhà tuyển dụng"',
-    authorName: 'Trung tâm Hỗ trợ HSSV',
-    views_count: 0,
-    commentsCount: 0,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAe9J9iPr6e2C-U99NRQnifggovalC5mlCZvg5N-reu0gTtgDeDdP3TgW5Zu15y5QIKOfYtAVPVyMtBPLzFwSSdn0_8ZSdKdxn4acdhjqKw4yFUkxMyDviS-VOrTDkDI_w6_XGqPdmW2QyhGwG54rpO_-1MwsjN86lnvtRjGFACzzg_bi81LtW9WNsoqhBXoe_3dToUNZiovBEUJ0cjbioajlUVu-cELO1OJj-_a6IWL9EPpK4DjyOY2jRF58kETSYHICeF1vSfVCw'
-  }
-];
+// Xóa MOCK_POSTS đi và dùng data từ API
+const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function LecturerPostsList() {
-  const [posts, setPosts] = useState<PostData[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<PostData | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  React.useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/lecturer/posts`, {
+        headers: {
+          'Accept': 'application/json',
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}` // Un-comment when auth is integrated
+        }
+      });
+      const json = await response.json();
+      if (json.data) {
+        const mappedPosts = json.data.map((item: any) => {
+          const authorRole = item.nguoi_tao?.vai_tro_id || '';
+          const authorName = authorRole === 2
+            ? `GV. ${item.nguoi_tao?.ho_ten || 'Unknown'}` 
+            : `${item.nguoi_tao?.ho_ten || 'Unknown'}`;
+          
+          let attachment = undefined;
+          if (item.tep_tin_bai_viet && item.tep_tin_bai_viet.length > 0) {
+            const fileData = item.tep_tin_bai_viet[0].tep_tin;
+            attachment = { name: fileData.ten_file, url: fileData.duong_dan };
+          }
+
+          return {
+            id: item.id.toString(),
+            title: item.tieu_de,
+            category: item.loai_bai_viet || 'bai_viet',
+            date: new Date(item.ngay_tao).toLocaleDateString('vi-VN'),
+            is_published: item.trang_thai === 'hien_thi',
+            is_pinned: false,
+            authorName: authorName,
+            views_count: item.luot_xem || 0, 
+            commentsCount: item.binh_luan ? item.binh_luan.length : 0,
+            image: item.anh_bia || 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o',
+            attachment: attachment
+          };
+        });
+        setPosts(mappedPosts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    }
+  };
 
   // Stats
   const totalPosts = posts.length;
   const publishedPosts = posts.filter(p => p.is_published).length;
   const draftPosts = posts.filter(p => !p.is_published).length;
 
-  const handleCreateOrUpdate = (postData: Omit<PostData, 'id' | 'views_count' | 'commentsCount' | 'date'>) => {
-    if (editingPost) {
-      setPosts(posts.map(p => p.id === editingPost.id ? { ...p, ...postData } : p));
-    } else {
-      const newPost: PostData = {
-        ...postData,
-        id: `p${posts.length + 1}`,
-        date: 'Vừa xong',
-        views_count: 0,
-        commentsCount: 0,
-      };
-      setPosts([newPost, ...posts]);
+  const handleCreateOrUpdate = async (postData: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('tieu_de', postData.title);
+      formData.append('noi_dung', postData.title + ' content...'); // Mapped temporarily from title
+      formData.append('trang_thai', postData.is_published ? 'hien_thi' : 'an');
+      formData.append('lop_hoc_phan_id', postData.lop_hoc_phan_id.toString());
+      
+      if (!editingPost) {
+        formData.append('loai_bai_viet', postData.category);
+      } else {
+        formData.append('_method', 'PUT'); // Laravel requirement for multipart PUT
+      }
+
+      if (postData.file) {
+        formData.append('file', postData.file);
+      }
+
+      const url = editingPost 
+        ? `${API_BASE_URL}/lecturer/posts/${editingPost.id}`
+        : `${API_BASE_URL}/lecturer/posts`;
+
+      let response = await fetch(url, {
+        method: 'POST', // Always POST, _method=PUT handles updates
+        headers: { 'Accept': 'application/json' }, // Let browser set Content-Type with boundary
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        alert('Lỗi: ' + (errData.message || 'Vui lòng kiểm tra lại thông tin.'));
+        return;
+      }
+      setIsModalOpen(false);
+      setEditingPost(null);
+      alert('Lưu bài viết thành công!');
+      fetchPosts(); // Refresh list after save
+    } catch (error) {
+      console.error('Error saving post', error);
+      alert('Lỗi kết nối mạng, vui lòng thử lại.');
     }
-    setIsModalOpen(false);
-    setEditingPost(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-      setPosts(posts.filter(p => p.id !== id));
+      try {
+        const response = await fetch(`${API_BASE_URL}/lecturer/posts/${id}`, {
+          method: 'DELETE',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) {
+          alert('Không thể xóa bài viết. Vui lòng thử lại sau.');
+          return;
+        }
+        fetchPosts(); // Refresh list
+      } catch (error) {
+        console.error('Error deleting post', error);
+      }
     }
   };
 
@@ -165,10 +214,11 @@ export default function LecturerPostsList() {
               <option>Sự kiện</option>
             </select>
             <select className={styles.filterSelect}>
-              <option>Loại thông báo</option>
-              <option>Chung</option>
-              <option>Học thuật</option>
-              <option>Sự kiện</option>
+              <option>Loại bài viết</option>
+              <option>Thông báo</option>
+              <option>Tài liệu</option>
+              <option>Bài tập</option>
+              <option>Bài viết</option>
             </select>
             <select className={styles.filterSelect}>
               <option>Trạng thái</option>
@@ -204,7 +254,7 @@ export default function LecturerPostsList() {
         {/* Posts Grid / List */}
         <div className={styles.gridSection}>
           <div className={`${styles.postsGrid} ${viewMode === 'list' ? styles.listMode : ''}`}>
-            {posts.slice(0, 3).map(post => (
+            {posts.map(post => (
               <PostCard 
                 key={post.id} 
                 post={post} 
