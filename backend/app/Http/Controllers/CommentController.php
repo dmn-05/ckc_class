@@ -14,13 +14,15 @@ class CommentController extends Controller
             'noi_dung' => 'required|string',
             'bai_viet_id' => 'required|integer|exists:bai_viet,id',
             'lop_hoc_phan_id' => 'required|integer',
+            'binh_luan_cha_id' => 'nullable|integer|exists:binh_luan,id',
         ]);
 
         $comment = BinhLuan::create([
             'noi_dung' => $validated['noi_dung'],
             'bai_viet_id' => $validated['bai_viet_id'],
             'lop_hoc_phan_id' => $validated['lop_hoc_phan_id'],
-            'nguoi_dung_id' => Auth::id(),
+            'binh_luan_cha_id' => $validated['binh_luan_cha_id'] ?? null,
+            'nguoi_dung_id' => Auth::id() ?? 4, // Sinh viên Lê Thành Đạt
             'trang_thai' => 'hien_thi',
         ]);
 
@@ -34,8 +36,8 @@ class CommentController extends Controller
         $comment = BinhLuan::findOrFail($id);
         
         // Authorization: only the comment author OR the post author (Lecturer) can delete
-        $isAuthor = $comment->nguoi_dung_id === Auth::id();
-        $isPostAuthor = $comment->baiViet->nguoi_tao_id === Auth::id();
+        $isAuthor = $comment->nguoi_dung_id === (Auth::id() ?? 4);
+        $isPostAuthor = $comment->baiViet->nguoi_tao_id === (Auth::id() ?? 4);
 
         if (!$isAuthor && !$isPostAuthor) {
             return response()->json(['message' => 'Unauthorized'], 403);

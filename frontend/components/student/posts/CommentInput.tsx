@@ -20,7 +20,7 @@ export default function CommentInput({
   submitText = 'Gửi bình luận',
   initialContent = '',
   autoFocus = false,
-  userAvatar = 'https://ui-avatars.com/api/?name=User&background=random'
+  userAvatar = 'https://ui-avatars.com/api/?name=User&background=3525cd&color=fff'
 }: CommentInputProps) {
   const [content, setContent] = useState(initialContent);
 

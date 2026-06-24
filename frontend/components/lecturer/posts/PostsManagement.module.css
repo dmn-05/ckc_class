@@ -12,9 +12,12 @@
 
 /* Base layouts extracted from mockup */
 .pageContainer {
-  margin-left: 280px; /* Offset for sidebar, handled by layout typically, but keeping here if needed */
-  padding-top: 4rem; /* 64px top nav */
-  min-height: 100vh;
+  max-width: 1024px;
+  margin: 0 auto;
+  font-family: var(--font-inter, system-ui, -apple-system, sans-serif);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .contentWrapper {

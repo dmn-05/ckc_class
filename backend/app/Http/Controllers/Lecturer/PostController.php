@@ -12,10 +12,11 @@ class PostController extends Controller
     public function index(Request $request)
     {
         // For testing purposes, we might just get all posts by this lecturer
-        // In reality, it should be filtered by lop_hoc_phan_id
-        $userId = Auth::id() ?? 2; // Fallback to GV001 (Đỗ Minh Nhật) for testing without auth
+        // In reality, it should be filtered by lop_hoc_phan_id to show all posts in a class
         $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
-            ->where('nguoi_tao_id', $userId);
+            ->whereHas('nguoiTao', function($q) {
+                $q->whereIn('vai_tro_id', [1, 2]); // Chỉ hiển thị bài của Admin(1) hoặc Giảng viên(2)
+            });
         
         if ($request->has('lop_hoc_phan_id')) {
             $query->where('lop_hoc_phan_id', $request->lop_hoc_phan_id);
@@ -87,7 +88,13 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $post = BaiViet::with(['nguoiTao', 'binhLuan.nguoiDung', 'tepTinBaiViet.tepTin'])
+        $post = BaiViet::with([
+                'nguoiTao', 
+                'binhLuan' => function($q) {
+                    $q->whereNull('binh_luan_cha_id')->with('nguoiDung', 'replies.nguoiDung');
+                }, 
+                'tepTinBaiViet.tepTin'
+            ])
             ->findOrFail($id);
             
         $post->increment('luot_xem');

@@ -10,17 +10,12 @@ export default function ProfileAvatar({ profileData }: { profileData?: any }) {
     <div className={`${styles.glassCard} ${styles.avatarSection}`}>
       <div className={styles.avatarBgGlow}></div>
       <div className={styles.avatarWrapper}>
-        {hasPhoto ? (
-          <img 
-            alt="Student Avatar" 
-            className={styles.avatarImg} 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcNSQXs5-LbQJDOQbKGq1BFmI1eYpdaflsF67_AjsQxpMC-G6H6ercthK9v35xQ4iGLsJG7j0k2CIuH8CeP2Osj27FoHd2cX4vcKQ-JzZ_0AaDpqckd5k09eTQh63s-hxDjjOx0M6Q1CW-a3SWGyKEtnLkubsSE3xkB_PkZ4FLiM6N9zdY-ukYH1x2YhayxUdBjcpyn3JH1XoMP3i3c2uxIHp9XqVHrP3LBOb9rlMgGr6Uf3mZzVACiXoMzLw2vH2Fov6MyUgYiUs" 
-          />
-        ) : (
-          <div className={styles.avatarFallback}>
-            {studentName ? studentName.charAt(0).toUpperCase() : 'SV'}
-          </div>
-        )}
+        <img 
+          alt="Student Avatar" 
+          className={styles.avatarImg} 
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(studentName || 'SV')}&background=3525cd&color=fff`}
+          style={{ objectFit: 'cover' }}
+        />
       </div>
       <h3 className={styles.avatarName}>{studentName}</h3>
       <p className={styles.avatarMssv}>MSSV: {studentId}</p>

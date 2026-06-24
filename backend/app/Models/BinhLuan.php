@@ -19,6 +19,7 @@ class BinhLuan extends Model
         'nguoi_dung_id',
         'lop_hoc_phan_id',
         'bai_viet_id',
+        'binh_luan_cha_id',
         'trang_thai',
     ];
 
@@ -30,5 +31,10 @@ class BinhLuan extends Model
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'nguoi_dung_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(BinhLuan::class, 'binh_luan_cha_id')->with('nguoiDung');
     }
 }

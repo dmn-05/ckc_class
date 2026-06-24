@@ -35,7 +35,6 @@ export default function ClassesPagination({
         paddingTop: '16px',
         paddingBottom: '16px',
         borderTop: '1px solid #e0e3e5',
-        borderTop: '1px solid #e0e3e5',
         marginTop: 'auto',
         zIndex: 10,
         display: 'flex',
