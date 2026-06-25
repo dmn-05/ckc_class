@@ -93,6 +93,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']);
         Route::post('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']); // FormData fallback
         Route::delete('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'destroy']);
+        // Exam management by lecturer
+        Route::get('/lecturer/exams', [\App\Http\Controllers\Lecturer\ExamController::class, 'index']);
+        Route::post('/lecturer/exams', [\App\Http\Controllers\Lecturer\ExamController::class, 'store']);
+        Route::get('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'show']);
+        Route::put('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'update']);
+        Route::delete('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'destroy']);
+        // Question management by lecturer
+        Route::get('/lecturer/exams/{examId}/questions', [\App\Http\Controllers\Lecturer\QuestionController::class, 'index']);
+        Route::post('/lecturer/exams/{examId}/questions', [\App\Http\Controllers\Lecturer\QuestionController::class, 'store']);
+        Route::get('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'show']);
+        Route::put('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'update']);
+        Route::delete('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'destroy']);
+        Route::put('/lecturer/exams/{examId}/questions/reorder', [\App\Http\Controllers\Lecturer\QuestionController::class, 'reorder']);
     });
 
     // Student Only Routes

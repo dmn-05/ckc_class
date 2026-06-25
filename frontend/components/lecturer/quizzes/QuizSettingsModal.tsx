@@ -3,23 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import styles from './QuizzesManagement.module.css';
 import { QuizData } from './QuizGrid';
-
-const AVAILABLE_SECTIONS = [
-  { id: 'sec1', name: 'Lập trình hướng đối tượng' },
-  { id: 'sec2', name: 'Thiết kế Giao diện' },
-  { id: 'sec3', name: 'Cơ sở dữ liệu' },
-];
+import { CourseSectionOption } from '@/app/actions/lecturer-quiz';
 
 interface QuizSettingsModalProps {
   initialData?: QuizData;
   onSave: (data: Partial<QuizData>) => void;
   onClose: () => void;
+  sections?: CourseSectionOption[];
 }
 
-export default function QuizSettingsModal({ initialData, onSave, onClose }: QuizSettingsModalProps) {
+export default function QuizSettingsModal({ initialData, onSave, onClose, sections = [] }: QuizSettingsModalProps) {
+  const defaultSectionId = sections.length > 0 ? sections[0].id : '';
   const [formData, setFormData] = useState({
     title: '',
-    sectionId: AVAILABLE_SECTIONS[0].id,
+    sectionId: defaultSectionId,
     description: '',
     timeLimit: 45,
     maxScore: 10,
@@ -31,6 +28,12 @@ export default function QuizSettingsModal({ initialData, onSave, onClose }: Quiz
     showResultAfter: true,
     isPublished: true
   });
+
+  useEffect(() => {
+    if (sections.length > 0 && !formData.sectionId) {
+      setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
+    }
+  }, [sections]);
 
   useEffect(() => {
     if (initialData) {
@@ -67,8 +70,8 @@ export default function QuizSettingsModal({ initialData, onSave, onClose }: Quiz
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const section = AVAILABLE_SECTIONS.find(s => s.id === formData.sectionId);
-    onSave({ ...formData, sectionName: section?.name || '' });
+    const section = sections.find(s => s.id === formData.sectionId);
+    onSave({ ...formData, sectionName: section ? `${section.subjectName} - ${section.name}` : '' });
   };
 
   return (
@@ -95,8 +98,8 @@ export default function QuizSettingsModal({ initialData, onSave, onClose }: Quiz
                   name="sectionId" className={styles.formSelect}
                   value={formData.sectionId} onChange={handleChange} required
                 >
-                  {AVAILABLE_SECTIONS.map(sec => (
-                    <option key={sec.id} value={sec.id}>{sec.name}</option>
+                  {sections.map(sec => (
+                    <option key={sec.id} value={sec.id}>{sec.subjectName} - {sec.name}</option>
                   ))}
                 </select>
               </div>
@@ -146,15 +149,15 @@ export default function QuizSettingsModal({ initialData, onSave, onClose }: Quiz
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Thời gian mở (Start time)</label>
                 <input 
-                  type="text" name="startTime" className={styles.formInput} 
-                  value={formData.startTime} onChange={handleChange} placeholder="VD: 20/10/2023 08:00"
+                  type="datetime-local" name="startTime" className={styles.formInput} 
+                  value={formData.startTime} onChange={handleChange}
                 />
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Thời gian đóng (End time)</label>
                 <input 
-                  type="text" name="endTime" className={styles.formInput} 
-                  value={formData.endTime} onChange={handleChange} placeholder="VD: 20/10/2023 10:00"
+                  type="datetime-local" name="endTime" className={styles.formInput} 
+                  value={formData.endTime} onChange={handleChange}
                 />
               </div>
             </div>
