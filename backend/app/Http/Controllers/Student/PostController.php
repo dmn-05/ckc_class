@@ -11,14 +11,40 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $request->validate(['lop_hoc_phan_id' => 'required|integer']);
+        $user = Auth::user();
 
-        $posts = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
-            ->where('lop_hoc_phan_id', $request->lop_hoc_phan_id)
-            ->where('trang_thai', 'hien_thi')
-            ->orderBy('ngay_tao', 'desc')
-            ->get();
-            
+        // Nếu truyền lop_hoc_phan_id cụ thể thì lọc theo lớp đó
+        if ($request->has('lop_hoc_phan_id') && $request->lop_hoc_phan_id) {
+            $posts = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+                ->where('lop_hoc_phan_id', (int) $request->lop_hoc_phan_id)
+                ->where('trang_thai', 'hien_thi')
+                ->orderBy('ngay_tao', 'desc')
+                ->get();
+
+            return response()->json(['data' => $posts]);
+        }
+
+        // Lấy các lớp sinh viên đã đăng ký (da_duyet)
+        $sinhVien = $user?->sinhVien;
+        $lopHocPhanIds = [];
+
+        if ($sinhVien) {
+            $lopHocPhanIds = \App\Models\DangKyHocPhan::where('sinh_vien_id', $sinhVien->id)
+                ->where('trang_thai', 'da_duyet')
+                ->pluck('lop_hoc_phan_id')
+                ->toArray();
+        }
+
+        $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+            ->where('trang_thai', 'hien_thi');
+
+        // Nếu có đăng ký thì lọc theo lớp đã đăng ký, không thì lấy tất cả
+        if (!empty($lopHocPhanIds)) {
+            $query->whereIn('lop_hoc_phan_id', $lopHocPhanIds);
+        }
+
+        $posts = $query->orderBy('ngay_tao', 'desc')->get();
+
         return response()->json(['data' => $posts]);
     }
 

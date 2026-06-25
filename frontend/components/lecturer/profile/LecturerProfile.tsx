@@ -6,7 +6,7 @@ import ProfileHeader from './ProfileHeader';
 import ProfileAvatar from './ProfileAvatar';
 import RecentActivities from './RecentActivities';
 import LecturerInfoForm from './LecturerInfoForm';
-import { updateLecturerProfileAction } from '../../../src/app/lecturer/profile/actions';
+import { updateLecturerProfileAction, updateAvatarAction } from '../../../src/app/lecturer/profile/actions';
 
 export default function LecturerProfile({ profileData }: { profileData?: any }) {
   const [isPending, startTransition] = useTransition();
@@ -22,12 +22,14 @@ export default function LecturerProfile({ profileData }: { profileData?: any }) 
   }), [profileData]);
 
   const [formData, setFormData] = useState(initialData);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   useEffect(() => {
     setFormData(initialData);
+    setAvatarFile(null);
   }, [initialData]);
 
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData);
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData) || avatarFile !== null;
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -48,14 +50,25 @@ export default function LecturerProfile({ profileData }: { profileData?: any }) 
     if (isDirty) {
       if (confirm("Bạn có chắc chắn muốn hủy bỏ các thay đổi chưa lưu?")) {
         setFormData(initialData);
+        setAvatarFile(null);
+        window.location.reload();
       }
     }
   };
 
   const handleSave = () => {
     startTransition(async () => {
+      if (avatarFile) {
+        const avatarResult = await updateAvatarAction(avatarFile);
+        if (!avatarResult.success) {
+          alert("Lỗi upload ảnh: " + avatarResult.message);
+          return;
+        }
+      }
+
       const result = await updateLecturerProfileAction(formData);
       if (result.success) {
+        setAvatarFile(null);
         alert(result.message);
       } else {
         alert("Lỗi: " + result.message);
@@ -70,7 +83,7 @@ export default function LecturerProfile({ profileData }: { profileData?: any }) 
       <div className={styles.mainGrid}>
         {/* Left Column - 4/12 */}
         <div className={styles.leftColumn}>
-          <ProfileAvatar profileData={profileData} />
+          <ProfileAvatar profileData={profileData} onAvatarChange={setAvatarFile} />
           <RecentActivities />
         </div>
         

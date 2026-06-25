@@ -1,18 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PostCard, { PostData } from './PostCard';
-import PostFormModal from './PostFormModal';
 import styles from './PostsManagement.module.css';
+import { authHeaders } from '@/lib/auth';
 
-// Xóa MOCK_POSTS đi và dùng data từ API
 const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function LecturerPostsList() {
+  const router = useRouter();
   const [posts, setPosts] = useState<PostData[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<PostData | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'popular'>('newest');
 
   React.useEffect(() => {
     fetchPosts();
@@ -21,10 +23,7 @@ export default function LecturerPostsList() {
   const fetchPosts = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/lecturer/posts`, {
-        headers: {
-          'Accept': 'application/json',
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}` // Un-comment when auth is integrated
-        }
+        headers: authHeaders()
       });
       const json = await response.json();
       if (json.data) {
@@ -48,9 +47,10 @@ export default function LecturerPostsList() {
             is_published: item.trang_thai === 'hien_thi',
             is_pinned: false,
             authorName: authorName,
+            authorAvatar: item.nguoi_tao?.avatar || null,
             views_count: item.luot_xem || 0, 
             commentsCount: item.binh_luan ? item.binh_luan.length : 0,
-            image: item.anh_bia || 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o',
+            image: item.hinh_anh || null,
             attachment: attachment
           };
         });
@@ -66,48 +66,22 @@ export default function LecturerPostsList() {
   const publishedPosts = posts.filter(p => p.is_published).length;
   const draftPosts = posts.filter(p => !p.is_published).length;
 
-  const handleCreateOrUpdate = async (postData: any) => {
-    try {
-      const formData = new FormData();
-      formData.append('tieu_de', postData.title);
-      formData.append('noi_dung', postData.title + ' content...'); // Mapped temporarily from title
-      formData.append('trang_thai', postData.is_published ? 'hien_thi' : 'an');
-      formData.append('lop_hoc_phan_id', postData.lop_hoc_phan_id.toString());
-      
-      if (!editingPost) {
-        formData.append('loai_bai_viet', postData.category);
-      } else {
-        formData.append('_method', 'PUT'); // Laravel requirement for multipart PUT
-      }
-
-      if (postData.file) {
-        formData.append('file', postData.file);
-      }
-
-      const url = editingPost 
-        ? `${API_BASE_URL}/lecturer/posts/${editingPost.id}`
-        : `${API_BASE_URL}/lecturer/posts`;
-
-      let response = await fetch(url, {
-        method: 'POST', // Always POST, _method=PUT handles updates
-        headers: { 'Accept': 'application/json' }, // Let browser set Content-Type with boundary
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        alert('Lỗi: ' + (errData.message || 'Vui lòng kiểm tra lại thông tin.'));
-        return;
-      }
-      setIsModalOpen(false);
-      setEditingPost(null);
-      alert('Lưu bài viết thành công!');
-      fetchPosts(); // Refresh list after save
-    } catch (error) {
-      console.error('Error saving post', error);
-      alert('Lỗi kết nối mạng, vui lòng thử lại.');
-    }
-  };
+  // Filtered + sorted posts
+  const filteredPosts = posts
+    .filter(p => {
+      const categoryMatch = filterCategory === 'all' || p.category === filterCategory;
+      const statusMatch =
+        filterStatus === 'all' ||
+        (filterStatus === 'hien_thi' && p.is_published) ||
+        (filterStatus === 'an' && !p.is_published);
+      return categoryMatch && statusMatch;
+    })
+    .sort((a, b) => {
+      if (sortOrder === 'newest') return parseInt(b.id) - parseInt(a.id);
+      if (sortOrder === 'oldest') return parseInt(a.id) - parseInt(b.id);
+      // popular: sắp xếp theo lượt xem giảm dần
+      return b.views_count - a.views_count;
+    });
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
@@ -135,14 +109,12 @@ export default function LecturerPostsList() {
     setPosts(posts.map(p => p.id === id ? { ...p, is_published: !p.is_published } : p));
   };
 
-  const openCreateModal = () => {
-    setEditingPost(null);
-    setIsModalOpen(true);
+  const openCreatePage = () => {
+    router.push('/lecturer/posts/create');
   };
 
-  const openEditModal = (post: PostData) => {
-    setEditingPost(post);
-    setIsModalOpen(true);
+  const openEditPage = (post: PostData) => {
+    router.push(`/lecturer/posts/${post.id}/edit`);
   };
 
   return (
@@ -153,7 +125,7 @@ export default function LecturerPostsList() {
           <h2 className="text-[32px] font-bold text-gray-900 leading-tight tracking-tight">Quản Lý Bài Viết</h2>
         </div>
         <button 
-          onClick={openCreateModal}
+          onClick={openCreatePage}
           className={styles.addButton}
         >
           <span className="material-symbols-outlined text-[20px]">add</span>
@@ -207,28 +179,36 @@ export default function LecturerPostsList() {
         {/* Filter Bar */}
         <div className={styles.filterBar}>
           <div className={styles.filterControls}>
-            <select className={styles.filterSelect}>
-              <option>Tất cả danh mục</option>
-              <option>Hành chính</option>
-              <option>Đào tạo</option>
-              <option>Sự kiện</option>
+            <select
+              className={styles.filterSelect}
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="all">Tất cả loại bài</option>
+              <option value="bai_viet">Bài viết</option>
+              <option value="thong_bao">Thông báo</option>
+              <option value="tai_lieu">Tài liệu</option>
+              <option value="bai_tap">Bài tập</option>
             </select>
-            <select className={styles.filterSelect}>
-              <option>Loại bài viết</option>
-              <option>Thông báo</option>
-              <option>Tài liệu</option>
-              <option>Bài tập</option>
-              <option>Bài viết</option>
+            <select
+              className={styles.filterSelect}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="hien_thi">Đã đăng (Hiển thị)</option>
+              <option value="an">Bản nháp (Ẩn)</option>
             </select>
-            <select className={styles.filterSelect}>
-              <option>Trạng thái</option>
-              <option>Đã đăng</option>
-              <option>Bản nháp</option>
-              <option>Đã lên lịch</option>
+            <select
+              className={styles.filterSelect}
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest' | 'popular')}
+            >
+              <option value="newest">Mới nhất</option>
+              <option value="oldest">Cũ nhất</option>
+              <option value="popular">Nổi bật</option>
             </select>
           </div>
-          
-          {/* View Toggle */}
           <div className={styles.viewToggle}>
             <button 
               className={`${styles.viewToggleButton} ${viewMode === 'grid' ? styles.active : ''}`}
@@ -253,23 +233,32 @@ export default function LecturerPostsList() {
 
         {/* Posts Grid / List */}
         <div className={styles.gridSection}>
-          <div className={`${styles.postsGrid} ${viewMode === 'list' ? styles.listMode : ''}`}>
-            {posts.map(post => (
-              <PostCard 
-                key={post.id} 
-                post={post} 
-                onEdit={openEditModal}
-                onDelete={handleDelete}
-                onTogglePin={handleTogglePin}
-                onTogglePublish={handleTogglePublish}
-              />
-            ))}
-          </div>
+          {filteredPosts.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', display: 'block', marginBottom: '1rem' }}>article</span>
+              <p>Không có bài viết nào phù hợp với bộ lọc đã chọn.</p>
+            </div>
+          ) : (
+            <div className={`${styles.postsGrid} ${viewMode === 'list' ? styles.listMode : ''}`}>
+              {filteredPosts.map(post => (
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                  onEdit={openEditPage}
+                  onDelete={handleDelete}
+                  onTogglePin={handleTogglePin}
+                  onTogglePublish={handleTogglePublish}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
         <div className={styles.paginationBar}>
-          <span className={styles.paginationText}>Hiển thị {posts.length} trong tổng số {posts.length} bài viết</span>
+          <span className={styles.paginationText}>
+            Hiển thị {filteredPosts.length} trong tổng số {totalPosts} bài viết
+          </span>
           <div className={styles.paginationControls}>
             <button className={styles.pageButton} disabled>
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_left</span>
@@ -282,12 +271,6 @@ export default function LecturerPostsList() {
         </div>
       </div>
 
-      <PostFormModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateOrUpdate}
-        initialData={editingPost}
-      />
     </div>
   );
 }

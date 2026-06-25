@@ -5,12 +5,23 @@ import Link from 'next/link';
 import { logoutAction } from '@/app/actions/auth';
 import styles from './StudentLayout.module.css';
 
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'SV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
 export default function StudentHeader({ profileData }: { profileData?: any }) {
-  const hasPhoto = false; // Set to true to display photo, false to display "SV"
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const studentName = profileData?.ho_ten || "Sinh viên";
+  const avatarUrl = profileData?.avatar || null;
+  const initials = getInitials(studentName);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,12 +48,30 @@ export default function StudentHeader({ profileData }: { profileData?: any }) {
         </button>
 
         <div className={styles.userProfile} ref={dropdownRef} onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer', position: 'relative' }}>
-          <img 
-            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(studentName)}&background=3525cd&color=fff`}
-            alt={studentName}
-            className={styles.userAvatar} 
-            style={{ objectFit: 'cover' }}
-          />
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl}
+              alt={studentName}
+              className={styles.userAvatar} 
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div 
+              className={styles.userAvatar} 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                backgroundColor: '#3b82f6', 
+                color: '#fff',
+                fontSize: '0.875rem',
+                fontWeight: '600'
+              }}
+            >
+              {initials}
+            </div>
+          )}
+          
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             {studentName}
             <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: '#64748b' }}>arrow_drop_down</span>

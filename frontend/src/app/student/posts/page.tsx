@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from '@/components/student/posts/PostsManagement.module.css';
 import Link from 'next/link';
-import StudentPostFormModal from '@/components/student/posts/StudentPostFormModal';
+import { authHeaders } from '@/lib/auth';
 
 interface PostData {
   id: string;
@@ -15,7 +15,7 @@ interface PostData {
   authorName: string;
   views: number;
   commentsCount: number;
-  image: string;
+  image: string | null;
   isQuestion?: boolean;
 }
 
@@ -23,8 +23,8 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function StudentPostsList() {
   const [posts, setPosts] = useState<PostData[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'popular'>('newest');
 
   React.useEffect(() => {
     fetchPosts();
@@ -32,8 +32,8 @@ export default function StudentPostsList() {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/student/posts?lop_hoc_phan_id=1`, {
-        headers: { 'Accept': 'application/json' }
+      const response = await fetch(`${API_BASE_URL}/student/posts`, {
+        headers: authHeaders()
       });
       const json = await response.json();
       if (json.data) {
@@ -56,7 +56,7 @@ export default function StudentPostsList() {
             title: item.tieu_de,
             views: item.luot_xem || 0, 
             commentsCount: item.binh_luan?.length || 0,
-            image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o',
+            image: item.hinh_anh || null,
             isQuestion: item.loai_bai_viet === 'bai_viet',
             attachment: attachment
           };
@@ -68,40 +68,6 @@ export default function StudentPostsList() {
     }
   };
 
-  const handlePostSubmit = async (postData: { title: string; category: string; isPublished: boolean; content: string; lopHocPhanId: number; file?: File | null }) => {
-    try {
-      const formData = new FormData();
-      formData.append('tieu_de', postData.title);
-      formData.append('noi_dung', postData.content);
-      formData.append('loai_bai_viet', postData.category);
-      formData.append('trang_thai', postData.isPublished ? 'hien_thi' : 'an');
-      formData.append('lop_hoc_phan_id', postData.lopHocPhanId.toString());
-      
-      if (postData.file) {
-        formData.append('file', postData.file);
-      }
-
-      const response = await fetch(`${API_BASE_URL}/student/posts`, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        alert('Lỗi khi đăng bài: ' + (errData.message || 'Vui lòng kiểm tra lại thông tin.'));
-        return;
-      }
-
-      setIsModalOpen(false);
-      alert('Đăng bài viết thành công!');
-      fetchPosts(); // Reload after submit
-    } catch (error) {
-      console.error('Failed to submit question', error);
-      alert('Lỗi kết nối mạng, vui lòng thử lại.');
-    }
-  };
-
   const getBadgeClass = (category: string) => {
     if (category === 'Thông báo') return styles.badgeDTT;
     if (category === 'Tài liệu') return styles.badgeHC;
@@ -109,25 +75,25 @@ export default function StudentPostsList() {
     return styles.badgeQuestion;
   };
 
-  const displayedPosts = filterCategory ? posts.filter(p => p.rawCategory === filterCategory) : posts;
+  const displayedPosts = (filterCategory ? posts.filter(p => p.rawCategory === filterCategory) : posts)
+    .slice()
+    .sort((a, b) => {
+      if (sortOrder === 'newest') return parseInt(b.id) - parseInt(a.id);
+      if (sortOrder === 'oldest') return parseInt(a.id) - parseInt(b.id);
+      // popular: lượt xem giảm dần
+      return b.views - a.views;
+    });
 
   return (
     <div className={styles.pageContainerList}>
       <div className={styles.pageHeader}>
         <div>
-          <h2 className={styles.pageTitle}>Bài viết & Thảo luận</h2>
-          <div className={styles.breadcrumb}>Lớp học phần / Bài viết</div>
+          <h2 className={styles.pageTitle}>Bài viết</h2>
         </div>
-        <button className={styles.btnSubmitPrimary} onClick={() => setIsModalOpen(true)}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Đăng câu hỏi / Thảo luận
-        </button>
       </div>
 
       <div className={styles.sectionBox} style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e0e3e5', display: 'flex', gap: '1rem', backgroundColor: '#f2f4f6' }}>
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #e0e3e5', display: 'flex', gap: '1rem', backgroundColor: '#f2f4f6', flexWrap: 'wrap', alignItems: 'center' }}>
           <select 
             className={styles.sortSelect} 
             style={{ backgroundColor: '#ffffff', border: '1px solid #e0e3e5', padding: '0.5rem', borderRadius: '0.5rem', color: '#191c1e' }}
@@ -140,13 +106,32 @@ export default function StudentPostsList() {
             <option value="bai_tap">Bài tập</option>
             <option value="bai_viet">Thảo luận</option>
           </select>
+          <select
+            className={styles.sortSelect}
+            style={{ backgroundColor: '#ffffff', border: '1px solid #e0e3e5', padding: '0.5rem', borderRadius: '0.5rem', color: '#191c1e' }}
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest' | 'popular')}
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="popular">Nổi bật</option>
+          </select>
+          <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#777587' }}>
+            {displayedPosts.length} bài viết
+          </span>
         </div>
 
         <div className={styles.gridContainer} style={{ padding: '1.5rem' }}>
           {displayedPosts.map(post => (
             <Link href={`/student/posts/${post.id}`} key={post.id} className={styles.postCard} style={{ textDecoration: 'none' }}>
               <div className={styles.postCardImageContainer}>
-                <img src={post.image} alt={post.title} className={styles.postCardImage} />
+                {post.image ? (
+                  <img src={post.image} alt={post.title} className={styles.postCardImage} />
+                ) : (
+                  <div className={styles.postCardImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f5', color: '#aaa' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>image</span>
+                  </div>
+                )}
                 <span className={`${styles.postCardBadge} ${getBadgeClass(post.category)}`}>
                   {post.category}
                 </span>
@@ -195,12 +180,6 @@ export default function StudentPostsList() {
           ))}
         </div>
       </div>
-
-      <StudentPostFormModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handlePostSubmit}
-      />
     </div>
   );
 }

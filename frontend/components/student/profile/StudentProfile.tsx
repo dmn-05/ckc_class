@@ -7,7 +7,7 @@ import ProfileAvatar from './ProfileAvatar';
 import ProfileStatus from './ProfileStatus';
 import BasicInfoForm from './BasicInfoForm';
 import ContactInfoForm from './ContactInfoForm';
-import { updateProfileAction } from '../../../src/app/student/profile/actions';
+import { updateProfileAction, updateAvatarAction } from '../../../src/app/student/profile/actions';
 
 export default function StudentProfile({ profileData }: { profileData?: any }) {
   const [isPending, startTransition] = useTransition();
@@ -23,13 +23,15 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
   }), [profileData]);
 
   const [formData, setFormData] = useState(initialData);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   // Sync formData if profileData is re-fetched after save
   useEffect(() => {
     setFormData(initialData);
+    setAvatarFile(null); // Reset avatar file after save
   }, [initialData]);
 
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData);
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData) || avatarFile !== null;
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -51,14 +53,28 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
     if (isDirty) {
       if (confirm("Bạn có chắc chắn muốn hủy bỏ các thay đổi chưa lưu?")) {
         setFormData(initialData);
+        setAvatarFile(null);
+        // Force reload page to clear preview
+        window.location.reload();
       }
     }
   };
 
   const handleSave = () => {
     startTransition(async () => {
+      // 1. Upload avatar if changed
+      if (avatarFile) {
+        const avatarResult = await updateAvatarAction(avatarFile);
+        if (!avatarResult.success) {
+          alert("Lỗi upload ảnh: " + avatarResult.message);
+          return; // Stop saving if avatar fails
+        }
+      }
+
+      // 2. Save profile info
       const result = await updateProfileAction(formData);
       if (result.success) {
+        setAvatarFile(null);
         alert(result.message);
       } else {
         alert("Lỗi: " + result.message);
@@ -72,7 +88,7 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
       
       <div className={styles.mainGrid}>
         <div className={styles.leftColumn}>
-          <ProfileAvatar profileData={profileData} />
+          <ProfileAvatar profileData={profileData} onAvatarChange={setAvatarFile} />
           <ProfileStatus status={profileData?.sinh_vien?.trang_thai} />
         </div>
         

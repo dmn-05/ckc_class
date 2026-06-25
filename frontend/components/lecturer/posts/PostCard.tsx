@@ -4,6 +4,16 @@ import React from 'react';
 import Image from 'next/image';
 import styles from './PostsManagement.module.css';
 
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'GV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
 export interface PostData {
   id: string;
   title: string;
@@ -14,7 +24,8 @@ export interface PostData {
   authorName: string;
   views_count: number;
   commentsCount: number;
-  image: string;
+  image: string | null;
+  authorAvatar?: string | null;
   attachment?: { name: string, url: string };
 }
 
@@ -57,11 +68,20 @@ export default function PostCard({
     <div className={styles.cardWrapper} onClick={() => router.push(`/lecturer/posts/${post.id}`)} style={{ cursor: 'pointer' }}>
       {/* Image container */}
       <div className={styles.cardImageContainer}>
-        <img
-          src={post.image}
-          alt={post.title}
-          className={styles.cardImage}
-        />
+        {post.image ? (
+          <img
+            src={post.image}
+            alt={post.title}
+            className={styles.cardImage}
+          />
+        ) : (
+          <div className={styles.cardImage} style={{ 
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: '#f0f0f5', color: '#aaa'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>image</span>
+          </div>
+        )}
         <span className={`${styles.cardCategoryBadge} ${catStyle.styleClass}`}>
           {catStyle.label}
         </span>
@@ -92,9 +112,29 @@ export default function PostCard({
 
           {/* Author */}
           <div className={styles.cardAuthor}>
-            <div className={styles.cardAuthorAvatar}>
-              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>person</span>
-            </div>
+            {post.authorAvatar ? (
+              <img 
+                src={post.authorAvatar} 
+                alt={post.authorName}
+                className={styles.cardAuthorAvatar} 
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div 
+                className={styles.cardAuthorAvatar} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  backgroundColor: '#3b82f6', 
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  fontWeight: '600'
+                }}
+              >
+                {getInitials(post.authorName)}
+              </div>
+            )}
             <span className={styles.cardAuthorName}>{post.authorName}</span>
           </div>
 

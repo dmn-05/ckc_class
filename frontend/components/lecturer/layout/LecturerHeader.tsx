@@ -5,12 +5,23 @@ import Link from 'next/link';
 import { logoutAction } from '@/app/actions/auth';
 import styles from './LecturerLayout.module.css';
 
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'GV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
 export default function LecturerHeader({ profileData }: { profileData?: any }) {
-  const hasPhoto = false; // Set to true to display photo, false to display "GV"
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const lecturerName = profileData?.ho_ten || "Giảng viên";
+  const avatarUrl = profileData?.avatar || null;
+  const initials = getInitials(lecturerName);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,16 +48,27 @@ export default function LecturerHeader({ profileData }: { profileData?: any }) {
         </button>
 
         <div className={styles.userProfile} ref={dropdownRef} onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer', position: 'relative' }}>
-          {hasPhoto ? (
+          {avatarUrl ? (
             <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtePGyL-OCAwFTFV8YAPLu-ThfD2Ya_ReUOwIW0PAy5QZxRaVI1emqF1TwYnLtmBjk82_S0bbuCnvZDB3A9EABi_F5cflLk7rp3FDWrd8_9h-EWEcOtaZ7NvXogtRE8waz07f9Tt9JPywtGgT2FcFdCyCUlWgQizviojMizJufX4VylSSPlA7tbEzhobYEkJydP8-cRqvTMpfF6zWWfRC9zkGu1MbHMIizHugDZboKD2suWmV-XudErXZEimOSUUglNmnK9P96ru4" 
+              src={avatarUrl} 
               alt={lecturerName}
               className={styles.userAvatar} 
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div className={styles.userAvatar}>
-              {lecturerName.charAt(0).toUpperCase()}
+            <div 
+              className={styles.userAvatar}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                backgroundColor: '#3b82f6', 
+                color: '#fff',
+                fontSize: '0.875rem',
+                fontWeight: '600'
+              }}
+            >
+              {initials}
             </div>
           )}
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

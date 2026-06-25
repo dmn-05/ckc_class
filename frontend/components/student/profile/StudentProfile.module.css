@@ -202,6 +202,61 @@
   transform: scale(1.1);
 }
 
+/* Clickable avatar */
+.avatarClickable {
+  cursor: pointer;
+}
+
+/* Overlay hiện khi hover */
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 15;
+}
+
+.avatarClickable:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.avatarOverlayText {
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Spinner khi đang upload */
+.avatarSpinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error text */
+.avatarError {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  max-width: 180px;
+}
+
 .avatarName {
   font-size: 1.5rem;
   font-weight: 600;
