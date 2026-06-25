@@ -4,11 +4,9 @@ import React, { useState, useEffect } from 'react';
 import styles from '@/components/lecturer/resources/ResourcesManagement.module.css';
 import ResourceDashboard from '@/components/lecturer/resources/ResourceDashboard';
 import ResourceGrid, { ResourceData } from '@/components/lecturer/resources/ResourceGrid';
-import ResourceFormModal from '@/components/lecturer/resources/ResourceFormModal';
+import { useRouter } from 'next/navigation';
 import {
   getLecturerResources,
-  createLecturerResource,
-  updateLecturerResource,
   deleteLecturerResource,
   toggleResourceVisibility,
 } from '@/app/actions/lecturer-resource';
@@ -29,8 +27,7 @@ export default function LecturerResourcesPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingResource, setEditingResource] = useState<ResourceData | undefined>(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     async function loadData() {
@@ -92,45 +89,14 @@ export default function LecturerResourcesPage() {
   };
 
   const handleOpenAdd = () => {
-    setEditingResource(undefined);
-    setIsFormModalOpen(true);
+    router.push('/lecturer/resources/create');
   };
 
   const handleOpenEdit = (resource: ResourceData) => {
-    setEditingResource(resource);
-    setIsFormModalOpen(true);
+    router.push(`/lecturer/resources/${resource.id}/edit`);
   };
 
-  const handleSaveResource = async (data: Partial<ResourceData>) => {
-    try {
-      if (editingResource) {
-        const updated = await updateLecturerResource(editingResource.id, {
-          tieu_de: data.title,
-          noi_dung: data.description,
-          loai_tai_nguyen: data.type,
-          trang_thai: data.isVisible ? 'hien_thi' : 'an',
-          file_url: data.fileUrl,
-          external_url: data.externalUrl,
-        });
-        setResources(prev => prev.map(r => r.id === editingResource.id ? updated : r));
-      } else {
-        const created = await createLecturerResource({
-          tieu_de: data.title,
-          noi_dung: data.description || '',
-          lop_hoc_phan_id: parseInt(data.sectionId || '0'),
-          loai_tai_nguyen: data.type || 'document',
-          trang_thai: data.isVisible ? 'hien_thi' : 'an',
-          file_url: data.fileUrl || '',
-          external_url: data.externalUrl || '',
-        });
-        setResources(prev => [...prev, created]);
-      }
-      setIsFormModalOpen(false);
-    } catch (error) {
-      alert('Có lỗi xảy ra khi lưu tài nguyên.');
-      console.error(error);
-    }
-  };
+  // Form handling is now moved to separate pages
 
   const handleReorder = (draggedId: string, targetId: string) => {
     setResources(prev => {
@@ -236,14 +202,6 @@ export default function LecturerResourcesPage() {
         />
       )}
 
-      {isFormModalOpen && (
-        <ResourceFormModal 
-          initialData={editingResource}
-          sections={sections}
-          onSave={handleSaveResource}
-          onClose={() => setIsFormModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

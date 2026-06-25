@@ -124,11 +124,20 @@ export async function createLecturerResource(data: FormData | Record<string, any
     return mapResourceFromApi(json.data || json);
 }
 
-export async function updateLecturerResource(id: string, data: Record<string, any>) {
-    const response = await fetchWithAuth(`/lecturer/resources/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-    });
+export async function updateLecturerResource(id: string, data: FormData | Record<string, any>) {
+    let response;
+    if (data instanceof FormData) {
+        data.append('_method', 'PUT');
+        response = await fetchWithAuth(`/lecturer/resources/${id}`, {
+            method: 'POST', // Laravel uses POST + _method=PUT
+            body: data,
+        });
+    } else {
+        response = await fetchWithAuth(`/lecturer/resources/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || 'Failed to update resource');

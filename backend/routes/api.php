@@ -91,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'store']);
         Route::get('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'show']);
         Route::put('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']);
+        Route::post('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']); // FormData fallback
         Route::delete('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'destroy']);
     });
 
