@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 export async function loginAction(data: { token: string; vai_tro_id: number; user: any }) {
     const cookieStore = await cookies();
     cookieStore.set("auth_token", data.token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 week
         path: "/",

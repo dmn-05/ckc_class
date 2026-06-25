@@ -3,6 +3,16 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'GV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
 interface PostSummaryProps {
   post: {
     title: string;
@@ -35,11 +45,29 @@ export default function PostSummary({ post }: PostSummaryProps) {
           <h3 className={styles.postTitle}>{post.title}</h3>
           
           <div className={styles.authorInfo}>
-            <img 
-              src={post.authorAvatar || "https://ui-avatars.com/api/?name=User&background=3525cd&color=fff"} 
-              alt="Author" 
-              className={styles.authorAvatar} 
-            />
+            {post.authorAvatar ? (
+              <img 
+                src={post.authorAvatar} 
+                alt="Author" 
+                className={styles.authorAvatar} 
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div 
+                className={styles.authorAvatar} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  backgroundColor: '#3b82f6', 
+                  color: '#fff',
+                  fontSize: '0.875rem',
+                  fontWeight: '600'
+                }}
+              >
+                {getInitials(post.authorName)}
+              </div>
+            )}
             <div>
               <p className={styles.authorName}>{post.authorName}</p>
               <p className={styles.authorRole}>{post.authorRole || 'Giảng viên'}</p>

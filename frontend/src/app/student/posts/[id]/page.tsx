@@ -5,9 +5,11 @@ import styles from '@/components/student/posts/PostsManagement.module.css';
 import PostSummary from '../../../../../components/student/posts/PostSummary';
 import CommentInput from '../../../../../components/student/posts/CommentInput';
 import CommentThread, { CommentData } from '../../../../../components/student/posts/CommentThread';
-import Pagination from '../../../../../components/student/posts/Pagination';
+
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { getProfileAction } from '../../../../../src/app/student/profile/actions';
+import { authHeaders } from '../../../../../src/lib/auth';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -16,6 +18,13 @@ export default function PostDetailPage() {
   const id = params?.id as string;
   const [postData, setPostData] = useState<any>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [currentUser, setCurrentUser] = useState<{ id: number; name: string; role: string; avatar: string | null }>({
+    id: 0,
+    name: 'Sinh viên',
+    role: 'student',
+    avatar: null
+  });
 
   const fetchedRef = React.useRef(false);
 
@@ -23,13 +32,26 @@ export default function PostDetailPage() {
     if (id && !fetchedRef.current) {
       fetchedRef.current = true;
       fetchPostDetail();
+      fetchCurrentUser();
     }
   }, [id]);
+
+  const fetchCurrentUser = async () => {
+    const result = await getProfileAction();
+    if (result.success && result.data) {
+      setCurrentUser({
+        id: result.data.id || 0,
+        name: result.data.ho_ten || 'Sinh viên',
+        role: 'student',
+        avatar: result.data.avatar || null
+      });
+    }
+  };
 
   const fetchPostDetail = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/student/posts/${id}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: authHeaders()
       });
       const json = await res.json();
       if (json.data) {
@@ -56,7 +78,7 @@ export default function PostDetailPage() {
                       json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
                       json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
             attachment: attachment,
-            image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8WWy8nQSdwRuA1IEGzFFn5Hb9bq-PbFhEW8PLv_2-yg-4bkR-2Qo2l3Udk_b4zbXrIKNzKK90IpA-sprj_X_1Ex_FPPN8B3G1WTA2XGYfeIDPoYDt5S3bIR-8fEylVnjJSF_STYGiLQrougKhvWOyzeYz9fBSXm7N-mHo9y81-z7PIyjgfza5CkskVqbDv8rY1NRnRtDI9ZoXS8nFS-oaWGZgXj5D4UMtFW0HnmAwJDQuzHIBlGhqILtjoIOd7jeYPdjnseCnV2o'
+            image: json.data.hinh_anh || null
           });
 
         // Map backend comments
@@ -64,7 +86,7 @@ export default function PostDetailPage() {
           id: c.id.toString(),
           authorId: c.nguoi_dung_id,
           authorName: c.nguoi_dung?.ho_ten || 'Sinh Viên',
-          authorAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nguoi_dung?.ho_ten || 'User')}&background=3525cd&color=fff`, 
+          authorAvatar: c.nguoi_dung?.avatar || null,
           role: c.nguoi_dung?.vai_tro_id === 2 ? 'teacher' : 'student',
           content: c.noi_dung,
           timeAgo: new Date(c.ngay_tao).toLocaleDateString('vi-VN'),
@@ -73,7 +95,7 @@ export default function PostDetailPage() {
             id: r.id.toString(),
             authorId: r.nguoi_dung_id,
             authorName: r.nguoi_dung?.ho_ten || 'Sinh Viên',
-            authorAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.nguoi_dung?.ho_ten || 'User')}&background=3525cd&color=fff`,
+            authorAvatar: r.nguoi_dung?.avatar || null,
             role: r.nguoi_dung?.vai_tro_id === 2 ? 'teacher' : 'student',
             content: r.noi_dung,
             timeAgo: new Date(r.ngay_tao).toLocaleDateString('vi-VN'),
@@ -93,11 +115,11 @@ export default function PostDetailPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           noi_dung: content,
           bai_viet_id: parseInt(id),
-          lop_hoc_phan_id: 1, // Mock
+          lop_hoc_phan_id: 1,
         })
       });
       
@@ -119,12 +141,12 @@ export default function PostDetailPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           noi_dung: content,
           bai_viet_id: parseInt(id),
-          lop_hoc_phan_id: 1, // Mock
-          binh_luan_cha_id: parseInt(parentId.replace('reply-', '')) // Parse ID safely
+          lop_hoc_phan_id: 1,
+          binh_luan_cha_id: parseInt(parentId.replace('reply-', ''))
         })
       });
       
@@ -142,36 +164,50 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleEditComment = (id: string, newContent: string) => {
-    setComments(prev => prev.map(c => {
-      if (c.id === id) {
-        return { ...c, content: newContent, isEdited: true };
+  const handleEditComment = async (id: string, newContent: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/comments/${id}`, {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          noi_dung: newContent,
+        })
+      });
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('API Error:', res.status, errText);
+        alert('Lỗi cập nhật bình luận: ' + res.status + ' - ' + errText);
+        return;
       }
-      if (c.replies) {
-        return {
-          ...c,
-          replies: c.replies.map(r => r.id === id ? { ...r, content: newContent, isEdited: true } : r)
-        };
-      }
-      return c;
-    }));
+      
+      fetchPostDetail(); // Reload comments
+    } catch (error) {
+      console.error('Error updating comment', error);
+      alert('Không thể kết nối đến server');
+    }
   };
 
-  const handleDeleteComment = (id: string) => {
-    setComments(prev => {
-      return prev.map(c => {
-        if (c.id === id) {
-          return { ...c, isDeleted: true, content: 'Bình luận này đã bị xóa' };
-        }
-        if (c.replies) {
-          return {
-            ...c,
-            replies: c.replies.map(r => r.id === id ? { ...r, isDeleted: true, content: 'Bình luận này đã bị xóa' } : r)
-          };
-        }
-        return c;
+  const handleDeleteComment = async (id: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/comments/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
       });
-    });
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('API Error:', res.status, errText);
+        alert('Lỗi xóa bình luận: ' + res.status + ' - ' + errText);
+        return;
+      }
+      
+      fetchPostDetail(); // Reload comments
+    } catch (error) {
+      console.error('Error deleting comment', error);
+      alert('Không thể kết nối đến server');
+    }
   };
 
   return (
@@ -192,7 +228,8 @@ export default function PostDetailPage() {
 
       <CommentInput 
           onSubmit={handleMainCommentSubmit} 
-          userAvatar={`https://ui-avatars.com/api/?name=${encodeURIComponent('Lê Thành Đạt')}&background=3525cd&color=fff`}
+          userAvatarUrl={currentUser.avatar}
+          userName={currentUser.name}
         />
 
       <section className={styles.sectionBox} style={{ background: 'transparent', boxShadow: 'none', border: 'none', padding: '0 1.5rem' }}>
@@ -200,10 +237,13 @@ export default function PostDetailPage() {
           <h4 className={styles.commentsCount}>Bình luận ({totalComments})</h4>
           <div className={styles.sortControls}>
             <span>Sắp xếp:</span>
-            <select className={styles.sortSelect} defaultValue="newest">
+            <select
+              className={styles.sortSelect}
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+            >
               <option value="newest">Mới nhất</option>
               <option value="oldest">Cũ nhất</option>
-              <option value="top">Nổi bật</option>
             </select>
           </div>
         </div>
@@ -214,19 +254,25 @@ export default function PostDetailPage() {
             <p>Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</p>
           </div>
         ) : (
-          comments.map(comment => (
-            <CommentThread
-              key={comment.id}
-              comment={comment}
-              onReplySubmit={handleReplySubmit}
-              onDelete={handleDeleteComment}
-              onEdit={handleEditComment}
-              currentUser={{ id: 4, name: 'Lê Thành Đạt', role: 'student' }}
-            />
-          ))
+          [...comments]
+            .sort((a, b) => {
+              const idA = parseInt(a.id);
+              const idB = parseInt(b.id);
+              return sortOrder === 'newest' ? idB - idA : idA - idB;
+            })
+            .map(comment => (
+              <CommentThread
+                key={comment.id}
+                comment={comment}
+                onReplySubmit={handleReplySubmit}
+                onDelete={handleDeleteComment}
+                onEdit={handleEditComment}
+                currentUser={{ id: currentUser.id, name: currentUser.name, role: currentUser.role, avatar: currentUser.avatar }}
+              />
+            ))
         )}
 
-        {totalComments > 10 && <Pagination />}
+
       </section>
     </div>
   );
