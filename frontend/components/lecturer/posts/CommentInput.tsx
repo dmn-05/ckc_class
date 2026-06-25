@@ -10,7 +10,18 @@ interface CommentInputProps {
   submitText?: string;
   initialContent?: string;
   autoFocus?: boolean;
-  userAvatar?: string;
+  userAvatarUrl?: string | null;
+  userName?: string;
+}
+
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'GV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
 }
 
 export default function CommentInput({ 
@@ -20,7 +31,8 @@ export default function CommentInput({
   submitText = 'Gửi bình luận',
   initialContent = '',
   autoFocus = false,
-  userAvatar = 'https://ui-avatars.com/api/?name=User&background=random'
+  userAvatarUrl = null,
+  userName = 'Giảng viên'
 }: CommentInputProps) {
   const [content, setContent] = useState(initialContent);
 
@@ -35,11 +47,30 @@ export default function CommentInput({
     <section className={styles.sectionBox} style={initialContent ? { border: 'none', padding: 0, boxShadow: 'none' } : {}}>
       <div className={styles.commentInputLayout}>
         {!initialContent && (
-          <img 
-            src={userAvatar} 
-            alt="Current User" 
-            className={styles.inputAvatar} 
-          />
+          userAvatarUrl ? (
+            <img 
+              src={userAvatarUrl} 
+              alt={userName} 
+              className={styles.inputAvatar} 
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div 
+              className={styles.inputAvatar} 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                backgroundColor: '#3b82f6', 
+                color: '#fff',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                flexShrink: 0
+              }}
+            >
+              {getInitials(userName)}
+            </div>
+          )
         )}
         <div className={styles.inputContainer}>
           <textarea 
@@ -68,3 +99,4 @@ export default function CommentInput({
     </section>
   );
 }
+

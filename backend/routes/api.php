@@ -110,25 +110,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subjects', [SubjectController::class, 'index']);
     Route::get('/subjects/{id}', [SubjectController::class, 'show']);
 
-    // Shared Comment Routes (Moved to public for testing)
+    // Shared Comment Routes
+    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+    Route::put('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'update']);
+    Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+
+    // Profile Routes
+    Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
+    Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
+    Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
+    Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
+
+    // Post Routes
+    Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
+    Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
+    Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
+
+    Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
 });
 
-Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
-Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
-
-// Temporary public routes for testing UI without login token
-// Profile Routes
-Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
-Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
-Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
-Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
-
-// Post Routes
-Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
-Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
-Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
-
-Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
 
 Route::get('/schema-bai-viet', function() {
     $columns = \Illuminate\Support\Facades\DB::select('SHOW COLUMNS FROM bai_viet');
@@ -156,3 +156,4 @@ Route::get('/fix-hoc-ky', function() {
         return 'Error: ' . $e->getMessage();
     }
 });
+
