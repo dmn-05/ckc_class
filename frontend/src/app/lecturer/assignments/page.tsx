@@ -1,17 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from '@/components/lecturer/assignments/AssignmentsManagement.module.css';
 import AssignmentDashboard from '@/components/lecturer/assignments/AssignmentDashboard';
 import AssignmentGrid, { AssignmentData } from '@/components/lecturer/assignments/AssignmentGrid';
-import AssignmentFormModal from '@/components/lecturer/assignments/AssignmentFormModal';
 import SubmissionsView, { SubmissionData } from '@/components/lecturer/assignments/SubmissionsView';
 import GradingModal from '@/components/lecturer/assignments/GradingModal';
 import ScoresReportModal from '@/components/lecturer/assignments/ScoresReportModal';
 import {
   getLecturerAssignments,
-  createLecturerAssignment,
-  updateLecturerAssignment,
   deleteLecturerAssignment,
 } from '@/app/actions/lecturer-assignment';
 import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
@@ -23,6 +21,7 @@ interface SectionOption {
 }
 
 export default function LecturerAssignmentsPage() {
+  const router = useRouter();
   const [viewState, setViewState] = useState<'list' | 'submissions'>('list');
   const [activeAssignment, setActiveAssignment] = useState<AssignmentData | null>(null);
   
@@ -36,11 +35,10 @@ export default function LecturerAssignmentsPage() {
   const [sectionFilter, setSectionFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Modals
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingAssignment, setEditingAssignment] = useState<AssignmentData | undefined>(undefined);
+  // Modals (still used for grading & scores)
   const [isScoresReportOpen, setIsScoresReportOpen] = useState(false);
   const [gradingSubmission, setGradingSubmission] = useState<SubmissionData | null>(null);
+
 
   useEffect(() => {
     async function loadData() {
@@ -80,13 +78,11 @@ export default function LecturerAssignmentsPage() {
 
   // Actions for Assignment
   const handleOpenAdd = () => {
-    setEditingAssignment(undefined);
-    setIsFormModalOpen(true);
+    router.push('/lecturer/assignments/create');
   };
 
   const handleOpenEdit = (assignment: AssignmentData) => {
-    setEditingAssignment(assignment);
-    setIsFormModalOpen(true);
+    router.push(`/lecturer/assignments/${assignment.id}/edit`);
   };
 
   const handleDelete = async (id: string) => {
@@ -101,40 +97,7 @@ export default function LecturerAssignmentsPage() {
     }
   };
 
-  const handleSaveAssignment = async (data: Partial<AssignmentData>) => {
-    try {
-      if (editingAssignment) {
-        const updated = await updateLecturerAssignment(editingAssignment.id, {
-          tieu_de: data.title,
-          noi_dung: data.description || data.instructions,
-          diem_toi_da: data.maxScore,
-          han_nop: data.dueDate || null,
-          cho_phep_nop_tre: data.allowLate,
-          tyle_phat_tre: data.latePenaltyPct,
-          trang_thai: data.isPublished ? 'hien_thi' : 'an',
-        });
-        setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? updated : a));
-      } else {
-        const created = await createLecturerAssignment({
-          tieu_de: data.title,
-          noi_dung: data.description || data.instructions || '',
-          lop_hoc_phan_id: parseInt(data.sectionId || '0'),
-          diem_toi_da: data.maxScore || 10,
-          han_nop: data.dueDate || null,
-          cho_phep_nop_tre: data.allowLate || false,
-          tyle_phat_tre: data.latePenaltyPct || 10,
-          trang_thai: data.isPublished ? 'hien_thi' : 'an',
-        });
-        setAssignments(prev => [...prev, created]);
-      }
-      setIsFormModalOpen(false);
-    } catch (error) {
-      alert('Có lỗi xảy ra khi lưu bài tập.');
-      console.error(error);
-    }
-  };
 
-  // Actions for Submissions View
   const handleViewSubmissions = (assignment: AssignmentData) => {
     setActiveAssignment(assignment);
     setViewState('submissions');
@@ -276,16 +239,6 @@ export default function LecturerAssignmentsPage() {
           onBack={handleBackToList}
           onGrade={handleGrade}
           onReturnBulk={handleReturnBulk}
-        />
-      )}
-
-      {/* Modals */}
-      {isFormModalOpen && (
-        <AssignmentFormModal 
-          initialData={editingAssignment}
-          sections={sections}
-          onSave={handleSaveAssignment}
-          onClose={() => setIsFormModalOpen(false)}
         />
       )}
 

@@ -10,6 +10,8 @@ export interface AssignmentData {
   title: string;
   description: string;
   instructions: string;
+  fileUrl?: string | null;
+  fileName?: string | null;
   maxScore: number;
   dueDate: string;
   allowLate: boolean;
