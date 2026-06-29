@@ -45,9 +45,9 @@ export default function CreateResourcePage() {
       if (data.type === 'link' && data.externalUrl) {
         formData.append('external_url', data.externalUrl);
       }
-      if (data.file) {
-        formData.append('file', data.file);
-      }
+      (data.files || []).forEach((file) => {
+        formData.append('files[]', file);
+      });
 
       await createLecturerResource(formData);
       router.push('/lecturer/resources');

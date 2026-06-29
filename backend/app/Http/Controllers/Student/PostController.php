@@ -24,21 +24,17 @@ class PostController extends Controller
             return response()->json(['data' => $posts]);
         }
 
-        // Lấy các lớp sinh viên đã đăng ký (da_duyet)
+        // Lấy các lớp sinh viên đã được thêm vào
         $sinhVien = $user?->sinhVien;
         $lopHocPhanIds = [];
 
         if ($sinhVien) {
-            $lopHocPhanIds = \App\Models\DangKyHocPhan::where('sinh_vien_id', $sinhVien->id)
-                ->where('trang_thai', 'da_duyet')
-                ->pluck('lop_hoc_phan_id')
-                ->toArray();
+            $lopHocPhanIds = $sinhVien->lopHocPhans()->pluck('lop_hoc_phan_id')->toArray();
         }
 
         $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
             ->where('trang_thai', 'hien_thi');
 
-        // Nếu có đăng ký thì lọc theo lớp đã đăng ký, không thì lấy tất cả
         if (!empty($lopHocPhanIds)) {
             $query->whereIn('lop_hoc_phan_id', $lopHocPhanIds);
         }
@@ -88,10 +84,16 @@ class PostController extends Controller
         $ten_chu_de = $ten_chu_de_map[$loai_bai_viet] ?? null;
         $chu_de_id = null;
         if ($ten_chu_de) {
-            $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
-                ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
-                ->where('ten_chu_de', $ten_chu_de)
-                ->value('id');
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
+                    $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
+                        ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
+                        ->where('ten_chu_de', $ten_chu_de)
+                        ->value('id');
+                }
+            } catch (\Exception $e) {
+                // Ignore if table doesn't exist
+            }
         }
 
         $post = BaiViet::create([

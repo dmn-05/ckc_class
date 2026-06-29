@@ -12,7 +12,7 @@ interface QuizSettingsModalProps {
   sections?: CourseSectionOption[];
 }
 
-export default function QuizSettingsModal({ initialData, onSave, onClose, sections = [] }: QuizSettingsModalProps) {
+export default function QuizSettingsForm({ initialData, onSave, onClose, sections = [] }: QuizSettingsModalProps) {
   const defaultSectionId = sections.length > 0 ? sections[0].id : '';
   const [formData, setFormData] = useState({
     title: '',
@@ -75,21 +75,23 @@ export default function QuizSettingsModal({ initialData, onSave, onClose, sectio
   };
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={`${styles.modalContent} ${styles.modalContentLarge}`}>
-        <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>
-            {initialData ? 'Cài đặt Bài kiểm tra' : 'Tạo Bài kiểm tra mới'}
-          </h3>
-          <button className={styles.btnCloseModal} onClick={onClose} type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div style={{ animation: 'modalIn 0.3s ease-out' }}>
+      <button onClick={onClose} className={styles.btnSecondary} style={{ marginBottom: '1.5rem' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Quay lại danh sách
+      </button>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-          <div className={styles.modalBody}>
+      <div className={styles.pageHeader}>
+        <h2 className={styles.pageTitle}>
+          {initialData ? 'Chỉnh sửa Bài kiểm tra' : 'Tạo Bài kiểm tra mới'}
+        </h2>
+      </div>
+
+      <div style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '1rem', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)', border: '1px solid #f3f4f6' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
             
             <div className={styles.formGridRow}>
               <div className={styles.formGroup}>
@@ -179,34 +181,37 @@ export default function QuizSettingsModal({ initialData, onSave, onClose, sectio
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#f7f9fb', padding: '1rem', borderRadius: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem', border: '1px solid #f1f5f9' }}>
               <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#191c1e', margin: 0 }}>Cài đặt tuỳ chọn khác</p>
               
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
                 <input 
                   type="checkbox" name="shuffleQuestions" 
                   checked={formData.shuffleQuestions} onChange={handleChange} 
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer', accentColor: '#4f46e5' }}
                 /> Trộn ngẫu nhiên câu hỏi (Shuffle questions)
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
                 <input 
                   type="checkbox" name="shuffleOptions" 
                   checked={formData.shuffleOptions} onChange={handleChange} 
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer', accentColor: '#4f46e5' }}
                 /> Trộn ngẫu nhiên đáp án (Shuffle options)
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
                 <input 
                   type="checkbox" name="showResultAfter" 
                   checked={formData.showResultAfter} onChange={handleChange} 
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer', accentColor: '#4f46e5' }}
                 /> Hiển thị điểm và đáp án ngay sau khi nộp bài
               </label>
             </div>
 
           </div>
 
-          <div className={styles.modalFooter}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #e0e3e5' }}>
             <button type="button" className={styles.btnSecondary} onClick={onClose}>Hủy</button>
             <button type="submit" className={styles.btnPrimary}>Lưu Cài đặt</button>
           </div>

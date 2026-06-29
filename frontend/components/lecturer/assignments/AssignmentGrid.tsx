@@ -12,6 +12,7 @@ export interface AssignmentData {
   instructions: string;
   fileUrl?: string | null;
   fileName?: string | null;
+  files?: { id: number; name: string; url: string; size: number }[];
   maxScore: number;
   dueDate: string;
   allowLate: boolean;

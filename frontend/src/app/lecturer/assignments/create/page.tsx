@@ -33,7 +33,7 @@ export default function CreateAssignmentPage() {
     loadData();
   }, []);
 
-  const handleSave = async (data: AssignmentFormData, file: File | null, _removeFile: boolean) => {
+  const handleSave = async (data: AssignmentFormData, files: File[], removeFileIds: number[], _removeFile: boolean) => {
     setSaving(true);
     try {
       const formData = new FormData();
@@ -46,9 +46,9 @@ export default function CreateAssignmentPage() {
       formData.append('cho_phep_nop_tre', data.allowLate ? '1' : '0');
       formData.append('tyle_phat_tre', String(data.latePenaltyPct));
       formData.append('trang_thai', data.isPublished ? 'hien_thi' : 'an');
-      if (file) {
-        formData.append('file', file);
-      }
+      files.forEach((file) => {
+        formData.append('files[]', file);
+      });
 
       await createLecturerAssignment(formData);
       router.push('/lecturer/assignments');

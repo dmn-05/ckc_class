@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import Link from 'next/link';
 import styles from './CourseManagement.module.css';
 
 export interface CourseType {
@@ -18,19 +19,9 @@ export interface CourseType {
 
 interface EnrolledCoursesProps {
   activeCourses: CourseType[];
-  completedCourses: CourseType[];
 }
 
-export default function EnrolledCourses({ activeCourses, completedCourses }: EnrolledCoursesProps) {
-  const [courses, setCourses] = useState(activeCourses);
-
-  const handleCancel = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học này?')) {
-      setCourses(courses.map(c => 
-        c.id === id ? { ...c, isActive: false } : c
-      ));
-    }
-  };
+export default function EnrolledCourses({ activeCourses }: EnrolledCoursesProps) {
 
   return (
     <div className={styles.mainColumn}>
@@ -52,16 +43,16 @@ export default function EnrolledCourses({ activeCourses, completedCourses }: Enr
 
       <div className={styles.cardsGrid}>
         {/* Active Courses */}
-        {courses.map((course) => {
-          const isCancelled = !course.isActive;
+        {activeCourses.map((course) => {
           const headerThemeClass = course.themeColor === 'secondary' ? styles.cardHeaderSecondary : styles.cardHeaderPrimary;
           const codeThemeClass = course.themeColor === 'secondary' ? styles.codeSecondary : styles.codePrimary;
           const titleHoverClass = course.themeColor === 'secondary' ? styles.hoverSecondary : styles.hoverPrimary;
 
           return (
-            <div key={course.id} className={`${styles.academicCard} ${isCancelled ? styles.cancelled : ''}`}>
-              <div className={headerThemeClass}></div>
-              <div className={styles.cardContent}>
+            <Link key={course.id} href={`/student/courses/${course.id}`} style={{ textDecoration: 'none' }}>
+              <div className={styles.academicCard}>
+                <div className={headerThemeClass}></div>
+                <div className={styles.cardContent}>
                 <div className={styles.cardTopRow}>
                   <span className={`${styles.courseCode} ${codeThemeClass}`}>{course.code}</span>
                   <span className={styles.courseSemester}>{course.semester}</span>
@@ -76,73 +67,23 @@ export default function EnrolledCourses({ activeCourses, completedCourses }: Enr
                     </svg>
                     <span>{course.instructor}</span>
                   </div>
-                  <div className={styles.infoRow}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{course.schedule}</span>
-                  </div>
                 </div>
 
                 <div className={styles.cardFooter}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #fff', backgroundColor: '#e6e8ea', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>
-                      +{course.enrolledStudents}
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#5f6368', fontSize: '0.875rem' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>{course.enrolledStudents || 0} sinh viên</span>
                   </div>
-                  <button 
-                    className={`${styles.btnCancel} ${isCancelled ? styles.btnCancelled : ''}`}
-                    onClick={() => handleCancel(course.id)}
-                    disabled={isCancelled}
-                  >
-                    {isCancelled ? 'Đã hủy' : 'Hủy đăng ký'}
-                  </button>
                 </div>
               </div>
-            </div>
+              </div>
+            </Link>
           );
         })}
 
-        {/* Completed Courses */}
-        {completedCourses.map((course) => (
-          <div key={course.id} className={styles.completedCard}>
-            <div className={styles.cardContent} style={{ padding: 0 }}>
-              <div className={styles.cardTopRow}>
-                <span className={`${styles.courseCode} ${styles.codeCompleted}`}>{course.code}</span>
-                <span className={styles.courseSemester}>{course.semester}</span>
-              </div>
-              
-              <h4 className={styles.courseTitle} style={{ marginBottom: '1rem' }}>{course.title}</h4>
-              
-              <div className={styles.courseInfo} style={{ marginBottom: '1rem' }}>
-                <div className={styles.infoRow}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Đã kết thúc môn học</span>
-                </div>
-              </div>
 
-              <div className={styles.cardFooter}>
-                <div className={styles.scoreContainer}>
-                  <span className={styles.scoreLabel}>Điểm tổng kết</span>
-                  <span className={styles.scoreValue}>{course.score}</span>
-                </div>
-                <button className={styles.btnDetails}>Xem chi tiết</button>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Add Course Ghost Card */}
-        <div className={styles.addCard}>
-          <div className={styles.addIconCircle}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="32" height="32">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <span className={styles.addText}>Đăng ký thêm học phần</span>
-        </div>
 
       </div>
     </div>

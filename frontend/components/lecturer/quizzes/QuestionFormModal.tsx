@@ -28,6 +28,8 @@ export default function QuestionFormModal({ initialData, onSave, onClose }: Ques
     ]
   });
 
+  const formId = React.useId();
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -179,22 +181,21 @@ export default function QuestionFormModal({ initialData, onSave, onClose }: Ques
                     <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <input 
                         type={formData.type === 'multiple_choice' ? 'checkbox' : 'radio'}
-                        name={`correct_option`}
+                        name={`correct_option_${formId}`}
                         checked={opt.isCorrect}
                         onChange={(e) => handleOptionCorrectChange(opt.id, e.target.checked)}
                         style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
                         title="Đánh dấu đáp án đúng"
                       />
                       
-                      {formData.type === 'true_false' ? (
-                        <input type="text" className={styles.formInput} value={opt.content} readOnly style={{ backgroundColor: '#eef2ff' }} />
-                      ) : (
-                        <input 
-                          type="text" className={styles.formInput} 
-                          value={opt.content} onChange={(e) => handleOptionContentChange(opt.id, e.target.value)}
-                          placeholder={`Đáp án ${idx + 1}`} required
-                        />
-                      )}
+                      <input 
+                        type="text" className={styles.formInput} 
+                        value={opt.content} 
+                        onChange={(e) => handleOptionContentChange(opt.id, e.target.value)}
+                        style={formData.type === 'true_false' ? { backgroundColor: '#eef2ff' } : {}}
+                        placeholder={`Đáp án ${idx + 1}`} 
+                        required
+                      />
 
                       {formData.type !== 'true_false' && formData.options.length > 2 && (
                         <button type="button" className={styles.iconBtn} onClick={() => handleRemoveOption(opt.id)} style={{ color: '#dc2626' }}>

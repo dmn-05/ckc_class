@@ -58,4 +58,9 @@ class BaiKiemTra extends Model
     {
         return $this->hasMany(CauHoi::class, 'bai_kiem_tra_id');
     }
+
+    public function ketQuas()
+    {
+        return $this->hasMany(KetQuaKiemTra::class, 'bai_kiem_tra_id');
+    }
 }

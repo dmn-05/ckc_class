@@ -70,6 +70,10 @@ export default function LecturerSectionsPage() {
     pendingGrading: Math.floor(Math.random() * 10)
   } : null;
 
+  const handleOpenManageStudents = (sectionId: string) => {
+    router.push(`/lecturer/sections/${sectionId}/students`);
+  };
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
@@ -102,6 +106,7 @@ export default function LecturerSectionsPage() {
             sections={filteredSections}
             onEdit={handleOpenEdit}
             onViewStats={setStatsSectionId}
+            onManageStudents={handleOpenManageStudents}
             onDelete={() => {}} // Disabled for lecturer, but passed to prevent error
             hideDelete={true}
           />

@@ -27,6 +27,13 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
@@ -69,7 +76,10 @@ function mapQuizFromApi(item: any): QuizData {
         sectionId: item.sectionId?.toString() || '',
         sectionName: item.sectionName || '',
         status,
-        stats: item.stats ?? { totalStudents: 0, completed: 0 },
+        stats: { 
+            totalStudents: item.totalStudents ?? 0, 
+            completed: item.submittedCount ?? 0 
+        },
     };
 }
 
@@ -272,3 +282,31 @@ export async function reorderLecturerQuestions(examId: string, orders: { id: str
     }
     return await response.json();
 }
+
+// ==================== RESULTS & GRADING API ====================
+
+export async function getQuizAttempts(examId: string) {
+    const response = await fetchWithAuth(`/lecturer/exams/${examId}/results`, { method: 'GET', cache: 'no-store' });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to fetch quiz attempts');
+    }
+    const json = await response.json();
+    return Array.isArray(json) ? json : (json.data || []);
+}
+
+export async function gradeQuizEssay(examId: string, attemptId: string, essayScore: number, essayAnswers: { questionId: string, score: number }[]) {
+    const response = await fetchWithAuth(`/lecturer/exams/${examId}/results/${attemptId}/grade`, {
+        method: 'POST',
+        body: JSON.stringify({
+            essayScore,
+            essayAnswers
+        })
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to grade essay');
+    }
+    return await response.json();
+}
+

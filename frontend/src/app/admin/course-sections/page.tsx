@@ -66,6 +66,10 @@ export default function CourseSectionsPage() {
     router.push(`/admin/course-sections/${section.id}/edit`);
   };
 
+  const handleManageStudents = (sectionId: string) => {
+    router.push(`/admin/course-sections/${sectionId}/students`);
+  };
+
   const filteredSections = sections.filter(s => {
     if (filter === 'all') return true;
     return s.status === filter;
@@ -113,6 +117,7 @@ export default function CourseSectionsPage() {
             sections={filteredSections}
             onEdit={handleOpenEdit}
             onViewStats={setStatsSectionId}
+            onManageStudents={handleManageStudents}
             onDelete={handleDeleteSection}
           />
         )}

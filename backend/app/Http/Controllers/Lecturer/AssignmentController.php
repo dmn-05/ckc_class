@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Controller;
 use App\Models\BaiTap;
 use App\Models\LopHocPhan;
-use App\Models\DangKyHocPhan;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,9 +35,7 @@ class AssignmentController extends Controller
             ->orderBy('ngay_tao', 'desc')
             ->get()
             ->map(function ($item) {
-                $totalStudents = DangKyHocPhan::where('lop_hoc_phan_id', $item->lop_hoc_phan_id)
-                    ->where('trang_thai', 'da_duyet')
-                    ->count();
+                $totalStudents = $item->lopHocPhan ? $item->lopHocPhan->sinhViens()->count() : 0;
                 return $this->formatAssignment($item, $totalStudents);
             });
 
@@ -58,36 +56,20 @@ class AssignmentController extends Controller
             'cho_phep_nop_tre' => 'nullable|boolean',
             'tyle_phat_tre'    => 'nullable|integer|min:0|max:100',
             'trang_thai'       => 'nullable|string|in:hien_thi,an',
-            'file'             => 'nullable|file|max:51200', // max 50MB
+            'files'            => 'nullable|array',
+            'files.*'          => 'nullable|file|max:51200', // max 50MB
         ]);
 
         if (!in_array($validated['lop_hoc_phan_id'], $sectionIds->toArray())) {
             abort(403, 'You do not own this course section');
         }
 
-        $fileUrl  = null;
-        $fileName = null;
-
-        if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
-            $file      = $request->file('file');
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result    = $cloudinary->uploadApi()->upload(
-                $file->getRealPath(),
-                [
-                    'folder'        => 'assignments',
-                    'resource_type' => 'auto',
-                ]
-            );
-            $fileUrl  = $result['secure_url'];
-            $fileName = $file->getClientOriginalName();
-        }
-
         $baiTap = BaiTap::create([
             'tieu_de'          => $validated['tieu_de'],
             'noi_dung'         => $validated['noi_dung'] ?? null,
             'huong_dan'        => $validated['huong_dan'] ?? null,
-            'file_url'         => $fileUrl,
-            'file_name'        => $fileName,
+            'file_url'         => null, // Legacy field
+            'file_name'        => null, // Legacy field
             'lop_hoc_phan_id'  => $validated['lop_hoc_phan_id'],
             'nguoi_tao_id'     => Auth::id(),
             'diem_toi_da'      => $validated['diem_toi_da'] ?? 10,
@@ -97,10 +79,38 @@ class AssignmentController extends Controller
             'trang_thai'       => $validated['trang_thai'] ?? 'hien_thi',
         ]);
 
+        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
+            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+            foreach ($request->file('files') as $file) {
+                $result = $cloudinary->uploadApi()->upload(
+                    $file->getRealPath(),
+                    [
+                        'folder'        => 'assignments',
+                        'resource_type' => 'auto',
+                    ]
+                );
+
+                $tepTin = \App\Models\TepTin::create([
+                    'ten_file'     => $file->getClientOriginalName(),
+                    'ten_file_luu' => basename($result['secure_url']),
+                    'duong_dan'    => $result['secure_url'],
+                    'loai_file'    => $file->getClientOriginalExtension() ?: 'unknown',
+                    'kich_thuoc'   => $file->getSize(),
+                    'nguoi_tao_id' => Auth::id(),
+                    'trang_thai'   => 'dang_su_dung',
+                ]);
+
+                \App\Models\TepTinBaiTap::create([
+                    'tep_tin_id' => $tepTin->id,
+                    'bai_tap_id' => $baiTap->id,
+                ]);
+            }
+        }
+
+
+
         $baiTap->load(['lopHocPhan.monHoc', 'nguoiTao']);
-        $totalStudents = DangKyHocPhan::where('lop_hoc_phan_id', $baiTap->lop_hoc_phan_id)
-            ->where('trang_thai', 'da_duyet')
-            ->count();
+        $totalStudents = $baiTap->lopHocPhan->sinhViens()->count();
 
         return response()->json(['data' => $this->formatAssignment($baiTap, $totalStudents)], 201);
     }
@@ -109,13 +119,11 @@ class AssignmentController extends Controller
     {
         $sectionIds = $this->getSectionIds();
 
-        $baiTap = BaiTap::with(['lopHocPhan.monHoc', 'nguoiTao'])
+        $baiTap = BaiTap::with(['lopHocPhan.monHoc', 'nguoiTao', 'tepTinBaiTap.tepTin'])
             ->whereIn('lop_hoc_phan_id', $sectionIds)
             ->findOrFail($id);
 
-        $totalStudents = DangKyHocPhan::where('lop_hoc_phan_id', $baiTap->lop_hoc_phan_id)
-            ->where('trang_thai', 'da_duyet')
-            ->count();
+        $totalStudents = $baiTap->lopHocPhan->sinhViens()->count();
 
         return response()->json(['data' => $this->formatAssignment($baiTap, $totalStudents)]);
     }
@@ -135,8 +143,11 @@ class AssignmentController extends Controller
             'cho_phep_nop_tre' => 'nullable|boolean',
             'tyle_phat_tre'    => 'nullable|integer|min:0|max:100',
             'trang_thai'       => 'sometimes|string|in:hien_thi,an',
-            'file'             => 'nullable|file|max:51200',
-            'remove_file'      => 'nullable|boolean',
+            'files'            => 'nullable|array',
+            'files.*'          => 'nullable|file|max:51200',
+            'remove_file_ids'  => 'nullable|array',
+            'remove_file_ids.*'=> 'integer',
+            'remove_file'      => 'nullable|boolean', // Legacy
         ]);
 
         $updateData = [];
@@ -146,25 +157,44 @@ class AssignmentController extends Controller
             }
         }
 
-        // Xóa file đính kèm
-        if (!empty($validated['remove_file'])) {
-            $updateData['file_url']  = null;
-            $updateData['file_name'] = null;
+        // Xóa file đính kèm dựa vào remove_file_ids
+        if (!empty($validated['remove_file_ids'])) {
+            $tepTins = \App\Models\TepTinBaiTap::where('bai_tap_id', $baiTap->id)
+                ->whereIn('tep_tin_id', $validated['remove_file_ids'])
+                ->get();
+            foreach ($tepTins as $ttbt) {
+                // Có thể gọi Cloudinary delete nếu cần, nhưng tạm thời chỉ xóa khỏi db
+                $ttbt->tepTin()->delete(); // Xóa TepTin cascade sẽ xóa TepTinBaiTap
+            }
         }
 
         // Upload file mới lên Cloudinary
-        if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
-            $file      = $request->file('file');
+        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result    = $cloudinary->uploadApi()->upload(
-                $file->getRealPath(),
-                [
-                    'folder'        => 'assignments',
-                    'resource_type' => 'auto',
-                ]
-            );
-            $updateData['file_url']  = $result['secure_url'];
-            $updateData['file_name'] = $file->getClientOriginalName();
+            foreach ($request->file('files') as $file) {
+                $result = $cloudinary->uploadApi()->upload(
+                    $file->getRealPath(),
+                    [
+                        'folder'        => 'assignments',
+                        'resource_type' => 'auto',
+                    ]
+                );
+
+                $tepTin = \App\Models\TepTin::create([
+                    'ten_file'     => $file->getClientOriginalName(),
+                    'ten_file_luu' => basename($result['secure_url']),
+                    'duong_dan'    => $result['secure_url'],
+                    'loai_file'    => $file->getClientOriginalExtension() ?: 'unknown',
+                    'kich_thuoc'   => $file->getSize(),
+                    'nguoi_tao_id' => Auth::id(),
+                    'trang_thai'   => 'dang_su_dung',
+                ]);
+
+                \App\Models\TepTinBaiTap::create([
+                    'tep_tin_id' => $tepTin->id,
+                    'bai_tap_id' => $baiTap->id,
+                ]);
+            }
         }
 
         if (!empty($updateData)) {
@@ -172,9 +202,7 @@ class AssignmentController extends Controller
         }
 
         $baiTap->load(['lopHocPhan.monHoc', 'nguoiTao']);
-        $totalStudents = DangKyHocPhan::where('lop_hoc_phan_id', $baiTap->lop_hoc_phan_id)
-            ->where('trang_thai', 'da_duyet')
-            ->count();
+        $totalStudents = $baiTap->lopHocPhan->sinhViens()->count();
 
         return response()->json(['data' => $this->formatAssignment($baiTap, $totalStudents)]);
     }
@@ -207,8 +235,16 @@ class AssignmentController extends Controller
             'title'          => $item->tieu_de,
             'description'    => $item->noi_dung ?? '',
             'instructions'   => $item->huong_dan ?? '',
-            'fileUrl'        => $item->file_url,
-            'fileName'       => $item->file_name,
+            'files'          => $item->tepTinBaiTap ? $item->tepTinBaiTap->map(function($ttbt) {
+                                    return [
+                                        'id' => $ttbt->tep_tin_id,
+                                        'name' => $ttbt->tepTin->ten_file,
+                                        'url' => $ttbt->tepTin->duong_dan,
+                                        'size' => $ttbt->tepTin->kich_thuoc,
+                                    ];
+                                })->toArray() : [],
+            'fileUrl'        => $item->file_url, // Legacy
+            'fileName'       => $item->file_name, // Legacy
             'maxScore'       => (float) ($item->diem_toi_da ?? 10),
             'dueDate'        => $hanNop ? $hanNop->format('d/m/Y H:i') : 'Không có hạn',
             'allowLate'      => (bool) ($item->cho_phep_nop_tre ?? false),

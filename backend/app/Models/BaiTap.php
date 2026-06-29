@@ -44,4 +44,9 @@ class BaiTap extends Model
     {
         return $this->belongsTo(LopHocPhan::class, 'lop_hoc_phan_id');
     }
+
+    public function tepTinBaiTap()
+    {
+        return $this->hasMany(TepTinBaiTap::class, 'bai_tap_id');
+    }
 }

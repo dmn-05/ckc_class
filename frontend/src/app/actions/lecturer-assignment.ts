@@ -26,6 +26,13 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
@@ -39,6 +46,7 @@ function mapAssignmentFromApi(item: any): AssignmentData {
         instructions: item.instructions ?? '',
         fileUrl: item.fileUrl ?? null,
         fileName: item.fileName ?? null,
+        files: item.files ?? [],
         maxScore: item.maxScore ?? 10,
         dueDate: item.dueDate || 'Không có hạn',
         allowLate: item.allowLate ?? false,
@@ -108,3 +116,4 @@ export async function deleteLecturerAssignment(id: string) {
     }
     return await response.json();
 }
+

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './AdminCreateCourseSections.module.css';
-import { createCourseSection, getSubjects, getLecturers } from '@/app/actions/course-section';
+import { createCourseSection, getSubjects, getLecturers, getClasses } from '@/app/actions/course-section';
 import { createLecturerCourseSection, getCurrentUser } from '@/app/actions/lecturer-course-section';
 
 interface CreateCourseSectionFormProps {
@@ -18,12 +18,14 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
   
   const [subjects, setSubjects] = useState<any[]>([]);
   const [lecturers, setLecturers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     ma_lop_hoc_phan: '',
     ten_lop: '',
     mon_hoc_id: '',
     giang_vien_id: '',
+    base_class_id: '',
     hoc_ky: 'HK1',
     nam_hoc: '2024-2025',
     si_so_toi_da: 40,
@@ -36,6 +38,9 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
         const subs = await getSubjects();
         setSubjects(subs);
         
+        const cls = await getClasses();
+        setClasses(cls);
+
         if (isLecturer) {
           const user = await getCurrentUser();
           const lecs = await getLecturers();
@@ -62,6 +67,33 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
       [name]: name === 'si_so_toi_da' ? parseInt(value) || 0 : value 
     }));
   };
+
+  useEffect(() => {
+    if (!formData.mon_hoc_id) return;
+
+    const subject = subjects.find(s => s.id.toString() === formData.mon_hoc_id.toString());
+    const subjectName = subject ? subject.ten_mon : '';
+
+    let generatedName = '';
+    
+    if (formData.base_class_id) {
+      const cls = classes.find(c => c.id.toString() === formData.base_class_id.toString());
+      if (cls) {
+        generatedName = `${cls.ma_lop} - ${subjectName}`;
+      }
+    } else {
+      const startYear = formData.nam_hoc.split('-')[0] || '2024';
+      generatedName = `HKP - ${subjectName} ${startYear}`;
+    }
+
+    if (!formData.ma_lop_hoc_phan) {
+      const randomCode = 'LHP_' + Math.random().toString(36).substr(2, 5).toUpperCase();
+      setFormData(prev => ({ ...prev, ten_lop: generatedName, ma_lop_hoc_phan: randomCode }));
+    } else {
+      setFormData(prev => ({ ...prev, ten_lop: generatedName }));
+    }
+
+  }, [formData.mon_hoc_id, formData.base_class_id, formData.nam_hoc, subjects, classes]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,21 +136,22 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
                   type="text" 
                   name="ma_lop_hoc_phan"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: CDTH24A_LTrWeb" 
+                  placeholder="Hệ thống tự động tạo" 
                   value={formData.ma_lop_hoc_phan}
-                  onChange={handleChange}
-                  required
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên Lớp (Tuỳ chọn)</label>
+                <label className={styles.formLabel}>Tên Lớp học phần</label>
                 <input 
                   type="text" 
                   name="ten_lop"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: Lập trình Web - Nhóm 1" 
+                  placeholder="Hệ thống tự động tạo" 
                   value={formData.ten_lop}
-                  onChange={handleChange}
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
             </div>
@@ -130,6 +163,15 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
                   <option value="">Chọn Môn học</option>
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.ten_mon} - {s.ma_mon}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Lớp (Tự động thêm toàn bộ SV) </label>
+                <select name="base_class_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.base_class_id} onChange={handleChange}>
+                  <option value="">Không chọn - Lớp phụ</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.id}>{c.ma_lop} - {c.ten_lop}</option>
                   ))}
                 </select>
               </div>

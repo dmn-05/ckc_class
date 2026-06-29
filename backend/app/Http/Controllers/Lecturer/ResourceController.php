@@ -53,10 +53,17 @@ class ResourceController extends Controller
             ->where('id', $validated['lop_hoc_phan_id'])
             ->firstOrFail();
 
-        $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
-            ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
-            ->where('ten_chu_de', 'Tài liệu')
-            ->value('id');
+        $chu_de_id = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
+                $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
+                    ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
+                    ->where('ten_chu_de', 'Tài liệu')
+                    ->value('id');
+            }
+        } catch (\Exception $e) {
+            // Ignore if table doesn't exist
+        }
 
         $post = BaiViet::create([
             'tieu_de' => $validated['tieu_de'],
@@ -68,32 +75,32 @@ class ResourceController extends Controller
             'trang_thai' => $validated['trang_thai'] ?? 'hien_thi',
         ]);
 
-        if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
-            $file = $request->file('file');
-            
+        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
-                $file->getRealPath(),
-                [
-                    'folder' => 'files',
-                    'resource_type' => 'auto'
-                ]
-            );
+            foreach ($request->file('files') as $file) {
+                $result = $cloudinary->uploadApi()->upload(
+                    $file->getRealPath(),
+                    [
+                        'folder' => 'files',
+                        'resource_type' => 'auto'
+                    ]
+                );
 
-            $tepTin = \App\Models\TepTin::create([
-                'ten_file' => $file->getClientOriginalName(),
-                'ten_file_luu' => basename($result['secure_url']),
-                'duong_dan' => $result['secure_url'],
-                'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
-                'kich_thuoc' => $file->getSize(),
-                'nguoi_tao_id' => Auth::id(),
-                'trang_thai' => 'dang_su_dung',
-            ]);
+                $tepTin = \App\Models\TepTin::create([
+                    'ten_file' => $file->getClientOriginalName(),
+                    'ten_file_luu' => basename($result['secure_url']),
+                    'duong_dan' => $result['secure_url'],
+                    'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
+                    'kich_thuoc' => $file->getSize(),
+                    'nguoi_tao_id' => Auth::id(),
+                    'trang_thai' => 'dang_su_dung',
+                ]);
 
-            \App\Models\TepTinBaiViet::create([
-                'tep_tin_id' => $tepTin->id,
-                'bai_viet_id' => $post->id,
-            ]);
+                \App\Models\TepTinBaiViet::create([
+                    'tep_tin_id' => $tepTin->id,
+                    'bai_viet_id' => $post->id,
+                ]);
+            }
         }
 
         $post->load(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao']);
@@ -131,6 +138,10 @@ class ResourceController extends Controller
             'file_url' => 'nullable|string',
             'external_url' => 'nullable|url',
             'trang_thai' => 'sometimes|string|in:hien_thi,an',
+            'files' => 'nullable|array',
+            'files.*' => 'nullable|file',
+            'remove_file_ids' => 'nullable|array',
+            'remove_file_ids.*' => 'integer',
         ]);
 
         $updateData = [];
@@ -140,34 +151,38 @@ class ResourceController extends Controller
         if (isset($validated['loai_tai_nguyen'])) $updateData['loai_tai_nguyen'] = $validated['loai_tai_nguyen'];
         if ($request->has('external_url')) $updateData['external_url'] = $validated['external_url'];
 
-        if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
-            $file = $request->file('file');
-            
+        // Handle file removals
+        if (!empty($validated['remove_file_ids'])) {
+            $tepTins = \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)
+                ->whereIn('tep_tin_id', $validated['remove_file_ids'])
+                ->get();
+            foreach ($tepTins as $ttbt) {
+                $ttbt->tepTin()->delete();
+            }
+        }
+
+        // Handle new file uploads
+        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
-                $file->getRealPath(),
-                [
-                    'folder' => 'files',
-                    'resource_type' => 'auto'
-                ]
-            );
+            foreach ($request->file('files') as $file) {
+                $result = $cloudinary->uploadApi()->upload(
+                    $file->getRealPath(),
+                    [
+                        'folder' => 'files',
+                        'resource_type' => 'auto'
+                    ]
+                );
 
-            // Update or create TepTin
-            $tepTinBaiViet = \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->first();
-            
-            $tepTin = \App\Models\TepTin::create([
-                'ten_file' => $file->getClientOriginalName(),
-                'ten_file_luu' => basename($result['secure_url']),
-                'duong_dan' => $result['secure_url'],
-                'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
-                'kich_thuoc' => $file->getSize(),
-                'nguoi_tao_id' => Auth::id(),
-                'trang_thai' => 'dang_su_dung',
-            ]);
+                $tepTin = \App\Models\TepTin::create([
+                    'ten_file' => $file->getClientOriginalName(),
+                    'ten_file_luu' => basename($result['secure_url']),
+                    'duong_dan' => $result['secure_url'],
+                    'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
+                    'kich_thuoc' => $file->getSize(),
+                    'nguoi_tao_id' => Auth::id(),
+                    'trang_thai' => 'dang_su_dung',
+                ]);
 
-            if ($tepTinBaiViet) {
-                $tepTinBaiViet->update(['tep_tin_id' => $tepTin->id]);
-            } else {
                 \App\Models\TepTinBaiViet::create([
                     'tep_tin_id' => $tepTin->id,
                     'bai_viet_id' => $post->id,

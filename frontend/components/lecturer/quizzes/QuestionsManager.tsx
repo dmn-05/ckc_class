@@ -25,17 +25,19 @@ interface QuestionsManagerProps {
   quizTitle: string;
   questions: QuestionData[];
   onBack: () => void;
-  onAddQuestion: () => void;
+  onSaveNewQuestion: (data: Partial<QuestionData>) => Promise<void>;
   onEditQuestion: (q: QuestionData) => void;
   onDeleteQuestion: (id: string) => void;
   onReorder: (newQuestions: QuestionData[]) => void;
 }
 
+import InlineQuestionForm from './InlineQuestionForm';
+
 export default function QuestionsManager({
   quizTitle,
   questions,
   onBack,
-  onAddQuestion,
+  onSaveNewQuestion,
   onEditQuestion,
   onDeleteQuestion,
   onReorder
@@ -43,6 +45,8 @@ export default function QuestionsManager({
   
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [localQuestions, setLocalQuestions] = useState<QuestionData[]>([]);
+  const [draftForms, setDraftForms] = useState<{id: number, data: Partial<QuestionData>}[]>([]);
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
   useEffect(() => {
     // Sort by order initially
@@ -90,7 +94,34 @@ export default function QuestionsManager({
     }
   };
 
-  const totalScore = localQuestions.reduce((sum, q) => sum + q.score, 0);
+  // Tính tổng điểm cho các câu đã lưu (từ localQuestions)
+  const savedScore = localQuestions.reduce((sum, q) => sum + q.score, 0);
+  // Cả điểm đã lưu và điểm từ các form nháp chưa lưu
+  const draftScore = draftForms.reduce((sum, draft) => sum + (draft.data.score || 1), 0);
+  const totalScore = savedScore + draftScore;
+  const totalQuestions = localQuestions.length + draftForms.length;
+
+  const handleSaveAllDrafts = async () => {
+    setIsSavingAll(true);
+    try {
+      // Save them one by one or Promise.all. 
+      // For simplicity, let's await sequentially so backend doesn't get flooded if there are many.
+      for (const draft of draftForms) {
+        if (!draft.data.content) {
+          alert('Vui lòng nhập đầy đủ nội dung câu hỏi cho tất cả các form nháp.');
+          setIsSavingAll(false);
+          return;
+        }
+        await onSaveNewQuestion(draft.data);
+      }
+      // If all successful, clear draft forms
+      setDraftForms([]);
+    } catch (err: any) {
+      alert(err.message || 'Có lỗi xảy ra khi lưu câu hỏi.');
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
 
   return (
     <div style={{ animation: 'modalIn 0.3s ease-out' }}>
@@ -105,11 +136,14 @@ export default function QuestionsManager({
         <div>
           <h2 className={styles.pageTitle}>Soạn câu hỏi: {quizTitle}</h2>
           <p className={styles.pageSubtitle}>
-            Tổng số: {localQuestions.length} câu hỏi • Tổng điểm: {totalScore}
+            Tổng số: {totalQuestions} câu hỏi • Tổng điểm: {totalScore}
           </p>
         </div>
         
-        <button className={styles.btnPrimary} onClick={onAddQuestion}>
+        <button className={styles.btnPrimary} onClick={() => {
+          setDraftForms(prev => [...prev, { id: Date.now(), data: { score: 1, type: 'single_choice' } }]);
+          setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+        }}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -180,8 +214,41 @@ export default function QuestionsManager({
           );
         })}
         
-        {localQuestions.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#777587', backgroundColor: '#f7f9fb', borderRadius: '0.75rem', border: '1px dashed #c7c4d8' }}>
+        {draftForms.map((draft) => (
+          <InlineQuestionForm
+            key={draft.id}
+            onChange={(newData) => {
+              setDraftForms(prev => prev.map(d => d.id === draft.id ? { ...d, data: newData } : d));
+            }}
+            onClose={() => setDraftForms(prev => prev.filter(d => d.id !== draft.id))}
+          />
+        ))}
+
+        {draftForms.length > 0 && (
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+            <button 
+              className={styles.btnSecondary} 
+              onClick={() => {
+                if (confirm('Bạn có chắc muốn hủy tất cả câu hỏi nháp chưa lưu?')) {
+                  setDraftForms([]);
+                }
+              }}
+              disabled={isSavingAll}
+            >
+              Hủy tất cả
+            </button>
+            <button 
+              className={styles.btnPrimary} 
+              onClick={handleSaveAllDrafts}
+              disabled={isSavingAll}
+            >
+              {isSavingAll ? 'Đang lưu...' : `Lưu tất cả ${draftForms.length} câu hỏi`}
+            </button>
+          </div>
+        )}
+
+        {localQuestions.length === 0 && draftForms.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#777587', backgroundColor: '#f9fafb', borderRadius: '0.75rem', border: '1px dashed #e0e3e5' }}>
             <p>Chưa có câu hỏi nào. Bấm "Thêm câu hỏi" để bắt đầu soạn đề.</p>
           </div>
         )}

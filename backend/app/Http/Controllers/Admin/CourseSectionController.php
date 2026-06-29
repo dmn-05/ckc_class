@@ -25,9 +25,25 @@ class CourseSectionController extends Controller
             'nam_hoc' => 'required|string|max:20',
             'si_so_toi_da' => 'required|integer|min:1',
             'trang_thai' => 'required|in:dang_mo,da_khoa,da_ket_thuc',
+            'base_class_id' => 'nullable|exists:lop,id'
         ]);
 
+        $baseClassId = $validated['base_class_id'] ?? null;
+        unset($validated['base_class_id']);
+
         $section = LopHocPhan::create($validated);
+
+        if ($baseClassId) {
+            $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
+                ->where('trang_thai', 'dang_hoc')
+                ->pluck('id');
+            $syncData = [];
+            foreach ($studentIds as $id) {
+                $syncData[$id] = ['ngay_tao' => now(), 'ngay_cap_nhat' => now()];
+            }
+            $section->sinhViens()->attach($syncData);
+        }
+
         return response()->json($section, 201);
     }
 
@@ -50,9 +66,21 @@ class CourseSectionController extends Controller
             'nam_hoc' => 'required|string|max:20',
             'si_so_toi_da' => 'required|integer|min:1',
             'trang_thai' => 'required|in:dang_mo,da_khoa,da_ket_thuc',
+            'base_class_id' => 'nullable|exists:lop,id'
         ]);
 
+        $baseClassId = $validated['base_class_id'] ?? null;
+        unset($validated['base_class_id']);
+
         $section->update($validated);
+
+        if ($baseClassId) {
+            $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
+                ->where('trang_thai', 'dang_hoc')
+                ->pluck('id');
+            // attach will only insert new records if we use syncWithoutDetaching
+            $section->sinhViens()->syncWithoutDetaching($studentIds);
+        }
         return response()->json($section);
     }
 

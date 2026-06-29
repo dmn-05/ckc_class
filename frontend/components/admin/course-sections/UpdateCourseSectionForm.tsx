@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './AdminUpdateCourseSections.module.css';
-import { updateCourseSection, getCourseSectionById, getSubjects, getLecturers } from '@/app/actions/course-section';
+import { updateCourseSection, getCourseSectionById, getSubjects, getLecturers, getClasses } from '@/app/actions/course-section';
 import { updateLecturerCourseSection, getLecturerCourseSectionById, getCurrentUser } from '@/app/actions/lecturer-course-section';
 
 interface UpdateCourseSectionFormProps {
@@ -19,11 +19,13 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
   
   const [subjects, setSubjects] = useState<any[]>([]);
   const [lecturers, setLecturers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     ma_lop_hoc_phan: '',
     ten_lop: '',
     mon_hoc_id: '',
+    base_class_id: '',
     giang_vien_id: '',
     hoc_ky: 'HK1',
     nam_hoc: '2024-2025',
@@ -38,6 +40,8 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
         setSubjects(subs);
         const lecs = await getLecturers();
         setLecturers(lecs);
+        const cls = await getClasses();
+        setClasses(cls);
       } catch (err) {
         console.error(err);
       }
@@ -51,6 +55,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
           ma_lop_hoc_phan: data.ma_lop_hoc_phan || '',
           ten_lop: data.ten_lop || '',
           mon_hoc_id: data.mon_hoc_id ? data.mon_hoc_id.toString() : '',
+          base_class_id: '',
           giang_vien_id: data.giang_vien_id ? data.giang_vien_id.toString() : '',
           hoc_ky: data.hoc_ky || 'HK1',
           nam_hoc: data.nam_hoc || '2024-2025',
@@ -63,10 +68,32 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: name === 'si_so_toi_da' ? parseInt(value) || 0 : value 
-    }));
+    
+    setFormData(prev => {
+      const nextData = { 
+        ...prev, 
+        [name]: name === 'si_so_toi_da' ? parseInt(value) || 0 : value 
+      };
+
+      if (['mon_hoc_id', 'base_class_id', 'nam_hoc'].includes(name)) {
+        const subject = subjects.find(s => s.id.toString() === nextData.mon_hoc_id.toString());
+        const subjectName = subject ? subject.ten_mon : '';
+        let generatedName = '';
+        
+        if (nextData.base_class_id) {
+          const cls = classes.find(c => c.id.toString() === nextData.base_class_id.toString());
+          if (cls) {
+            generatedName = `${cls.ma_lop} - ${subjectName}`;
+          }
+        } else {
+          const startYear = nextData.nam_hoc.split('-')[0] || '2024';
+          generatedName = `HKP - ${subjectName} ${startYear}`;
+        }
+        nextData.ten_lop = generatedName;
+      }
+
+      return nextData;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,16 +142,20 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
                   value={formData.ma_lop_hoc_phan}
                   onChange={handleChange}
                   required
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên Lớp (Tuỳ chọn)</label>
+                <label className={styles.formLabel}>Tên Lớp</label>
                 <input 
                   type="text" 
                   name="ten_lop"
                   className={styles.formInput} 
                   value={formData.ten_lop}
                   onChange={handleChange}
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
             </div>
@@ -136,6 +167,15 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
                   <option value="">Chọn Môn học</option>
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.ten_mon} - {s.ma_mon}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Lớp (Tự động thêm toàn bộ SV) </label>
+                <select name="base_class_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.base_class_id} onChange={handleChange}>
+                  <option value="">Không chọn - Lớp phụ</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.id}>{c.ma_lop} - {c.ten_lop}</option>
                   ))}
                 </select>
               </div>

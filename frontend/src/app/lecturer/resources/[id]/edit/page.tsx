@@ -40,7 +40,10 @@ export default function EditResourcePage() {
             sectionId: resourceData.sectionId || '',
             fileUrl: resourceData.fileUrl || '',
             externalUrl: resourceData.externalUrl || '',
-            isVisible: resourceData.isVisible
+            isVisible: resourceData.isVisible,
+            existingFiles: resourceData.files ?? [],
+            files: [],
+            removeFileIds: []
           });
         }
       } catch (error) {
@@ -67,9 +70,12 @@ export default function EditResourcePage() {
       if (data.type === 'link' && data.externalUrl) {
         formData.append('external_url', data.externalUrl);
       }
-      if (data.file) {
-        formData.append('file', data.file);
-      }
+      (data.files || []).forEach((file) => {
+        formData.append('files[]', file);
+      });
+      (data.removeFileIds || []).forEach((removeId) => {
+        formData.append('remove_file_ids[]', String(removeId));
+      });
 
       await updateLecturerResource(id, formData);
       router.push('/lecturer/resources');

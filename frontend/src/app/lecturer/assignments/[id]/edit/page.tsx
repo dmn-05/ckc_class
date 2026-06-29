@@ -58,6 +58,7 @@ export default function EditAssignmentPage() {
             allowLate: assignmentData.allowLate ?? false,
             latePenaltyPct: assignmentData.latePenaltyPct ?? 10,
             isPublished: assignmentData.isPublished ?? true,
+            existingFiles: assignmentData.files ?? [],
             existingFileUrl: assignmentData.fileUrl ?? null,
             existingFileName: assignmentData.fileName ?? null,
           });
@@ -74,7 +75,7 @@ export default function EditAssignmentPage() {
     }
   }, [id]);
 
-  const handleSave = async (data: AssignmentFormData, file: File | null, removeFile: boolean) => {
+  const handleSave = async (data: AssignmentFormData, files: File[], removeFileIds: number[], removeFile: boolean) => {
     setSaving(true);
     try {
       const formData = new FormData();
@@ -89,9 +90,12 @@ export default function EditAssignmentPage() {
       if (removeFile) {
         formData.append('remove_file', '1');
       }
-      if (file) {
-        formData.append('file', file);
-      }
+      removeFileIds.forEach((removeId) => {
+        formData.append('remove_file_ids[]', String(removeId));
+      });
+      files.forEach((file) => {
+        formData.append('files[]', file);
+      });
 
       await updateLecturerAssignment(id, formData);
       router.push('/lecturer/assignments');

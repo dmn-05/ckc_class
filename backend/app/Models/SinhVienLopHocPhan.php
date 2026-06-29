@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DangKyHocPhan extends Model
+class SinhVienLopHocPhan extends Model
 {
     use HasFactory;
 
-    protected $table = 'dang_ky_hoc_phan';
+    protected $table = 'sinh_vien_lop_hoc_phan';
 
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
@@ -17,8 +17,6 @@ class DangKyHocPhan extends Model
     protected $fillable = [
         'sinh_vien_id',
         'lop_hoc_phan_id',
-        'ngay_dang_ky',
-        'trang_thai',
     ];
 
     public function sinhVien()
