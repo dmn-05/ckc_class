@@ -1,8 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import CourseHeader from '../../../../components/student/courses/CourseHeader';
 import EnrolledCourses, { CourseType } from '../../../../components/student/courses/EnrolledCourses';
 import styles from '@/components/student/courses/CourseManagement.module.css';
 import { getStudentCourseSections } from '@/app/actions/student-section';
+
+export const metadata: Metadata = {
+  title: 'Lớp học phần',
+};
 
 export default async function StudentCoursesPage() {
   const sections = await getStudentCourseSections();

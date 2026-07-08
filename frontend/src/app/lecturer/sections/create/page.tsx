@@ -1,5 +1,10 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import CreateCourseSectionForm from '@/components/admin/course-sections/CreateCourseSectionForm';
+
+export const metadata: Metadata = {
+  title: 'Thêm lớp học phần mới',
+};
 
 export default function LecturerCreateCourseSectionPage() {
   return (

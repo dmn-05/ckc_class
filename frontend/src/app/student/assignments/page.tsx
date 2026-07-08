@@ -16,6 +16,10 @@ interface ApiAssignment {
   ngay_tao: string;
   ten_mon: string;
   ten_lop: string | null;
+  submission?: {
+    trang_thai: string;
+    diem: number | null;
+  } | null;
 }
 
 export default function StudentAssignmentsPage() {
@@ -69,7 +73,17 @@ export default function StudentAssignmentsPage() {
               style={{ cursor: 'pointer' }}
             >
               <div className={styles.cardHeader}>
-                <span className={`${styles.cardBadge} ${styles.statusPending}`}>Chưa nộp</span>
+                {a.submission ? (
+                  a.submission.trang_thai === 'da_cham' ? (
+                    <span className={`${styles.cardBadge} ${styles.statusGraded}`}>Đã chấm: {a.submission.diem ?? 0} đ</span>
+                  ) : a.submission.trang_thai === 'nop_muon' ? (
+                    <span className={`${styles.cardBadge} ${styles.statusLate}`}>Nộp muộn</span>
+                  ) : (
+                    <span className={`${styles.cardBadge} ${styles.statusSubmitted}`}>Đã nộp</span>
+                  )
+                ) : (
+                  <span className={`${styles.cardBadge} ${styles.statusPending}`}>Chưa nộp</span>
+                )}
               </div>
               <h4 className={styles.cardTitle}>{a.tieu_de}</h4>
               {a.ten_lop && <p className={styles.cardSubtitle} style={{ color: '#6366f1', fontWeight: 500 }}>{a.ten_lop}</p>}

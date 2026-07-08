@@ -168,8 +168,6 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                 >
                   <option value="bai_viet">Bài viết</option>
                   <option value="thong_bao">Thông báo</option>
-                  <option value="tai_lieu">Tài liệu</option>
-                  <option value="bai_tap">Bài tập</option>
                 </select>
                 {isEdit && <small style={{color: '#777587', marginTop: '4px'}}>Không thể đổi loại bài viết sau khi tạo.</small>}
               </div>

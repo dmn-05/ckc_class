@@ -9,8 +9,34 @@ use Illuminate\Support\Facades\Auth;
 
 class StudentAssignmentController extends Controller
 {
-    private function formatAssignment($item): array
+    private function formatAssignment($item, $studentId = null): array
     {
+        $submission = null;
+        if ($studentId) {
+            $sub = \Illuminate\Support\Facades\DB::table('bai_nop')
+                ->where('bai_tap_id', $item->id)
+                ->where('sinh_vien_id', $studentId)
+                ->first();
+            if ($sub) {
+                $isReturned = ($sub->trang_thai === 'da_tra');
+                $displayStatus = 'da_nop';
+                if ($isReturned) {
+                    $displayStatus = 'da_cham';
+                } elseif ($sub->trang_thai === 'nop_muon') {
+                    $displayStatus = 'nop_muon';
+                }
+
+                $submission = [
+                    'id' => $sub->id,
+                    'ngay_nop' => $sub->ngay_nop ? \Carbon\Carbon::parse($sub->ngay_nop)->format('H:i, d/m/Y') : null,
+                    'duong_dan_file' => $sub->duong_dan_file,
+                    'trang_thai' => $displayStatus,
+                    'diem' => $isReturned ? $sub->diem : null,
+                    'nhan_xet' => $isReturned ? $sub->nhan_xet : null,
+                ];
+            }
+        }
+
         return [
             'id'              => $item->id,
             'tieu_de'         => $item->tieu_de,
@@ -30,6 +56,7 @@ class StudentAssignmentController extends Controller
                 'url'  => $t->tepTin?->duong_dan,
                 'size' => $t->tepTin?->kich_thuoc ?? 0,
             ])->filter(fn($f) => $f['id'])->values()->toArray() : [],
+            'submission'      => $submission,
         ];
     }
 
@@ -54,7 +81,7 @@ class StudentAssignmentController extends Controller
 
         $assignments = $query->orderBy('ngay_tao', 'desc')
             ->get()
-            ->map(fn($item) => $this->formatAssignment($item));
+            ->map(fn($item) => $this->formatAssignment($item, $student->id));
 
         return response()->json(['data' => $assignments]);
     }
@@ -74,6 +101,76 @@ class StudentAssignmentController extends Controller
             ->with(['lopHocPhan.monHoc', 'nguoiTao', 'tepTinBaiTap.tepTin'])
             ->findOrFail($id);
 
-        return response()->json(['data' => $this->formatAssignment($baiTap)]);
+        return response()->json(['data' => $this->formatAssignment($baiTap, $student->id)]);
+    }
+
+    public function submit(Request $request, $id)
+    {
+        $user = Auth::user();
+        if ($user->vai_tro_id !== 3 || !$user->sinhVien) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $student = $user->sinhVien;
+
+        $baiTap = BaiTap::where('trang_thai', 'hien_thi')
+            ->findOrFail($id);
+
+        $isEnrolled = $student->lopHocPhans()->where('lop_hoc_phan.id', $baiTap->lop_hoc_phan_id)->exists();
+        if (!$isEnrolled) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $existing = \Illuminate\Support\Facades\DB::table('bai_nop')
+            ->where('bai_tap_id', $baiTap->id)
+            ->where('sinh_vien_id', $student->id)
+            ->first();
+        if ($existing && ($existing->trang_thai === 'da_cham' || $existing->trang_thai === 'da_tra')) {
+            return response()->json(['message' => 'Bài tập đã được chấm điểm, không thể nộp lại'], 400);
+        }
+
+        $request->validate([
+            'file' => 'required|file|max:51200', // 50MB max
+        ]);
+
+        $fileUrl = null;
+        if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
+            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+            $result = $cloudinary->uploadApi()->upload(
+                $request->file('file')->getRealPath(),
+                [
+                    'folder' => 'submissions',
+                    'resource_type' => 'auto'
+                ]
+            );
+            $fileUrl = $result['secure_url'];
+        } else {
+            return response()->json(['message' => 'Server missing Cloudinary configuration'], 500);
+        }
+
+        $trangThai = 'da_nop';
+        if ($baiTap->han_nop && \Carbon\Carbon::now()->greaterThan(\Carbon\Carbon::parse($baiTap->han_nop))) {
+            if (!$baiTap->cho_phep_nop_tre) {
+                return response()->json(['message' => 'Đã quá hạn nộp bài'], 400);
+            }
+            $trangThai = 'nop_muon';
+        }
+
+        $now = \Carbon\Carbon::now();
+
+        \Illuminate\Support\Facades\DB::table('bai_nop')->updateOrInsert(
+            [
+                'bai_tap_id' => $baiTap->id,
+                'sinh_vien_id' => $student->id
+            ],
+            [
+                'duong_dan_file' => $fileUrl,
+                'trang_thai' => $trangThai,
+                'ngay_nop' => $now,
+                'ngay_cap_nhat' => $now
+            ]
+        );
+
+        return response()->json(['message' => 'Nộp bài thành công', 'trang_thai' => $trangThai]);
     }
 }

@@ -1,6 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import CreatePostForm from '@/components/lecturer/posts/CreatePostForm';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Tạo bài viết mới',
+};
 
 export default function LecturerCreatePostPage() {
   return (

@@ -130,11 +130,11 @@ export default function QuizResult({
             const userAns = currentAttempt.userAnswers[q.id];
             const correctAns = correctAnswers[q.id];
             if (q.type === 'multiple') {
-              const uA = Array.isArray(userAns) ? [...userAns].sort() : [];
-              const cA = Array.isArray(correctAns) ? [...correctAns].sort() : [];
+              const uA = Array.isArray(userAns) ? userAns.map(String).sort() : [];
+              const cA = Array.isArray(correctAns) ? correctAns.map(String).sort() : [];
               isCorrect = JSON.stringify(uA) === JSON.stringify(cA);
             } else {
-              isCorrect = userAns === correctAns;
+              isCorrect = String(userAns) === String(correctAns);
             }
 
             if (isCorrect) {
@@ -170,12 +170,12 @@ export default function QuizResult({
                   // show the options, highlight the user's answer
                   q.options?.map(opt => {
                     const isUserSelected = q.type === 'multiple' 
-                      ? (currentAttempt.userAnswers[q.id] || []).includes(opt.id)
-                      : currentAttempt.userAnswers[q.id] === opt.id;
+                      ? (currentAttempt.userAnswers[q.id] || []).map(String).includes(String(opt.id))
+                      : String(currentAttempt.userAnswers[q.id]) === String(opt.id);
                       
                     const isActuallyCorrect = q.type === 'multiple'
-                      ? (correctAnswers[q.id] || []).includes(opt.id)
-                      : correctAnswers[q.id] === opt.id;
+                      ? (correctAnswers[q.id] || []).map(String).includes(String(opt.id))
+                      : String(correctAnswers[q.id]) === String(opt.id);
 
                     if (!isUserSelected && !isActuallyCorrect) return null; // Only show selected or correct for brevity in mock
 

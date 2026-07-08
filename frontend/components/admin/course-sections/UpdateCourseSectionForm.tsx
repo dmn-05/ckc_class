@@ -172,12 +172,23 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Lớp (Tự động thêm toàn bộ SV) </label>
-                <select name="base_class_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.base_class_id} onChange={handleChange}>
+                <select 
+                  name="base_class_id" 
+                  className={`${styles.formInput} ${styles.formSelect}`} 
+                  value={formData.base_class_id} 
+                  onChange={handleChange}
+                  disabled={formData.trang_thai === 'da_khoa' || formData.trang_thai === 'da_ket_thuc'}
+                >
                   <option value="">Không chọn - Lớp phụ</option>
                   {classes.map(c => (
                     <option key={c.id} value={c.id}>{c.ma_lop} - {c.ten_lop}</option>
                   ))}
                 </select>
+                {(formData.trang_thai === 'da_khoa' || formData.trang_thai === 'da_ket_thuc') && (
+                  <small style={{ color: '#dc3545', display: 'block', marginTop: '4px' }}>
+                    Không thể tự động thêm SV khi lớp học phần đã khóa hoặc kết thúc
+                  </small>
+                )}
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>

@@ -12,10 +12,15 @@ export default function CreateResourcePage() {
   const [sections, setSections] = useState<{id: string; name: string; code: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
 
   useEffect(() => {
     async function loadData() {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const sId = params.get('sectionId');
+        if (sId) setInitialSectionId(sId);
+
         const sectionsData = await getLecturerCourseSections();
         const formattedSections = (sectionsData || []).map((s: any) => ({
           id: s.id.toString(),
@@ -50,7 +55,11 @@ export default function CreateResourcePage() {
       });
 
       await createLecturerResource(formData);
-      router.push('/lecturer/resources');
+      if (initialSectionId) {
+        router.push(`/lecturer/sections/${initialSectionId}`);
+      } else {
+        router.push('/lecturer/resources');
+      }
     } catch (error) {
       alert('Có lỗi xảy ra khi lưu tài nguyên.');
       console.error(error);
@@ -63,6 +72,14 @@ export default function CreateResourcePage() {
     return <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>Đang tải dữ liệu...</div>;
   }
 
+  const handleBack = () => {
+    if (initialSectionId) {
+      router.push(`/lecturer/sections/${initialSectionId}`);
+    } else {
+      router.push('/lecturer/resources');
+    }
+  };
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
@@ -70,7 +87,7 @@ export default function CreateResourcePage() {
           <button 
             className={styles.btnCancel} 
             style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: 'none', background: 'none', cursor: 'pointer' }}
-            onClick={() => router.push('/lecturer/resources')}
+            onClick={handleBack}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -82,10 +99,11 @@ export default function CreateResourcePage() {
       </div>
 
       <ResourceForm 
+        initialData={initialSectionId ? { sectionId: initialSectionId, title: '', description: '', type: 'document', fileUrl: '', externalUrl: '', isVisible: true } : undefined}
         sections={sections}
         saving={saving}
         onSave={handleSave}
-        onCancel={() => router.push('/lecturer/resources')}
+        onCancel={handleBack}
       />
     </div>
   );

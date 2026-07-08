@@ -45,7 +45,7 @@ export async function getSectionStudents(sectionId: string) {
     }
 
     const data = await res.json();
-    return { success: true, data: data.data };
+    return { success: true, data: data.data, section: data.section };
   } catch (error) {
     return { success: false, error: 'Lỗi kết nối' };
   }
@@ -64,7 +64,8 @@ export async function addStudentToSection(sectionId: string, ma_sinh_vien: strin
       return { success: false, error: data.message || 'Lỗi khi thêm sinh viên' };
     }
 
-    revalidatePath('/lecturer/classes');
+    revalidatePath('/lecturer/sections');
+    revalidatePath(`/lecturer/sections/${sectionId}/students`);
     return { success: true, data: data.data };
   } catch (error) {
     return { success: false, error: 'Lỗi kết nối' };
@@ -81,18 +82,22 @@ export async function removeStudentFromSection(sectionId: string, studentId: str
       return { success: false, error: 'Lỗi khi xóa sinh viên' };
     }
 
-    revalidatePath('/lecturer/classes');
+    revalidatePath('/lecturer/sections');
+    revalidatePath(`/lecturer/sections/${sectionId}/students`);
     return { success: true };
   } catch (error) {
     return { success: false, error: 'Lỗi kết nối' };
   }
 }
 
-export async function searchStudents(query: string, sectionId?: string) {
+export async function searchStudents(query: string, sectionId?: string, classId?: string) {
   try {
     let url = `/lecturer/students/search?q=${encodeURIComponent(query)}`;
     if (sectionId) {
       url += `&section_id=${encodeURIComponent(sectionId)}`;
+    }
+    if (classId) {
+      url += `&class_id=${encodeURIComponent(classId)}`;
     }
     const res = await fetchWithAuth(url, {
       method: 'GET',
@@ -108,4 +113,76 @@ export async function searchStudents(query: string, sectionId?: string) {
     return { success: false, error: 'Lỗi kết nối' };
   }
 }
+
+export async function getClassStudents(classId: string) {
+  try {
+    const res = await fetchWithAuth(`/classes/${classId}/students`, {
+      method: 'GET',
+    });
+
+    if (!res.ok) {
+      return { success: false, error: 'Không thể lấy danh sách sinh viên lớp' };
+    }
+
+    const data = await res.json();
+    return { success: true, data: data.data };
+  } catch (error) {
+    return { success: false, error: 'Lỗi kết nối' };
+  }
+}
+
+export async function addStudentToClass(classId: string, ma_sinh_vien: string) {
+  try {
+    const res = await fetchWithAuth(`/classes/${classId}/students`, {
+      method: 'POST',
+      body: JSON.stringify({ ma_sinh_vien }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return { success: false, error: data.message || 'Lỗi khi thêm sinh viên vào lớp' };
+    }
+
+    revalidatePath('/admin/classes');
+    return { success: true, data: data.data };
+  } catch (error) {
+    return { success: false, error: 'Lỗi kết nối' };
+  }
+}
+
+export async function removeStudentFromClass(classId: string, studentId: string) {
+  try {
+    const res = await fetchWithAuth(`/classes/${classId}/students/${studentId}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      return { success: false, error: 'Lỗi khi xóa sinh viên khỏi lớp' };
+    }
+
+    revalidatePath('/admin/classes');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Lỗi kết nối' };
+  }
+}
+
+export async function getClassById(id: string) {
+  try {
+    const res = await fetchWithAuth(`/classes/${id}`, {
+      method: 'GET',
+    });
+
+    if (!res.ok) {
+      return { success: false, error: 'Không thể lấy thông tin lớp' };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: 'Lỗi kết nối' };
+  }
+}
+
 

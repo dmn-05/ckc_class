@@ -7,7 +7,7 @@ import CommentInput from '../../../../../components/student/posts/CommentInput';
 import CommentThread, { CommentData } from '../../../../../components/student/posts/CommentThread';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getProfileAction } from '../../../../../src/app/student/profile/actions';
 import { authHeaders } from '../../../../../src/lib/auth';
 
@@ -15,6 +15,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function PostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
   const [postData, setPostData] = useState<any>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -215,8 +216,15 @@ export default function PostDetailPage() {
     <div className={styles.pageContainer}>
       <header className={styles.pageHeader} style={{ alignItems: 'flex-start', flexDirection: 'column', padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-outline-variant)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-          <Link 
-            href={postData?.lop_hoc_phan_id ? `/student/courses/${postData.lop_hoc_phan_id}?tab=stream` : "/student/courses"} 
+          {/* Back button */}
+          <button 
+            onClick={() => {
+              if (window.history.length > 2) {
+                router.back();
+              } else {
+                router.push(postData?.lop_hoc_phan_id ? `/student/courses/${postData.lop_hoc_phan_id}?tab=stream` : "/student/courses");
+              }
+            }}
             style={{ 
               display: 'inline-flex', 
               alignItems: 'center', 
@@ -227,6 +235,8 @@ export default function PostDetailPage() {
               color: 'var(--color-on-surface-variant)', 
               borderRadius: '50%', 
               textDecoration: 'none', 
+              border: 'none',
+              cursor: 'pointer',
               transition: 'background-color 0.2s',
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-container-highest)'}
@@ -234,7 +244,7 @@ export default function PostDetailPage() {
             title="Quay lại lớp học"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>arrow_back</span>
-          </Link>
+          </button>
           <h2 className={styles.pageTitle} style={{ margin: 0 }}>Chi tiết bài đăng</h2>
         </div>
       </header>

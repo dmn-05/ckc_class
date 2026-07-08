@@ -1,8 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import StudentListManagement from '@/components/lecturer/sections/StudentListManagement';
 import { getCourseSectionById } from '@/app/actions/course-section';
 import Link from 'next/link';
 import styles from '@/components/lecturer/sections/StudentManagement.module.css';
+
+export const metadata: Metadata = {
+  title: 'Danh sách sinh viên lớp học phần',
+};
 
 export default async function AdminStudentManagementPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

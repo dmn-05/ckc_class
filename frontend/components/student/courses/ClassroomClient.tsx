@@ -87,54 +87,58 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
 
               {/* Feed Posts */}
               {posts.map((post) => (
-                <article 
-                  key={post.id} 
-                  className={styles.postCard} 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => router.push(`/student/posts/${post.id}`)}
-                >
-                  <div className={styles.postHeader}>
-                    <div className={styles.postAuthorInfo}>
-                      <div className={styles.avatar}>
-                        <span className="material-symbols-outlined">person</span>
-                      </div>
-                      <div>
-                        <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Người dùng'}</h4>
-                        <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.nguoi_tao?.vai_tro === 'giang_vien' ? 'Giảng viên' : 'Sinh viên'}</p>
+                post.loai_bai_viet === 'bai_tap' ? (
+                  <Link key={post.id} href={`/student/assignments/${post.bai_tap_id || post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>assignment</span>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 500, fontSize: '16px' }}>{post.tieu_de}</div>
+                          <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {formatDate(post.ngay_tao)}</div>
+                        </div>
                       </div>
                     </div>
-                    <button className={styles.postMenuBtn} onClick={(e) => e.stopPropagation()}>
-                      <span className="material-symbols-outlined">more_vert</span>
-                    </button>
-                  </div>
-                  
-                  <div className={styles.postBody}>
-                    {post.tieu_de && <strong>{post.tieu_de}<br/></strong>}
-                    {post.noi_dung}
-                  </div>
-
-                  <div className={styles.postFooter}>
-                    <button className={styles.postActionBtn} onClick={(e) => e.stopPropagation()}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>thumb_up</span>
-                      Thích
-                    </button>
-                    <button className={styles.postActionBtn} onClick={(e) => e.stopPropagation()}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>chat_bubble</span>
-                      {post.binh_luan?.length || 0} nhận xét
-                    </button>
-                  </div>
-
-                  {/* Comment Input */}
-                  <div className={styles.commentInputArea} onClick={(e) => e.stopPropagation()}>
-                    <div className={styles.avatarSmall}>SV</div>
-                    <div className={styles.commentInputBox}>
-                      <input className={styles.commentInput} placeholder="Thêm nhận xét..." type="text" onClick={(e) => e.stopPropagation()} />
-                      <button className={styles.sendBtn} onClick={(e) => e.stopPropagation()}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>send</span>
+                  </Link>
+                ) : (
+                  <article 
+                    key={post.id} 
+                    className={styles.postCard} 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => router.push(`/student/posts/${post.id}`)}
+                  >
+                    <div className={styles.postHeader}>
+                      <div className={styles.postAuthorInfo}>
+                        <div className={styles.avatar}>
+                          <span className="material-symbols-outlined">person</span>
+                        </div>
+                        <div>
+                          <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Người dùng'}</h4>
+                          <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.nguoi_tao?.vai_tro === 'giang_vien' ? 'Giảng viên' : 'Sinh viên'}</p>
+                        </div>
+                      </div>
+                      <button className={styles.postMenuBtn} onClick={(e) => e.stopPropagation()}>
+                        <span className="material-symbols-outlined">more_vert</span>
                       </button>
                     </div>
-                  </div>
-                </article>
+                    
+                    <div className={styles.postBody}>
+                      {post.tieu_de && <strong>{post.tieu_de}<br/></strong>}
+                      {post.noi_dung}
+                      {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
+                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {post.tep_tin_bai_viet.map((tt: any) => (
+                            <span key={tt.id} style={{ display: 'inline-block', padding: '6px 12px', backgroundColor: 'var(--color-surface-container-high)', borderRadius: '6px', fontSize: '13px', color: 'var(--color-on-surface)', border: '1px solid var(--color-outline-variant)' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '6px' }}>attach_file</span>
+                              {tt.tep_tin?.ten_file}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                )
               ))}
 
               {posts.length === 0 && (
@@ -167,6 +171,27 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                               <div style={{ fontWeight: 500, fontSize: '16px' }}>{a.tieu_de}</div>
                               <div style={{ fontSize: '12px', color: '#5f6368' }}>Hạn nộp: {a.han_nop ?? 'Không có hạn'}</div>
                             </div>
+                          </div>
+                          <div>
+                            {a.submission ? (
+                              a.submission.trang_thai === 'da_cham' ? (
+                                <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, backgroundColor: '#dcfce7', color: '#15803d' }}>
+                                  Đã chấm: {a.submission.diem ?? 0} đ
+                                </span>
+                              ) : a.submission.trang_thai === 'nop_muon' ? (
+                                <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, backgroundColor: '#fef3c7', color: '#b45309' }}>
+                                  Nộp muộn
+                                </span>
+                              ) : (
+                                <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, backgroundColor: '#dbeafe', color: '#1d4ed8' }}>
+                                  Đã nộp
+                                </span>
+                              )
+                            ) : (
+                              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f1f5f9', color: '#64748b' }}>
+                                Chưa nộp
+                              </span>
+                            )}
                           </div>
                         </div>
                       </Link>
@@ -233,27 +258,29 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                 {posts && posts.filter(p => p.loai_bai_viet === 'tai_lieu').length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {posts.filter(p => p.loai_bai_viet === 'tai_lieu').map(r => (
-                      <div key={r.id} className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>book</span>
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 500, fontSize: '16px' }}>{r.tieu_de}</div>
-                            <div style={{ fontSize: '12px', color: '#5f6368' }}>{r.noi_dung}</div>
-                            {r.tepTinBaiViet && r.tepTinBaiViet.length > 0 && (
-                              <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                {r.tepTinBaiViet.map((tt: any) => (
-                                  <a key={tt.id} href={tt.tepTin?.duong_dan} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '4px 8px', backgroundColor: 'var(--color-surface-container-high)', borderRadius: '4px', fontSize: '12px', textDecoration: 'none', color: 'var(--color-on-surface)' }}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>attach_file</span>
-                                    {tt.tepTin?.ten_file}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
+                      <Link key={r.id} href={`/student/posts/${r.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>book</span>
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 500, fontSize: '16px' }}>{r.tieu_de}</div>
+                              <div style={{ fontSize: '12px', color: '#5f6368' }}>{r.noi_dung}</div>
+                              {r.tep_tin_bai_viet && r.tep_tin_bai_viet.length > 0 && (
+                                <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                  {r.tep_tin_bai_viet.map((tt: any) => (
+                                    <span key={tt.id} style={{ display: 'inline-block', padding: '4px 8px', backgroundColor: 'var(--color-surface-container-high)', borderRadius: '4px', fontSize: '12px', color: 'var(--color-on-surface)' }}>
+                                      <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>attach_file</span>
+                                      {tt.tep_tin?.ten_file}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
@@ -304,36 +331,37 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
               <span className="material-symbols-outlined text-primary">event</span>
             </div>
             <div className={styles.widgetList}>
-              <div className={styles.widgetItem}>
-                <p className={styles.widgetItemTitle}>Nộp báo cáo tiến độ</p>
-                <p className={styles.widgetItemDesc}>Cuối tuần này</p>
-              </div>
-            </div>
-            <button className={styles.widgetLink}>Xem tất cả</button>
-          </div>
+              {(() => {
+                const upcomingAssignments = (assignments || []).filter(a => {
+                  if (a.submission) return false;
+                  if (!a.han_nop || a.han_nop === 'Không có hạn') return false;
+                  const parts = a.han_nop.split(', ');
+                  if (parts.length !== 2) return false;
+                  const time = parts[0];
+                  const date = parts[1];
+                  const [hour, minute] = time.split(':');
+                  const [day, month, year] = date.split('/');
+                  const dueDate = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+                  
+                  const now = new Date();
+                  const twoDaysFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+                  
+                  return dueDate > now && dueDate <= twoDaysFromNow;
+                });
 
-          {/* Progress Widget */}
-          <div className={styles.widget}>
-            <h3 className={styles.widgetTitle} style={{ marginBottom: '1.5rem' }}>Tiến độ học tập</h3>
-            
-            <div className={styles.progressItem}>
-              <div className={styles.progressHeader}>
-                <span className={styles.progressLabel}>Hoàn thành bài tập</span>
-                <span className={styles.progressValue}>75%</span>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: '75%' }}></div>
-              </div>
-            </div>
-
-            <div className={styles.progressItem}>
-              <div className={styles.progressHeader}>
-                <span className={styles.progressLabel}>Chuyên cần</span>
-                <span className={styles.progressValueSecondary}>92%</span>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFillSecondary} style={{ width: '92%' }}></div>
-              </div>
+                if (upcomingAssignments.length > 0) {
+                  return upcomingAssignments.map(a => (
+                    <div key={a.id} className={styles.widgetItem}>
+                      <Link href={`/student/assignments/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <p className={styles.widgetItemTitle} style={{ cursor: 'pointer', color: 'var(--color-primary)' }}>{a.tieu_de}</p>
+                      </Link>
+                      <p className={styles.widgetItemDesc}>{a.han_nop}</p>
+                    </div>
+                  ));
+                } else {
+                  return <div style={{ padding: '0.5rem 0', color: '#5f6368', fontSize: '13px' }}>Tuyệt vời, không có bài tập nào sắp đến hạn!</div>;
+                }
+              })()}
             </div>
           </div>
 

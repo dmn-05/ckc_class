@@ -179,35 +179,52 @@ export default function LecturerPostsList() {
         {/* Filter Bar */}
         <div className={styles.filterBar}>
           <div className={styles.filterControls}>
-            <select
-              className={styles.filterSelect}
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-            >
-              <option value="all">Tất cả loại bài</option>
-              <option value="bai_viet">Bài viết</option>
-              <option value="thong_bao">Thông báo</option>
-              <option value="tai_lieu">Tài liệu</option>
-              <option value="bai_tap">Bài tập</option>
-            </select>
-            <select
-              className={styles.filterSelect}
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="hien_thi">Đã đăng (Hiển thị)</option>
-              <option value="an">Bản nháp (Ẩn)</option>
-            </select>
-            <select
-              className={styles.filterSelect}
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest' | 'popular')}
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="popular">Nổi bật</option>
-            </select>
+            <div className={styles.filterSelectWrapper}>
+              <select
+                className={styles.filterSelect}
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+              >
+                <option value="all">Tất cả loại bài</option>
+                <option value="bai_viet">Bài viết</option>
+                <option value="thong_bao">Thông báo</option>
+                <option value="tai_lieu">Tài liệu</option>
+                <option value="bai_tap">Bài tập</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <div className={styles.filterSelectWrapper}>
+              <select
+                className={styles.filterSelect}
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="hien_thi">Đã đăng (Hiển thị)</option>
+                <option value="an">Bản nháp (Ẩn)</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <div className={styles.filterSelectWrapper}>
+              <select
+                className={styles.filterSelect}
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest' | 'popular')}
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="popular">Nổi bật</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
           <div className={styles.viewToggle}>
             <button 

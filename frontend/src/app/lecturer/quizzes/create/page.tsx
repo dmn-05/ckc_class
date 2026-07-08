@@ -10,8 +10,13 @@ export default function CreateQuizPage() {
     const router = useRouter();
     const [sections, setSections] = useState<CourseSectionOption[]>([]);
     const [loading, setLoading] = useState(true);
+    const [initialSectionId, setInitialSectionId] = useState<string>('');
 
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const sId = params.get('sectionId');
+        if (sId) setInitialSectionId(sId);
+
         getLecturerCourseSections()
             .then(data => setSections(data))
             .catch(err => console.error(err))
@@ -21,7 +26,11 @@ export default function CreateQuizPage() {
     const handleSave = async (data: Partial<QuizData>) => {
         try {
             await createLecturerQuiz(data);
-            router.push('/lecturer/quizzes');
+            if (initialSectionId) {
+                router.push(`/lecturer/sections/${initialSectionId}`);
+            } else {
+                router.push('/lecturer/quizzes');
+            }
         } catch (err: any) {
             alert(err.message || 'Lưu thất bại');
         }
@@ -35,12 +44,21 @@ export default function CreateQuizPage() {
         );
     }
 
+    const handleBack = () => {
+        if (initialSectionId) {
+            router.push(`/lecturer/sections/${initialSectionId}`);
+        } else {
+            router.push('/lecturer/quizzes');
+        }
+    };
+
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
             <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--color-on-surface)' }}>Thêm bài kiểm tra mới</h1>
             <QuizSettingsForm
+                initialData={initialSectionId ? { sectionId: initialSectionId } as any : undefined}
                 onSave={handleSave}
-                onClose={() => router.push('/lecturer/quizzes')}
+                onClose={handleBack}
                 sections={sections}
             />
         </div>

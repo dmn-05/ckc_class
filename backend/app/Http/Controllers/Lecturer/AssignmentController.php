@@ -30,7 +30,7 @@ class AssignmentController extends Controller
     {
         $sectionIds = $this->getSectionIds();
 
-        $assignments = BaiTap::with(['lopHocPhan.monHoc', 'nguoiTao'])
+        $assignments = BaiTap::with(['lopHocPhan.monHoc', 'nguoiTao', 'tepTinBaiTap.tepTin'])
             ->whereIn('lop_hoc_phan_id', $sectionIds)
             ->orderBy('ngay_tao', 'desc')
             ->get()
@@ -107,7 +107,16 @@ class AssignmentController extends Controller
             }
         }
 
-
+        \App\Models\BaiViet::create([
+            'tieu_de'          => $baiTap->tieu_de,
+            'noi_dung'         => '',
+            'lop_hoc_phan_id'  => $baiTap->lop_hoc_phan_id,
+            'nguoi_tao_id'     => Auth::id(),
+            'loai_bai_viet'    => 'bai_tap',
+            'bai_tap_id'       => $baiTap->id,
+            'trang_thai'       => $baiTap->trang_thai,
+            'han_nop'          => $baiTap->han_nop,
+        ]);
 
         $baiTap->load(['lopHocPhan.monHoc', 'nguoiTao']);
         $totalStudents = $baiTap->lopHocPhan->sinhViens()->count();
@@ -199,6 +208,12 @@ class AssignmentController extends Controller
 
         if (!empty($updateData)) {
             $baiTap->update($updateData);
+            
+            \App\Models\BaiViet::where('bai_tap_id', $baiTap->id)->update([
+                'tieu_de'    => $baiTap->tieu_de,
+                'trang_thai' => $baiTap->trang_thai,
+                'han_nop'    => $baiTap->han_nop,
+            ]);
         }
 
         $baiTap->load(['lopHocPhan.monHoc', 'nguoiTao']);
@@ -212,9 +227,106 @@ class AssignmentController extends Controller
         $sectionIds = $this->getSectionIds();
 
         $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+        \App\Models\BaiViet::where('bai_tap_id', $baiTap->id)->delete();
         $baiTap->delete();
 
         return response()->json(['message' => 'Assignment deleted successfully']);
+    }
+
+    public function submissions($id)
+    {
+        $sectionIds = $this->getSectionIds();
+        $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+
+        $submissions = \Illuminate\Support\Facades\DB::table('bai_nop')
+            ->join('sinh_vien', 'bai_nop.sinh_vien_id', '=', 'sinh_vien.id')
+            ->join('nguoi_dung', 'sinh_vien.nguoi_dung_id', '=', 'nguoi_dung.id')
+            ->where('bai_tap_id', $baiTap->id)
+            ->select(
+                'bai_nop.id',
+                'bai_nop.sinh_vien_id',
+                'nguoi_dung.ho_ten as student_name',
+                'sinh_vien.ma_sinh_vien as student_code',
+                'bai_nop.ngay_nop',
+                'bai_nop.duong_dan_file',
+                'bai_nop.trang_thai',
+                'bai_nop.diem',
+                'bai_nop.nhan_xet'
+            )
+            ->get()
+            ->map(function ($sub) {
+                // Map status
+                $status = 'submitted';
+                if ($sub->trang_thai === 'nop_muon') $status = 'late';
+                if ($sub->trang_thai === 'da_cham' || $sub->diem !== null) $status = 'graded';
+                if ($sub->trang_thai === 'da_tra') $status = 'returned';
+                
+                return [
+                    'id' => (string)$sub->id,
+                    'studentId' => (string)$sub->sinh_vien_id,
+                    'studentName' => $sub->student_name,
+                    'studentCode' => $sub->student_code,
+                    'submittedAt' => \Carbon\Carbon::parse($sub->ngay_nop)->format('d/m/Y H:i'),
+                    'fileUrl' => $sub->duong_dan_file,
+                    'status' => $status,
+                    'score' => $sub->diem !== null ? (float)$sub->diem : null,
+                    'feedback' => $sub->nhan_xet
+                ];
+            });
+
+        return response()->json(['data' => $submissions]);
+    }
+
+    public function gradeSubmission(Request $request, $id, $submissionId)
+    {
+        $sectionIds = $this->getSectionIds();
+        $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+
+        $baiNop = \Illuminate\Support\Facades\DB::table('bai_nop')
+            ->where('id', $submissionId)
+            ->where('bai_tap_id', $baiTap->id)
+            ->first();
+
+        if (!$baiNop) {
+            abort(404, 'Submission not found');
+        }
+
+        $validated = $request->validate([
+            'diem' => 'required|numeric|min:0|max:' . ($baiTap->diem_toi_da ?? 10),
+            'nhan_xet' => 'nullable|string'
+        ]);
+
+        $newStatus = ($baiNop->trang_thai === 'da_tra') ? 'da_tra' : 'da_cham';
+
+        \Illuminate\Support\Facades\DB::table('bai_nop')
+            ->where('id', $submissionId)
+            ->update([
+                'diem' => $validated['diem'],
+                'nhan_xet' => $validated['nhan_xet'],
+                'trang_thai' => $newStatus
+            ]);
+
+        return response()->json(['message' => 'Graded successfully']);
+    }
+
+    public function returnSubmissions(Request $request, $id)
+    {
+        $sectionIds = $this->getSectionIds();
+        $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+
+        $validated = $request->validate([
+            'submission_ids' => 'required|array',
+            'submission_ids.*' => 'integer'
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('bai_nop')
+            ->whereIn('id', $validated['submission_ids'])
+            ->where('bai_tap_id', $baiTap->id)
+            ->update([
+                'trang_thai' => 'da_tra'
+            ]);
+
+        return response()->json(['message' => 'Submissions returned successfully']);
     }
 
     private function formatAssignment($item, int $totalStudents)
@@ -229,6 +341,10 @@ class AssignmentController extends Controller
         } else {
             $status = 'open';
         }
+
+        $baiNops = \Illuminate\Support\Facades\DB::table('bai_nop')->where('bai_tap_id', $item->id)->get();
+        $submittedCount = $baiNops->count();
+        $needsGradingCount = $baiNops->where('diem', null)->count();
 
         return [
             'id'             => (string) $item->id,
@@ -254,9 +370,9 @@ class AssignmentController extends Controller
             'sectionName'    => $item->lopHocPhan->ten_lop ?? $item->lopHocPhan->monHoc->ten_mon ?? '',
             'status'         => $status,
             'stats'          => [
-                'submitted'    => 0,
+                'submitted'    => $submittedCount,
                 'total'        => $totalStudents,
-                'needsGrading' => 0,
+                'needsGrading' => $needsGradingCount,
             ],
             'createdAt' => $item->ngay_tao,
         ];

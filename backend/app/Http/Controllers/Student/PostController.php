@@ -56,7 +56,7 @@ class PostController extends Controller
             ->where('trang_thai', 'hien_thi')
             ->findOrFail($id);
             
-        $post->increment('luot_xem');
+        // $post->increment('luot_xem'); // Column not found in DB
             
         return response()->json(['data' => $post]);
     }

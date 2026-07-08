@@ -28,7 +28,15 @@ class StudentListController extends Controller
 
         $students = $section->sinhViens()->with('nguoiDung', 'lop')->get();
         
-        return response()->json(['data' => $students]);
+        return response()->json([
+            'data' => $students,
+            'section' => [
+                'id' => $section->id,
+                'ma_lop_hoc_phan' => $section->ma_lop_hoc_phan,
+                'ten_lop' => $section->ten_lop,
+                'trang_thai' => $section->trang_thai,
+            ]
+        ]);
     }
 
     public function store(Request $request, $sectionId)
@@ -47,9 +55,9 @@ class StudentListController extends Controller
 
         $student = \App\Models\SinhVien::where('ma_sinh_vien', $validated['ma_sinh_vien'])->firstOrFail();
 
-        // Check if course section is ended
-        if ($section->trang_thai === 'da_ket_thuc') {
-            return response()->json(['message' => 'Không thể thêm sinh viên vào lớp học phần đã kết thúc'], 422);
+        // Check if course section is locked or ended
+        if (in_array($section->trang_thai, ['da_khoa', 'da_ket_thuc'])) {
+            return response()->json(['message' => 'Không thể thêm sinh viên vào lớp học phần đã khóa hoặc kết thúc'], 422);
         }
 
         // Check if student is suspended or graduated
@@ -94,6 +102,7 @@ class StudentListController extends Controller
 
         $query = $request->get('q', '');
         $sectionId = $request->get('section_id');
+        $classId = $request->get('class_id');
         
         $students = \App\Models\SinhVien::with('nguoiDung', 'lop')
             ->where('trang_thai', 'dang_hoc')
@@ -108,6 +117,11 @@ class StudentListController extends Controller
             ->when($sectionId, function($q) use ($sectionId) {
                 $q->whereDoesntHave('lopHocPhans', function($subQ) use ($sectionId) {
                     $subQ->where('lop_hoc_phan_id', $sectionId);
+                });
+            })
+            ->when($classId, function($q) use ($classId) {
+                $q->where(function($sub) use ($classId) {
+                    $sub->where('lop_id', '!=', $classId)->orWhereNull('lop_id');
                 });
             })
             ->limit(20)

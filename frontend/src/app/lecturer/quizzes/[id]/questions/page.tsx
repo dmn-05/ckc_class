@@ -20,12 +20,17 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
     const [quizData, setQuizData] = useState<QuizData | null>(null);
     const [questions, setQuestions] = useState<QuestionData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [initialSectionId, setInitialSectionId] = useState<string>('');
 
     // Modals
     const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
     const [editingQuestion, setEditingQuestion] = useState<QuestionData | undefined>(undefined);
 
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const sId = params.get('sectionId');
+        if (sId) setInitialSectionId(sId);
+
         Promise.all([
             getLecturerQuizById(id),
             getLecturerQuestions(id)
@@ -37,7 +42,11 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
         .catch(err => {
             console.error(err);
             alert('Không thể tải dữ liệu câu hỏi');
-            router.push('/lecturer/quizzes');
+            if (sId) {
+                router.push(`/lecturer/sections/${sId}`);
+            } else {
+                router.push('/lecturer/quizzes');
+            }
         })
         .finally(() => setLoading(false));
     }, [id, router]);
@@ -52,13 +61,14 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
                 setQuestions(prev => [...prev, created]);
             }
             setIsQuestionModalOpen(false);
+            setEditingQuestion(undefined);
         } catch (err: any) {
             alert(err.message || 'Lưu câu hỏi thất bại');
         }
     };
 
     const handleDeleteQuestion = async (questionId: string) => {
-        if (!window.confirm("Xóa câu hỏi này?")) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) return;
         try {
             await deleteLecturerQuestion(id, questionId);
             setQuestions(prev => prev.filter(q => q.id !== questionId));
@@ -72,7 +82,7 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
         try {
             await reorderLecturerQuestions(id, newQuestions.map(q => ({ id: q.id, order: q.order })));
         } catch (err: any) {
-            console.error('Reorder failed:', err);
+            console.error('Failed to save order', err);
         }
     };
 
@@ -86,12 +96,20 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
 
     if (!quizData) return null;
 
+    const handleBack = () => {
+        if (initialSectionId) {
+            router.push(`/lecturer/sections/${initialSectionId}`);
+        } else {
+            router.push('/lecturer/quizzes');
+        }
+    };
+
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
             <QuestionsManager
                 quizTitle={quizData.title}
                 questions={questions}
-                onBack={() => router.push('/lecturer/quizzes')}
+                onBack={handleBack}
                 onSaveNewQuestion={handleSaveQuestion}
                 onEditQuestion={(q) => {
                     setEditingQuestion(q);

@@ -9,10 +9,11 @@ interface ClassListProps {
   classes: ClassData[];
   onEdit: (classItem: ClassData) => void;
   onViewStats: (classId: string) => void;
+  onManageStudents?: (classId: string) => void;
   onDelete: (classId: string) => void;
 }
 
-export default function ClassList({ classes, onEdit, onViewStats, onDelete }: ClassListProps) {
+export default function ClassList({ classes, onEdit, onViewStats, onManageStudents, onDelete }: ClassListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // Adjust as needed
@@ -57,6 +58,7 @@ export default function ClassList({ classes, onEdit, onViewStats, onDelete }: Cl
             classItem={classItem} 
             onEdit={onEdit} 
             onViewStats={onViewStats}
+            onManageStudents={onManageStudents}
             onDelete={onDelete}
           />
         ))}

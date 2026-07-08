@@ -3,6 +3,7 @@
 import React from 'react';
 import styles from './AdminLecturers.module.css';
 import LecturerCard, { LecturerData } from './LecturerCard';
+import { getPaginationRange } from '@/utils/pagination';
 
 interface LecturerListProps {
   lecturers: LecturerData[];
@@ -98,14 +99,24 @@ export default function LecturerList({
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
 
-          {Array.from({ length: totalPages }).map((_, idx) => (
-            <button
-              key={idx + 1}
-              className={`${styles.btnPage} ${currentPage === idx + 1 ? styles.btnPageActive : ''}`}
-              onClick={() => onPageChange(idx + 1)}
-            >
-              {idx + 1}
-            </button>
+          {getPaginationRange(currentPage, totalPages).map((pageNum, idx) => (
+            typeof pageNum === 'number' ? (
+              <button
+                key={pageNum}
+                className={`${styles.btnPage} ${currentPage === pageNum ? styles.btnPageActive : ''}`}
+                onClick={() => onPageChange(pageNum)}
+              >
+                {pageNum}
+              </button>
+            ) : (
+              <span
+                key={`dots-${idx}`}
+                className={styles.btnPage}
+                style={{ border: 'none', background: 'transparent', cursor: 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                {pageNum}
+              </span>
+            )
           ))}
 
           <button

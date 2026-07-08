@@ -117,3 +117,34 @@ export async function deleteLecturerAssignment(id: string) {
     return await response.json();
 }
 
+export async function getLecturerAssignmentSubmissions(id: string) {
+    const response = await fetchWithAuth(`/lecturer/assignments/${id}/submissions`, { method: 'GET', cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch submissions');
+    const json = await response.json();
+    return json.data || [];
+}
+
+export async function gradeLecturerSubmission(assignmentId: string, submissionId: string, score: number, feedback: string) {
+    const response = await fetchWithAuth(`/lecturer/assignments/${assignmentId}/submissions/${submissionId}/grade`, {
+        method: 'POST',
+        body: JSON.stringify({ diem: score, nhan_xet: feedback })
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to grade submission');
+    }
+    return await response.json();
+}
+
+export async function returnLecturerSubmissions(assignmentId: string, submissionIds: string[]) {
+    const response = await fetchWithAuth(`/lecturer/assignments/${assignmentId}/submissions/return`, {
+        method: 'POST',
+        body: JSON.stringify({ submission_ids: submissionIds.map(id => Number(id)) })
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to return submissions');
+    }
+    return await response.json();
+}
+

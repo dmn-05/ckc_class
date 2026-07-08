@@ -72,6 +72,13 @@ class CourseSectionController extends Controller
         $baseClassId = $validated['base_class_id'] ?? null;
         unset($validated['base_class_id']);
 
+        if ($baseClassId) {
+            $targetStatus = $validated['trang_thai'] ?? $section->trang_thai;
+            if (in_array($targetStatus, ['da_khoa', 'da_ket_thuc'])) {
+                return response()->json(['message' => 'Không thể tự động thêm sinh viên vào lớp học phần đã khóa hoặc kết thúc'], 422);
+            }
+        }
+
         $section->update($validated);
 
         if ($baseClassId) {

@@ -68,16 +68,16 @@ export default function QuizResultPage({ params }: { params: Promise<{ id: strin
                                 if (q && q.type !== 'text') {
                                     if (ct.diem_dat > 0) correctCount++;
                                     if (q.type === 'single') {
-                                        userAnswers[qId] = ct.cau_tra_loi;
+                                        userAnswers[qId] = ct.dap_an_id;
                                     } else if (q.type === 'multiple') {
                                         try {
-                                            userAnswers[qId] = JSON.parse(ct.cau_tra_loi || '[]');
+                                            userAnswers[qId] = typeof ct.dap_an_ids === 'string' ? JSON.parse(ct.dap_an_ids || '[]') : (ct.dap_an_ids || []);
                                         } catch {
                                             userAnswers[qId] = [];
                                         }
                                     }
                                 } else if (q && q.type === 'text') {
-                                    userAnswers[qId] = ct.cau_tra_loi;
+                                    userAnswers[qId] = ct.dap_an_tu_luan;
                                     textScores[qId] = ct.diem_dat || 0;
                                 }
                             });

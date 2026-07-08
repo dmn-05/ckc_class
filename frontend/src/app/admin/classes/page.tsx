@@ -53,6 +53,10 @@ export default function LecturerClassesPage() {
     router.push(`/admin/classes/${classItem.id}/edit`);
   };
 
+  const handleManageStudents = (classId: string) => {
+    router.push(`/admin/classes/${classId}/students`);
+  };
+
   const handleDeleteClass = (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa lớp này?')) {
       setClasses(prev => prev.filter(s => s.id !== id));
@@ -102,6 +106,7 @@ export default function LecturerClassesPage() {
             classes={filteredClasses}
             onEdit={handleOpenEdit}
             onViewStats={setStatsClassId}
+            onManageStudents={handleManageStudents}
             onDelete={handleDeleteClass}
           />
         )}

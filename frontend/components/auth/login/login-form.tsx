@@ -18,6 +18,8 @@ export function LoginForm() {
     const email = formData.get("email");
     const password = formData.get("password");
 
+    let successData = null;
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/login`, {
         method: "POST",
@@ -32,18 +34,28 @@ export function LoginForm() {
 
       if (response.ok && data.success) {
         setStatus("success");
-        await loginAction({
+        successData = {
           token: data.token,
           vai_tro_id: data.user.vai_tro_id,
           user: data.user,
-        });
+        };
       } else {
         setStatus("error");
         setErrorMessage(data.message || data.errors?.email?.[0] || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (
+        (error && typeof error.message === "string" && error.message.includes("NEXT_REDIRECT")) ||
+        (error && typeof error.digest === "string" && error.digest.includes("NEXT_REDIRECT"))
+      ) {
+        throw error;
+      }
       setStatus("error");
       setErrorMessage("Không thể kết nối đến máy chủ.");
+    }
+
+    if (successData) {
+      await loginAction(successData);
     }
   }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lop;
+use App\Models\SinhVien;
 use Illuminate\Http\Request;
 
 class ClassController extends Controller
@@ -55,5 +56,43 @@ class ClassController extends Controller
         $lop = Lop::findOrFail($id);
         $lop->delete();
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    public function getStudents($id)
+    {
+        $lop = Lop::findOrFail($id);
+        $students = $lop->sinhViens()->with('nguoiDung', 'khoa', 'lop')->get();
+        return response()->json(['data' => $students]);
+    }
+
+    public function addStudent(Request $request, $id)
+    {
+        $lop = Lop::findOrFail($id);
+        $validated = $request->validate([
+            'ma_sinh_vien' => 'required|string|exists:sinh_vien,ma_sinh_vien',
+        ]);
+        $student = SinhVien::where('ma_sinh_vien', $validated['ma_sinh_vien'])->firstOrFail();
+
+        if ($student->lop_id == $lop->id) {
+            return response()->json(['message' => 'Sinh viên này đã thuộc lớp ' . $lop->ma_lop], 422);
+        }
+
+        $student->lop_id = $lop->id;
+        if ($lop->khoa_id) {
+            $student->khoa_id = $lop->khoa_id;
+        }
+        $student->save();
+        $student->load('nguoiDung', 'khoa', 'lop');
+
+        return response()->json(['message' => 'Thêm sinh viên vào lớp thành công', 'data' => $student], 201);
+    }
+
+    public function removeStudent($id, $studentId)
+    {
+        $lop = Lop::findOrFail($id);
+        $student = SinhVien::where('lop_id', $lop->id)->findOrFail($studentId);
+        $student->lop_id = null;
+        $student->save();
+        return response()->json(['message' => 'Đã xóa sinh viên khỏi lớp']);
     }
 }

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import styles from './AssignmentsManagement.module.css';
 import { SubmissionData } from './SubmissionsView';
 
+import { downloadFile } from '@/utils/download';
+
 interface GradingModalProps {
   submission: SubmissionData;
   maxScore: number;
@@ -16,13 +18,19 @@ export default function GradingModal({ submission, maxScore, onSave, onClose }: 
   const [feedback, setFeedback] = useState<string>('');
 
   useEffect(() => {
-    if (submission.score !== undefined) setScore(submission.score.toString());
+    if (submission.score != null) setScore(submission.score.toString());
     if (submission.feedback) setFeedback(submission.feedback);
   }, [submission]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(submission.id, Number(score), feedback);
+  };
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const fileName = submission.fileUrl.split('/').pop() || 'submission.pdf';
+    downloadFile(submission.fileUrl.replace('/fl_attachment/', '/'), fileName);
   };
 
   return (
@@ -54,8 +62,12 @@ export default function GradingModal({ submission, maxScore, onSave, onClose }: 
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20" style={{ color: '#4f46e5' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
-              <a href={submission.fileUrl} target="_blank" rel="noreferrer" style={{ color: '#4f46e5', textDecoration: 'underline', fontSize: '0.875rem', fontWeight: 500 }}>
-                Xem file đính kèm
+              <a 
+                href={submission.fileUrl} 
+                onClick={handleDownload}
+                style={{ color: '#4f46e5', textDecoration: 'underline', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}
+              >
+                Tải file đính kèm
               </a>
             </div>
           </div>

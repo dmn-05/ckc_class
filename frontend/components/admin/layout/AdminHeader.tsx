@@ -5,10 +5,22 @@ import Link from 'next/link';
 import { logoutAction } from '@/app/actions/auth';
 import styles from './AdminLayout.module.css';
 
-export default function AdminHeader() {
-  const hasPhoto = false; // Set to true to display photo, false to display "GV"
+function getInitials(fullName: string): string {
+  if (!fullName) return 'AD';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
+export default function AdminHeader({ profileData }: { profileData?: any }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const adminName = profileData?.ho_ten || "Admin";
+  const avatarUrl = profileData?.avatar || null;
+  const initials = getInitials(adminName);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -35,23 +47,32 @@ export default function AdminHeader() {
         </button>
 
         <div className={styles.userProfile} ref={dropdownRef} onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer', position: 'relative' }}>
-          {hasPhoto ? (
+          {avatarUrl ? (
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtePGyL-OCAwFTFV8YAPLu-ThfD2Ya_ReUOwIW0PAy5QZxRaVI1emqF1TwYnLtmBjk82_S0bbuCnvZDB3A9EABi_F5cflLk7rp3FDWrd8_9h-EWEcOtaZ7NvXogtRE8waz07f9Tt9JPywtGgT2FcFdCyCUlWgQizviojMizJufX4VylSSPlA7tbEzhobYEkJydP8-cRqvTMpfF6zWWfRC9zkGu1MbHMIizHugDZboKD2suWmV-XudErXZEimOSUUglNmnK9P96ru4"
-              alt="Admin"
+              src={avatarUrl}
+              alt={adminName}
               className={styles.userAvatar}
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: 'cover', borderRadius: '50%' }}
             />
           ) : (
-            <div className={styles.userAvatar}>Admin</div>
+            <div
+              className={styles.userAvatar}
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, borderRadius: '50%' }}
+            >
+              {initials}
+            </div>
           )}
           <div className={styles.userName} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Admin
+            {adminName}
             <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: '#64748b' }}>arrow_drop_down</span>
           </div>
 
           {showDropdown && (
             <div className={styles.dropdownMenu} onClick={(e) => e.stopPropagation()}>
+              <Link href="/admin/profile" className={styles.dropdownItem} onClick={() => setShowDropdown(false)} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>account_circle</span>
+                Hồ sơ cá nhân
+              </Link>
               <form action={logoutAction}>
                 <button type="submit" className={styles.dropdownItem} style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>logout</span>

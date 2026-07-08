@@ -73,3 +73,34 @@ export async function getStudentAssignmentById(id: string | number) {
         return null;
     }
 }
+
+export async function submitStudentAssignment(assignmentId: string, formData: FormData) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+
+    if (!token) {
+        return { success: false, message: 'Not authenticated' };
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/student/assignments/${assignmentId}/submit`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+            },
+            body: formData,
+            cache: 'no-store'
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            return { success: false, message: data.message || 'Lỗi nộp bài' };
+        }
+
+        return { success: true, message: data.message };
+    } catch (error: any) {
+        console.error('Error submitting assignment:', error);
+        return { success: false, message: error.message || 'Lỗi kết nối' };
+    }
+}

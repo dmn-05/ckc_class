@@ -1,8 +1,20 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { getStudentCourseSection, getStudentCoursePosts } from '@/app/actions/student-section';
 import { getStudentAssignments } from '@/app/actions/student-assignment';
 import { getStudentQuizzes } from '@/app/actions/student-quiz';
 import ClassroomClient from '../../../../../components/student/courses/ClassroomClient';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const section = await getStudentCourseSection(id);
+    const title = section?.ten_lop || section?.mon_hoc?.ten_mon || `Lớp học phần #${id}`;
+    return { title };
+  } catch (error) {
+    return { title: `Lớp học phần #${id}` };
+  }
+}
 
 export default async function CourseDetailClassroomPage({ params }: { params: { id: string } }) {
   const { id: sectionId } = await params;
