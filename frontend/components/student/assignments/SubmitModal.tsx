@@ -1,25 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from './AssignmentsManagement.module.css';
 
 interface SubmitModalProps {
   assignmentTitle: string;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (file: string, note: string) => void;
+  onSubmit: (file: File | null, note: string) => void;
 }
 
 export default function SubmitModal({ assignmentTitle, isOpen, onClose, onSubmit }: SubmitModalProps) {
   const [note, setNote] = useState('');
-  const [file, setFile] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    onSubmit(file || 'uploaded_file.zip', note);
+    onSubmit(file, note);
     setNote('');
     setFile(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleDropzoneClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -42,15 +53,22 @@ export default function SubmitModal({ assignmentTitle, isOpen, onClose, onSubmit
           
           <div className={styles.modalField}>
             <label className={styles.fieldLabel}>Đính kèm tệp (.zip, .pdf)</label>
-            <div className={styles.dropzone} onClick={() => setFile('Project_02_SourceCode.zip')}>
+            <div className={styles.dropzone} onClick={handleDropzoneClick}>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleFileChange} 
+                accept=".zip,.pdf"
+              />
               <svg className={styles.dropzoneIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               {file ? (
-                <p className={styles.dropzoneText}>Đã chọn: <span className={styles.dropzoneTextPrimary}>{file}</span></p>
+                <p className={styles.dropzoneText}>Đã chọn: <span className={styles.dropzoneTextPrimary}>{file.name}</span></p>
               ) : (
                 <>
-                  <p className={styles.dropzoneText}>Nhấn vào đây để <span className={styles.dropzoneTextPrimary}>chọn file giả lập</span></p>
+                  <p className={styles.dropzoneText}>Nhấn vào đây để <span className={styles.dropzoneTextPrimary}>chọn file</span></p>
                   <p className={styles.dropzoneSubtext}>Dung lượng tối đa: 50MB</p>
                 </>
               )}

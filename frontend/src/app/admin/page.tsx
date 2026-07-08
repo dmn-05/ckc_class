@@ -1,6 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { getDashboardStats } from '@/app/actions/dashboard';
 import styles from './Dashboard.module.css';
+
+export const metadata: Metadata = {
+  title: 'Bảng điều khiển',
+};
 
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();

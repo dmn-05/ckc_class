@@ -19,9 +19,7 @@ return new class extends Migration
             });
 
             Schema::table('binh_luan', function (Blueprint $table) {
-                // Khớp đúng kiểu dữ liệu INT (signed) theo cấu trúc bảng hiện tại
-                $table->integer('binh_luan_cha_id')->nullable()->after('bai_viet_id');
-                $table->foreign('binh_luan_cha_id')->references('id')->on('binh_luan')->onDelete('cascade');
+                $table->foreignId('binh_luan_cha_id')->nullable()->after('bai_viet_id')->constrained('binh_luan')->onDelete('cascade');
             });
         }
     }

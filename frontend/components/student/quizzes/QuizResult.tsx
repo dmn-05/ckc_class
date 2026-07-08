@@ -4,30 +4,65 @@ import React from 'react';
 import styles from './QuizzesManagement.module.css';
 import { QuestionData } from './QuizInterface';
 
-interface QuizResultProps {
+export interface AttemptResult {
+  id: string;
+  attemptNumber: number;
   score: number;
-  maxScore: number;
   correctCount: number;
-  totalQuestions: number;
   timeSpentStr: string;
+  attemptStatus: string;
+  textScores: Record<string, number>;
+  userAnswers: Record<string, any>;
+}
+
+interface QuizResultProps {
+  attempts: AttemptResult[];
+  maxScore: number;
+  totalQuestions: number;
   hasTextQuestions: boolean;
   questions: QuestionData[];
-  userAnswers: Record<string, any>;
   correctAnswers: Record<string, any>; // mock correct answers dict
   explanations: Record<string, string>; // mock explanations
   onBackToList: () => void;
 }
 
 export default function QuizResult({
-  score, maxScore, correctCount, totalQuestions, timeSpentStr,
-  hasTextQuestions, questions, userAnswers, correctAnswers, explanations,
+  attempts, maxScore, totalQuestions,
+  hasTextQuestions, questions, correctAnswers, explanations,
   onBackToList
 }: QuizResultProps) {
 
-  const isPending = hasTextQuestions;
+  const [selectedAttemptIndex, setSelectedAttemptIndex] = React.useState(attempts.length > 0 ? attempts.length - 1 : 0);
+  const currentAttempt = attempts[selectedAttemptIndex];
+
+  const isPending = hasTextQuestions && currentAttempt?.attemptStatus !== 'da_cham';
+
+  if (!currentAttempt) return null;
 
   return (
     <div className={styles.resultContainer}>
+      {attempts.length > 1 && (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+          {attempts.map((att, idx) => (
+            <button
+              key={att.id}
+              onClick={() => setSelectedAttemptIndex(idx)}
+              style={{
+                padding: '0.5rem 1rem',
+                border: 'none',
+                background: selectedAttemptIndex === idx ? '#eef2ff' : 'transparent',
+                color: selectedAttemptIndex === idx ? '#4f46e5' : '#6b7280',
+                fontWeight: selectedAttemptIndex === idx ? 600 : 400,
+                borderRadius: '0.375rem',
+                cursor: 'pointer'
+              }}
+            >
+              Lần {att.attemptNumber}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={styles.scoreBanner}>
         <div className={`${styles.scoreIconBox} ${isPending ? styles.scoreIconBoxPending : ''}`}>
           {isPending ? (
@@ -48,7 +83,7 @@ export default function QuizResult({
           </>
         ) : (
           <>
-            <h2 className={styles.scoreResultTitle}>Kết quả: {Number(score.toFixed(1))} / {Number(maxScore.toFixed(1))}</h2>
+            <h2 className={styles.scoreResultTitle}>Kết quả: {Number(currentAttempt.score.toFixed(1))} / {Number(maxScore.toFixed(1))}</h2>
             <p className={styles.scoreResultSubtitle}>Chúc mừng! Bạn đã hoàn thành bài thi rất tốt.</p>
           </>
         )}
@@ -56,17 +91,17 @@ export default function QuizResult({
         <div className={styles.scoreStatsGrid}>
           <div className={styles.scoreStatItem}>
             <p className={styles.statItemLabel}>Trả lời đúng</p>
-            <p className={`${styles.statItemValue} ${isPending ? styles.statItemValueNeutral : ''}`}>{correctCount}/{totalQuestions}</p>
+            <p className={`${styles.statItemValue} ${isPending ? styles.statItemValueNeutral : ''}`}>{currentAttempt.correctCount}/{totalQuestions}</p>
           </div>
           <div className={styles.statDivider}></div>
           <div className={styles.scoreStatItem}>
             <p className={styles.statItemLabel}>Thời gian</p>
-            <p className={`${styles.statItemValue} ${styles.statItemValueNeutral}`}>{timeSpentStr}</p>
+            <p className={`${styles.statItemValue} ${styles.statItemValueNeutral}`}>{currentAttempt.timeSpentStr}</p>
           </div>
         </div>
 
         <button className={styles.btnBackList} onClick={onBackToList}>
-          Quay về danh sách
+          Quay lại
         </button>
       </div>
 
@@ -80,19 +115,26 @@ export default function QuizResult({
           let statusClass = '';
 
           if (q.type === 'text') {
-            statusText = 'ĐANG CHỜ CHẤM';
-            cardClass = `${styles.reviewCard} ${styles.reviewCardPending}`;
-            statusClass = styles.reviewStatusPending;
+            if (currentAttempt.attemptStatus === 'da_cham') {
+              const qScore = currentAttempt.textScores ? currentAttempt.textScores[q.id] || 0 : 0;
+              statusText = `ĐÃ CHẤM (${qScore} đ)`;
+              cardClass = `${styles.reviewCard} ${styles.reviewCardCorrect}`;
+              statusClass = styles.reviewStatusCorrect;
+            } else {
+              statusText = 'ĐANG CHỜ CHẤM';
+              cardClass = `${styles.reviewCard} ${styles.reviewCardPending}`;
+              statusClass = styles.reviewStatusPending;
+            }
           } else {
             // simple check for single choice
-            const userAns = userAnswers[q.id];
+            const userAns = currentAttempt.userAnswers[q.id];
             const correctAns = correctAnswers[q.id];
             if (q.type === 'multiple') {
-              const uA = Array.isArray(userAns) ? [...userAns].sort() : [];
-              const cA = Array.isArray(correctAns) ? [...correctAns].sort() : [];
+              const uA = Array.isArray(userAns) ? userAns.map(String).sort() : [];
+              const cA = Array.isArray(correctAns) ? correctAns.map(String).sort() : [];
               isCorrect = JSON.stringify(uA) === JSON.stringify(cA);
             } else {
-              isCorrect = userAns === correctAns;
+              isCorrect = String(userAns) === String(correctAns);
             }
 
             if (isCorrect) {
@@ -122,18 +164,18 @@ export default function QuizResult({
               <div className="space-y-2">
                 {q.type === 'text' ? (
                   <div className={`${styles.reviewAnswerBox} ${styles.reviewAnswerBoxPending}`}>
-                    {userAnswers[q.id] || '(Không có câu trả lời)'}
+                    {currentAttempt.userAnswers[q.id] || '(Không có câu trả lời)'}
                   </div>
                 ) : (
                   // show the options, highlight the user's answer
                   q.options?.map(opt => {
                     const isUserSelected = q.type === 'multiple' 
-                      ? (userAnswers[q.id] || []).includes(opt.id)
-                      : userAnswers[q.id] === opt.id;
+                      ? (currentAttempt.userAnswers[q.id] || []).map(String).includes(String(opt.id))
+                      : String(currentAttempt.userAnswers[q.id]) === String(opt.id);
                       
                     const isActuallyCorrect = q.type === 'multiple'
-                      ? (correctAnswers[q.id] || []).includes(opt.id)
-                      : correctAnswers[q.id] === opt.id;
+                      ? (correctAnswers[q.id] || []).map(String).includes(String(opt.id))
+                      : String(correctAnswers[q.id]) === String(opt.id);
 
                     if (!isUserSelected && !isActuallyCorrect) return null; // Only show selected or correct for brevity in mock
 

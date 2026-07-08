@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CKC CLASS - Đăng nhập",
-  description: "Cổng đăng nhập hệ thống CKC CLASSROOM",
+  title: {
+    template: "%s | CKC CLASS",
+    default: "CKC CLASS | Cổng thông tin Học tập & Giảng dạy",
+  },
+  description: "Hệ thống Quản lý Học tập & Giảng dạy CKC CLASSROOM",
 };
 
 export default function RootLayout({

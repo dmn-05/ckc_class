@@ -35,7 +35,8 @@ class PostController extends Controller
             'loai_bai_viet' => 'required|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
-            'file' => 'nullable|file|max:20480', // Max 20MB
+            'hinh_anh' => 'required|image|max:10240', // Ảnh bìa bắt buộc, tối đa 10MB
+            'file' => 'nullable|file|max:20480', // Tệp đính kèm, tối đa 20MB
         ]);
 
         $ten_chu_de_map = [
@@ -47,18 +48,36 @@ class PostController extends Controller
         $ten_chu_de = $ten_chu_de_map[$validated['loai_bai_viet']] ?? null;
         $chu_de_id = null;
         if ($ten_chu_de) {
-            $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
-                ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
-                ->where('ten_chu_de', $ten_chu_de)
-                ->value('id');
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
+                    $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
+                        ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
+                        ->where('ten_chu_de', $ten_chu_de)
+                        ->value('id');
+                }
+            } catch (\Exception $e) {
+                // Ignore if table doesn't exist
+            }
+        }
+
+        // Upload ảnh bìa lên Cloudinary
+        $hinh_anh_url = null;
+        if ($request->hasFile('hinh_anh')) {
+            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+            $result = $cloudinary->uploadApi()->upload(
+                $request->file('hinh_anh')->getRealPath(),
+                ['folder' => 'posts']
+            );
+            $hinh_anh_url = $result['secure_url'];
         }
 
         $post = BaiViet::create([
             'tieu_de' => $validated['tieu_de'],
             'noi_dung' => $validated['noi_dung'],
+            'hinh_anh' => $hinh_anh_url,
             'lop_hoc_phan_id' => $validated['lop_hoc_phan_id'],
             'chu_de_id' => $chu_de_id,
-            'nguoi_tao_id' => Auth::id() ?? 2, // Fallback to GV001 (Đỗ Minh Nhật)
+            'nguoi_tao_id' => Auth::id() ?? 2,
             'loai_bai_viet' => $validated['loai_bai_viet'],
             'trang_thai' => $validated['trang_thai'] ?? 'hien_thi',
         ]);
@@ -112,7 +131,20 @@ class PostController extends Controller
             'noi_dung' => 'sometimes|string',
             'loai_bai_viet' => 'sometimes|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
             'trang_thai' => 'sometimes|string',
+            'hinh_anh' => 'nullable|image|max:10240',
         ]);
+
+        // Nếu có ảnh mới, upload lên Cloudinary
+        if ($request->hasFile('hinh_anh')) {
+            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+            $result = $cloudinary->uploadApi()->upload(
+                $request->file('hinh_anh')->getRealPath(),
+                ['folder' => 'posts']
+            );
+            $validated['hinh_anh'] = $result['secure_url'];
+        } else {
+            unset($validated['hinh_anh']); // Không ghi đè nếu không upload ảnh mới
+        }
 
         $post->update($validated);
 

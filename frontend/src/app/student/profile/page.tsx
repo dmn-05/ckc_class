@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import StudentProfile from '../../../../components/student/profile/StudentProfile';
 
 export const metadata = {
-  title: 'Chỉnh sửa hồ sơ Sinh viên | Academic Portal',
+  title: 'Hồ sơ cá nhân',
 };
 
 async function getProfile() {

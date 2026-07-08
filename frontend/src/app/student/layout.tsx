@@ -1,9 +1,18 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import StudentSidebar from '../../../components/student/layout/StudentSidebar';
 import StudentHeader from '../../../components/student/layout/StudentHeader';
 
 import styles from '@/components/student/layout/StudentLayout.module.css';
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | Sinh viên - CKC CLASS",
+    default: "Cổng thông tin Sinh viên | CKC CLASS",
+  },
+  description: "Cổng thông tin dành cho Sinh viên CKC CLASSROOM",
+};
 
 async function getUserProfile() {
   const cookieStore = await cookies();

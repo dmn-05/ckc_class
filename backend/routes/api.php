@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ClassController;
 
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -24,9 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Only Routes
     Route::middleware(\App\Http\Middleware\CheckRole::class.':1')->group(function () {
-        // User routes
-        Route::get('/lecturers', [UserController::class, 'getLecturers']);
-        Route::get('/lecturers/{id}', [UserController::class, 'getLecturerById']);
+        // User routes (Create/Update/Delete)
         Route::post('/lecturers', [UserController::class, 'storeLecturer']);
         Route::put('/lecturers/{id}', [UserController::class, 'updateLecturer']);
 
@@ -43,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/classes/{id}', [ClassController::class, 'show']);
         Route::put('/classes/{id}', [ClassController::class, 'update']);
         Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
+        Route::get('/classes/{id}/students', [ClassController::class, 'getStudents']);
+        Route::post('/classes/{id}/students', [ClassController::class, 'addStudent']);
+        Route::delete('/classes/{id}/students/{studentId}', [ClassController::class, 'removeStudent']);
         
         // Course Section routes
         Route::get('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'index']);
@@ -51,9 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
         Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
-        // Subject routes
+        // Subject routes (Create/Update/Delete)
         Route::get('/subjects/stats', [SubjectController::class, 'stats']);
-        Route::apiResource('subjects', SubjectController::class);
+        Route::apiResource('subjects', SubjectController::class)->except(['index', 'show']);
         
         // Faculty routes
         Route::get('/faculties', [FacultyController::class, 'index']);
@@ -70,25 +72,96 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
     });
     
-    // Shared Comment Routes (Moved to public for testing)
+    // Lecturer Only Routes
+    Route::middleware(\App\Http\Middleware\CheckRole::class.':2')->group(function () {
+        Route::get('/lecturer/course-sections', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'index']);
+        Route::post('/lecturer/course-sections', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'store']);
+        Route::get('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'show']);
+        Route::put('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'update']);
+
+        // Resource management by lecturer
+        Route::get('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'index']);
+        Route::post('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'store']);
+        Route::get('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'show']);
+        Route::put('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'update']);
+        Route::delete('/lecturer/resources/{id}', [\App\Http\Controllers\Lecturer\ResourceController::class, 'destroy']);
+        Route::patch('/lecturer/resources/{id}/toggle-visibility', [\App\Http\Controllers\Lecturer\ResourceController::class, 'toggleVisibility']);
+        // Assignment management by lecturer
+        Route::get('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'index']);
+        Route::post('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'store']);
+        Route::get('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'show']);
+        Route::get('/lecturer/assignments/{id}/submissions', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'submissions']);
+        Route::post('/lecturer/assignments/{id}/submissions/return', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'returnSubmissions']);
+        Route::post('/lecturer/assignments/{id}/submissions/{submissionId}/grade', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'gradeSubmission']);
+        Route::put('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']);
+        Route::post('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']); // FormData fallback
+        Route::delete('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'destroy']);
+        // Exam management by lecturer
+        Route::get('/lecturer/exams', [\App\Http\Controllers\Lecturer\ExamController::class, 'index']);
+        Route::post('/lecturer/exams', [\App\Http\Controllers\Lecturer\ExamController::class, 'store']);
+        Route::get('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'show']);
+        Route::put('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'update']);
+        Route::delete('/lecturer/exams/{id}', [\App\Http\Controllers\Lecturer\ExamController::class, 'destroy']);
+        // Question management by lecturer
+        Route::get('/lecturer/exams/{examId}/questions', [\App\Http\Controllers\Lecturer\QuestionController::class, 'index']);
+        Route::post('/lecturer/exams/{examId}/questions', [\App\Http\Controllers\Lecturer\QuestionController::class, 'store']);
+        Route::get('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'show']);
+        Route::put('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'update']);
+        Route::delete('/lecturer/exams/{examId}/questions/{questionId}', [\App\Http\Controllers\Lecturer\QuestionController::class, 'destroy']);
+        Route::put('/lecturer/exams/{examId}/questions/reorder', [\App\Http\Controllers\Lecturer\QuestionController::class, 'reorder']);
+    });
+
+    // Student Only Routes
+    Route::middleware(\App\Http\Middleware\CheckRole::class.':3')->group(function () {
+    });
+
+
+    // Common Authenticated Routes
+    Route::get('/lecturers', [UserController::class, 'getLecturers']);
+    Route::get('/lecturers/{id}', [UserController::class, 'getLecturerById']);
+    Route::get('/subjects', [SubjectController::class, 'index']);
+    Route::get('/subjects/{id}', [SubjectController::class, 'show']);
+
+    // Shared Comment Routes
+    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+    Route::put('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'update']);
+    Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
+
+    // Profile Routes
+    Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
+    Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
+    Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
+    Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
+    Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
+    Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
+
+    // Post Routes
+    Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
+    Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
+    Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
+    Route::get('/student/sections', [\App\Http\Controllers\Student\StudentSectionController::class, 'index']);
+    Route::get('/student/sections/{id}', [\App\Http\Controllers\Student\StudentSectionController::class, 'show']);
+    Route::get('/student/quizzes', [\App\Http\Controllers\Student\StudentQuizController::class, 'index']);
+    Route::get('/student/quizzes/{id}', [\App\Http\Controllers\Student\StudentQuizController::class, 'show']);
+    Route::post('/student/quizzes/{id}/submit', [\App\Http\Controllers\Student\StudentQuizController::class, 'submit']);
+    Route::get('/student/quizzes/{id}/result', [\App\Http\Controllers\Student\StudentQuizController::class, 'result']);
+    Route::get('/student/assignments', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'index']);
+    Route::get('/student/assignments/{id}', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'show']);
+    Route::post('/student/assignments/{id}/submit', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'submit']);
+
+    Route::get('lecturer/exams/{id}/results', [\App\Http\Controllers\Lecturer\ExamController::class, 'getResults']);
+    Route::post('lecturer/exams/{id}/results/{attemptId}/grade', [\App\Http\Controllers\Lecturer\ExamController::class, 'gradeEssay']);
+    Route::apiResource('lecturer/exams', \App\Http\Controllers\Lecturer\ExamController::class);
+    Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
+
+    // Student Management by lecturer
+    Route::get('/lecturer/students/search', [\App\Http\Controllers\Lecturer\StudentListController::class, 'search']);
+    Route::get('/lecturer/course-sections/{sectionId}/students', [\App\Http\Controllers\Lecturer\StudentListController::class, 'index']);
+    Route::get('/lecturer/classes', [\App\Http\Controllers\Admin\ClassController::class, 'index']);
+    Route::post('/lecturer/course-sections/{sectionId}/students', [\App\Http\Controllers\Lecturer\StudentListController::class, 'store']);
+    Route::delete('/lecturer/course-sections/{sectionId}/students/{studentId}', [\App\Http\Controllers\Lecturer\StudentListController::class, 'destroy']);
 });
 
-Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
-Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
-
-// Temporary public routes for testing UI without login token
-// Profile Routes
-Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
-Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
-Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
-Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
-
-// Post Routes
-Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
-Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
-Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
-
-Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
 
 Route::get('/schema-bai-viet', function() {
     $columns = \Illuminate\Support\Facades\DB::select('SHOW COLUMNS FROM bai_viet');
@@ -107,3 +180,14 @@ Route::get('/add-luot-xem', function() {
 Route::get('/dump-users', function() {
     return response()->json(\App\Models\NguoiDung::all());
 });
+
+Route::get('/fix-hoc-ky', function() {
+    try {
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE lop_hoc_phan MODIFY hoc_ky ENUM('HK1', 'HK2', 'HK3', 'HK4', 'HK5', 'HK6') NOT NULL DEFAULT 'HK1'");
+        return 'Updated hoc_ky successfully';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
+

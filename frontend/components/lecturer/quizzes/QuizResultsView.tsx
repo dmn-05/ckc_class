@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import styles from './QuizzesManagement.module.css';
 import { QuizData } from './QuizGrid';
+import { exportToExcel, formatExportFileName } from '@/utils/exportExcel';
 
 export type AttemptStatus = 'graded' | 'needs_grading';
 
@@ -42,6 +43,23 @@ export default function QuizResultsView({
   onGradeEssay
 }: QuizResultsViewProps) {
   
+  const handleExport = () => {
+    const data = attempts.map((attempt, index) => ({
+      'STT': index + 1,
+      'Mã sinh viên': attempt.studentCode || '',
+      'Họ và tên': attempt.studentName || '',
+      'Lần làm bài': attempt.attemptNumber,
+      'Thời gian nộp': attempt.submittedAt || '',
+      'Trạng thái': attempt.status === 'graded' ? 'Đã chấm' : 'Chờ chấm tự luận',
+      'Điểm trắc nghiệm': attempt.autoScore ?? 0,
+      'Điểm tự luận': attempt.essayScore ?? 0,
+      'Tổng điểm': `${attempt.totalScore ?? 0} / ${quiz.maxScore || 10}`,
+      'Điểm chuẩn hóa': attempt.totalScore ?? 0,
+    }));
+    const fileName = formatExportFileName('Bang_diem', quiz.title || 'Quiz');
+    exportToExcel(data, fileName, 'Kết quả kiểm tra');
+  };
+
   const getStatusBadge = (status: AttemptStatus) => {
     switch (status) {
       case 'graded': return <span style={{ color: '#059669', backgroundColor: '#ecfdf5', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontWeight: 600, fontSize: '0.75rem' }}>Đã chấm</span>;
@@ -67,7 +85,7 @@ export default function QuizResultsView({
           </p>
         </div>
         
-        <button className={styles.btnSecondary}>
+        <button className={styles.btnSecondary} onClick={handleExport}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>

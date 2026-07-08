@@ -1,8 +1,17 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import LecturerSidebar from '@/components/lecturer/layout/LecturerSidebar';
 import LecturerHeader from '@/components/lecturer/layout/LecturerHeader';
 import styles from '@/components/lecturer/layout/LecturerLayout.module.css';
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | Giảng viên - CKC CLASS",
+    default: "Cổng thông tin Giảng viên | CKC CLASS",
+  },
+  description: "Cổng thông tin dành cho Giảng viên CKC CLASSROOM",
+};
 
 async function getUserProfile() {
   const cookieStore = await cookies();

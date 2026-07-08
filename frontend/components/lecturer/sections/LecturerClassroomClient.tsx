@@ -1,0 +1,492 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import styles from '@/components/student/courses/ClassroomView.module.css';
+
+interface LecturerClassroomClientProps {
+  section: any;
+  posts: any[];
+  assignments: any[];
+  quizzes: any[];
+  resources?: any[];
+  students: any[];
+}
+
+export default function LecturerClassroomClient({
+  section,
+  posts,
+  assignments,
+  quizzes,
+  resources = [],
+  students,
+}: LecturerClassroomClientProps) {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
+
+  const courseCode = section.ma_lop_hoc_phan || section.code || '';
+  const courseName = section.ten_lop || section.name || section.mon_hoc?.ten_mon || 'Lớp học phần';
+  const subjectName = section.mon_hoc?.ten_mon || section.subjectName || courseName;
+  const teacherName = section.giang_vien?.nguoi_dung?.ho_ten || section.lecturerName || 'Bạn';
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Vừa xong';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('vi-VN');
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div className={styles.pageContainer} style={{ padding: '24px', maxWidth: '1280px', margin: '0 auto' }}>
+      {/* Back Button & Action Toolbar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <Link href="/lecturer/sections" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3525cd', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Quay lại danh sách lớp học phần
+        </Link>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
+            style={{ backgroundColor: '#ffffff', color: '#3525cd', border: '1px solid #3525cd', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Quản lý sinh viên ({students.length})
+          </button>
+          <button
+            onClick={() => router.push(`/lecturer/sections/${section.id}/edit`)}
+            style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Chỉnh sửa lớp học phần
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Banner */}
+      <section className={styles.heroBanner}>
+        <div className={styles.bannerDecor}></div>
+        <div className={styles.bannerContent}>
+          <span className={styles.bannerSemester}>
+            Học kỳ {section.hoc_ky || '1'} - {section.nam_hoc || '2023-2024'}
+          </span>
+          <h1 className={styles.courseTitle}>{courseCode}</h1>
+          <p className={styles.courseSubtitle}>{courseName} • GV: {teacherName}</p>
+        </div>
+      </section>
+
+      {/* Content Grid */}
+      <section className={styles.contentGrid}>
+        {/* Main Feed Column */}
+        <div className={styles.feedColumn}>
+          {/* Secondary Nav tabs */}
+          <div className={styles.tabsContainer}>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'stream' ? styles.tabBtnActive : ''}`}
+              onClick={() => setActiveTab('stream')}
+            >
+              Bảng tin
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'classwork' ? styles.tabBtnActive : ''}`}
+              onClick={() => setActiveTab('classwork')}
+            >
+              Bài tập trên lớp
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'people' ? styles.tabBtnActive : ''}`}
+              onClick={() => setActiveTab('people')}
+            >
+              Mọi người
+            </button>
+          </div>
+
+          {activeTab === 'stream' && (
+            <>
+              {/* Create Post Box */}
+              <div 
+                className={styles.announceBox} 
+                onClick={() => router.push(`/lecturer/posts/create?sectionId=${section.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white' }}>
+                  <span>GV</span>
+                </div>
+                <button className={styles.announceText}>
+                  Thông báo nội dung nào đó cho lớp học của bạn...
+                </button>
+                <div className={styles.actionIcons}>
+                  <button className={styles.iconBtn}>
+                    <span className="material-symbols-outlined">add_circle</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Feed Posts */}
+              {posts && posts.length > 0 ? (
+                posts.map((post) => (
+                  <article 
+                    key={post.id} 
+                    className={styles.postCard} 
+                    style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                    onClick={() => {
+                      if (post.loai_bai_viet === 'bai_tap' && (post.bai_tap_id || post.id)) {
+                        router.push(`/lecturer/assignments/${post.bai_tap_id || post.id}/submissions`);
+                      } else {
+                        router.push(`/lecturer/posts/${post.id}`);
+                      }
+                    }}
+                  >
+                    <div className={styles.postHeader}>
+                      <div className={styles.postAuthorInfo}>
+                        <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white' }}>
+                          <span>{post.nguoi_tao?.ho_ten ? post.nguoi_tao.ho_ten.charAt(0).toUpperCase() : 'GV'}</span>
+                        </div>
+                        <div>
+                          <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Giảng viên'}</h4>
+                          <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}</p>
+                        </div>
+                      </div>
+                      <span style={{ padding: '4px 10px', backgroundColor: '#eef2ff', color: '#3525cd', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
+                        {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}
+                      </span>
+                    </div>
+
+                    <div className={styles.postBody}>
+                      {post.tieu_de && <strong style={{ display: 'block', marginBottom: '8px', fontSize: '16px', color: '#191c1e' }}>{post.tieu_de}</strong>}
+                      <p style={{ margin: 0, color: '#464555', whiteSpace: 'pre-wrap' }}>{post.noi_dung}</p>
+
+                      {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
+                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {post.tep_tin_bai_viet.map((tt: any) => (
+                            <span key={tt.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0' }}>
+                              <span>📎</span>
+                              {tt.tep_tin?.ten_file || 'Tệp đính kèm'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <div style={{ padding: '3rem 2rem', textAlign: 'center', color: '#5f6368', background: '#ffffff', borderRadius: '1rem', border: '1px dashed #cbd5e1' }}>
+                  Chưa có bài đăng nào trong lớp học này.
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'classwork' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => router.push(`/lecturer/assignments/create?sectionId=${section.id}`)}
+                  style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', boxShadow: '0 2px 4px rgba(53,37,205,0.2)' }}
+                >
+                  <span>+</span> Tạo bài tập mới
+                </button>
+                <button
+                  onClick={() => router.push(`/lecturer/quizzes/create?sectionId=${section.id}`)}
+                  style={{ backgroundColor: '#ffffff', color: '#3525cd', border: '1px solid #3525cd', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}
+                >
+                  <span>+</span> Tạo bài kiểm tra
+                </button>
+                <button
+                  onClick={() => router.push(`/lecturer/resources/create?sectionId=${section.id}`)}
+                  style={{ backgroundColor: '#ffffff', color: '#d97706', border: '1px solid #d97706', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}
+                >
+                  <span>+</span> Thêm tài nguyên
+                </button>
+              </div>
+
+              {/* Assignments Section */}
+              <div className={styles.widget} style={{ border: '1px solid #e0e3e5', padding: '1.5rem', background: '#ffffff', borderRadius: '1rem' }}>
+                <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
+                  Danh sách Bài tập
+                </h2>
+                {assignments && assignments.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {assignments.map(a => (
+                      <div
+                        key={a.id}
+                        onClick={() => router.push(`/lecturer/assignments/${a.id}/submissions`)}
+                        style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', backgroundColor: '#3525cd', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                            BT
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{a.title || a.tieu_de}</div>
+                            <div style={{ fontSize: '13px', color: '#64748b' }}>Hạn nộp: {a.dueDate || a.han_nop || 'Không có hạn'}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, backgroundColor: '#dbeafe', color: '#1d4ed8' }}>
+                            Đã nộp: {a.stats?.submitted || 0}/{a.stats?.total || students.length || 0}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/assignments/${a.id}/edit?sectionId=${section.id}`);
+                            }}
+                            style={{ backgroundColor: 'transparent', color: '#3525cd', border: '1px solid #3525cd', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Chỉnh sửa
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/assignments/${a.id}/submissions`);
+                            }}
+                            style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Chấm bài
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ color: '#64748b', textAlign: 'center', padding: '2rem 0' }}>Chưa có bài tập nào cho lớp này.</div>
+                )}
+              </div>
+
+              {/* Quizzes Section */}
+              <div className={styles.widget} style={{ border: '1px solid #e0e3e5', padding: '1.5rem', background: '#ffffff', borderRadius: '1rem' }}>
+                <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
+                  Danh sách Bài kiểm tra
+                </h2>
+                {quizzes && quizzes.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {quizzes.map(q => (
+                      <div
+                        key={q.id}
+                        onClick={() => router.push(`/lecturer/quizzes/${q.id}/results`)}
+                        style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', backgroundColor: '#059669', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                            KT
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{q.title || q.tieu_de}</div>
+                            <div style={{ fontSize: '13px', color: '#64748b' }}>Thời gian làm bài: {q.timeLimit || q.duration || '60'} phút</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/quizzes/${q.id}/questions?sectionId=${section.id}`);
+                            }}
+                            style={{ backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Soạn câu hỏi
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/quizzes/${q.id}/edit?sectionId=${section.id}`);
+                            }}
+                            style={{ backgroundColor: 'transparent', color: '#059669', border: '1px solid #059669', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Chỉnh sửa
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/quizzes/${q.id}/results`);
+                            }}
+                            style={{ backgroundColor: '#059669', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Xem kết quả
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ color: '#64748b', textAlign: 'center', padding: '2rem 0' }}>Chưa có bài kiểm tra nào cho lớp này.</div>
+                )}
+              </div>
+
+              {/* Resources Section */}
+              <div className={styles.widget} style={{ border: '1px solid #e0e3e5', padding: '1.5rem', background: '#ffffff', borderRadius: '1rem' }}>
+                <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
+                  Danh sách Tài nguyên
+                </h2>
+                {resources && resources.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {resources.map(r => (
+                      <div
+                        key={r.id}
+                        onClick={() => router.push(`/lecturer/resources/${r.id}/edit`)}
+                        style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', backgroundColor: '#d97706', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                            {r.type === 'video' ? 'VD' : r.type === 'link' ? 'LK' : r.type === 'image' ? 'IM' : 'TL'}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{r.title || r.tieu_de}</div>
+                            <div style={{ fontSize: '13px', color: '#64748b' }}>
+                              {r.createdAt ? `Ngày đăng: ${r.createdAt}` : 'Tài nguyên lớp học'} {r.fileSize ? `• ${r.fileSize}` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {r.fileUrl || (r.files && r.files.length > 0) ? (
+                            <a
+                              href={r.fileUrl || r.files[0]?.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ backgroundColor: '#fef3c7', color: '#b45309', textDecoration: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px' }}
+                            >
+                              Tải về / Xem
+                            </a>
+                          ) : r.externalUrl ? (
+                            <a
+                              href={r.externalUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ backgroundColor: '#fef3c7', color: '#b45309', textDecoration: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px' }}
+                            >
+                              Mở liên kết
+                            </a>
+                          ) : null}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/lecturer/resources/${r.id}/edit?sectionId=${section.id}`);
+                            }}
+                            style={{ backgroundColor: 'transparent', color: '#d97706', border: '1px solid #d97706', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                          >
+                            Chỉnh sửa
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ color: '#64748b', textAlign: 'center', padding: '2rem 0' }}>Chưa có tài nguyên nào cho lớp này.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'people' && (
+            <div className={styles.widget} style={{ border: '1px solid #e0e3e5', padding: '2rem', background: '#ffffff', borderRadius: '1rem' }}>
+              <div style={{ borderBottom: '2px solid #3525cd', paddingBottom: '0.75rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ color: '#3525cd', fontSize: '20px', fontWeight: 700, margin: 0 }}>Giảng viên</h2>
+              </div>
+              <div className={styles.memberItem} style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '48px', height: '48px', fontSize: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                  <span>{teacherName ? teacherName.charAt(0).toUpperCase() : 'GV'}</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', display: 'block' }}>{teacherName}</span>
+                  <span style={{ fontSize: '13px', color: '#64748b' }}>Giảng viên chính</span>
+                </div>
+              </div>
+
+              <div style={{ borderBottom: '2px solid #3525cd', paddingBottom: '0.75rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ color: '#3525cd', fontSize: '20px', fontWeight: 700, margin: 0 }}>Sinh viên</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <span style={{ fontSize: '14px', color: '#3525cd', fontWeight: 600 }}>{students.length} sinh viên</span>
+                  <button
+                    onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
+                    style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                  >
+                    Quản lý danh sách
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                {students && students.length > 0 ? (
+                  students.map((sv: any) => (
+                    <div key={sv.id || sv.ma_sinh_vien} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#64748b', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '14px' }}>
+                          <span>{sv.ho_ten ? sv.ho_ten.charAt(0).toUpperCase() : 'SV'}</span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b', display: 'block' }}>{sv.ho_ten || sv.nguoi_dung?.ho_ten || 'Sinh viên'}</span>
+                          <span style={{ fontSize: '13px', color: '#64748b' }}>Mã SV: {sv.ma_sinh_vien}</span>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '13px', color: '#64748b' }}>{sv.email || sv.nguoi_dung?.email || ''}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Chưa có sinh viên nào trong lớp này.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Sidebar */}
+        <aside className={styles.sidebarColumn}>
+          {/* Quick Stats Widget */}
+          <div className={styles.widget} style={{ border: '1px solid #e0e3e5', background: '#ffffff', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className={styles.widgetHeader} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <h3 className={styles.widgetTitle} style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>Thống kê lớp học</h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontSize: '14px' }}>Sĩ số:</span>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{students.length} / {section.si_so_toi_da || section.maxStudents || 40}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontSize: '14px' }}>Bài tập:</span>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{assignments.length}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontSize: '14px' }}>Bài kiểm tra:</span>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{quizzes.length}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontSize: '14px' }}>Tài nguyên:</span>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{resources ? resources.length : 0}</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Teacher Info Widget */}
+          <div className={styles.widget} style={{ border: '1px solid #e0e3e5', background: '#ffffff', borderRadius: '1rem', padding: '1.5rem' }}>
+            <h3 className={styles.widgetTitle} style={{ margin: '0 0 1rem 0', fontSize: '16px', fontWeight: 600, color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>Giảng viên phụ trách</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                <span>{teacherName ? teacherName.charAt(0).toUpperCase() : 'GV'}</span>
+              </div>
+              <div>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{teacherName}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Giảng viên chính</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </div>
+  );
+}

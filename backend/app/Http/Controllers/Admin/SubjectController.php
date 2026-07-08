@@ -12,7 +12,18 @@ class SubjectController extends Controller
 {
     public function index()
     {
-        $subjects = MonHoc::with(['khoa', 'boMon'])->get();
+        $query = MonHoc::with(['khoa', 'boMon']);
+        
+        $user = auth()->user();
+        if ($user && $user->vai_tro_id == 2) {
+            $user->load('giangVien.boMon');
+            if ($user->giangVien && $user->giangVien->boMon) {
+                $khoaId = $user->giangVien->boMon->khoa_id;
+                $query->where('khoa_id', $khoaId);
+            }
+        }
+
+        $subjects = $query->get();
         return response()->json($subjects);
     }
 

@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './AdminCreateCourseSections.module.css';
-import { createCourseSection, getSubjects, getLecturers } from '@/app/actions/course-section';
+import { createCourseSection, getSubjects, getLecturers, getClasses } from '@/app/actions/course-section';
+import { createLecturerCourseSection, getCurrentUser } from '@/app/actions/lecturer-course-section';
 
-export default function CreateCourseSectionForm() {
+interface CreateCourseSectionFormProps {
+  isLecturer?: boolean;
+}
+
+export default function CreateCourseSectionForm({ isLecturer = false }: CreateCourseSectionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -13,12 +18,14 @@ export default function CreateCourseSectionForm() {
   
   const [subjects, setSubjects] = useState<any[]>([]);
   const [lecturers, setLecturers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     ma_lop_hoc_phan: '',
     ten_lop: '',
     mon_hoc_id: '',
     giang_vien_id: '',
+    base_class_id: '',
     hoc_ky: 'HK1',
     nam_hoc: '2024-2025',
     si_so_toi_da: 40,
@@ -26,11 +33,32 @@ export default function CreateCourseSectionForm() {
   });
 
   useEffect(() => {
-    Promise.all([getSubjects(), getLecturers()]).then(([subs, lecs]) => {
-      setSubjects(subs);
-      setLecturers(lecs);
-    }).catch(console.error);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const subs = await getSubjects();
+        setSubjects(subs);
+        
+        const cls = await getClasses();
+        setClasses(cls);
+
+        if (isLecturer) {
+          const user = await getCurrentUser();
+          const lecs = await getLecturers();
+          setLecturers(lecs);
+          
+          if (user?.user?.giang_vien?.id) {
+            setFormData(prev => ({ ...prev, giang_vien_id: user.user.giang_vien.id.toString() }));
+          }
+        } else {
+          const lecs = await getLecturers();
+          setLecturers(lecs);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchData();
+  }, [isLecturer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -40,6 +68,33 @@ export default function CreateCourseSectionForm() {
     }));
   };
 
+  useEffect(() => {
+    if (!formData.mon_hoc_id) return;
+
+    const subject = subjects.find(s => s.id.toString() === formData.mon_hoc_id.toString());
+    const subjectName = subject ? subject.ten_mon : '';
+
+    let generatedName = '';
+    
+    if (formData.base_class_id) {
+      const cls = classes.find(c => c.id.toString() === formData.base_class_id.toString());
+      if (cls) {
+        generatedName = `${cls.ma_lop} - ${subjectName}`;
+      }
+    } else {
+      const startYear = formData.nam_hoc.split('-')[0] || '2024';
+      generatedName = `HKP - ${subjectName} ${startYear}`;
+    }
+
+    if (!formData.ma_lop_hoc_phan) {
+      const randomCode = 'LHP_' + Math.random().toString(36).substr(2, 5).toUpperCase();
+      setFormData(prev => ({ ...prev, ten_lop: generatedName, ma_lop_hoc_phan: randomCode }));
+    } else {
+      setFormData(prev => ({ ...prev, ten_lop: generatedName }));
+    }
+
+  }, [formData.mon_hoc_id, formData.base_class_id, formData.nam_hoc, subjects, classes]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -47,10 +102,14 @@ export default function CreateCourseSectionForm() {
     setErrorMessage('');
 
     try {
-      await createCourseSection(formData);
+      if (isLecturer) {
+        await createLecturerCourseSection(formData);
+      } else {
+        await createCourseSection(formData);
+      }
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/admin/course-sections');
+        router.push(isLecturer ? '/lecturer/sections' : '/admin/course-sections');
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -77,21 +136,22 @@ export default function CreateCourseSectionForm() {
                   type="text" 
                   name="ma_lop_hoc_phan"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: CDTH24A_LTrWeb" 
+                  placeholder="Hệ thống tự động tạo" 
                   value={formData.ma_lop_hoc_phan}
-                  onChange={handleChange}
-                  required
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên Lớp (Tuỳ chọn)</label>
+                <label className={styles.formLabel}>Tên Lớp học phần</label>
                 <input 
                   type="text" 
                   name="ten_lop"
                   className={styles.formInput} 
-                  placeholder="Ví dụ: Lập trình Web - Nhóm 1" 
+                  placeholder="Hệ thống tự động tạo" 
                   value={formData.ten_lop}
-                  onChange={handleChange}
+                  readOnly
+                  style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
                 />
               </div>
             </div>
@@ -107,13 +167,23 @@ export default function CreateCourseSectionForm() {
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>
-                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required>
-                  <option value="">Chọn Giảng viên</option>
-                  {lecturers.map(l => (
-                    <option key={l.id} value={l.id}>{l.ho_ten} ({l.giang_vien?.ma_giang_vien || 'N/A'})</option>
+                <label className={styles.formLabel}>Lớp (Tự động thêm toàn bộ SV) </label>
+                <select name="base_class_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.base_class_id} onChange={handleChange}>
+                  <option value="">Không chọn - Lớp phụ</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.id}>{c.ma_lop} - {c.ten_lop}</option>
                   ))}
                 </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Giảng viên <span style={{color:'red'}}>*</span></label>
+                <select name="giang_vien_id" className={`${styles.formInput} ${styles.formSelect}`} value={formData.giang_vien_id} onChange={handleChange} required disabled={isLecturer}>
+                  <option value="">Chọn Giảng viên</option>
+                  {lecturers.map(l => (
+                    <option key={l.id} value={l.giang_vien?.id}>{l.ho_ten} - {l.giang_vien?.ma_giang_vien || 'N/A'}</option>
+                  ))}
+                </select>
+                {isLecturer && <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Chỉ có thể chọn chính bạn làm giảng viên phụ trách.</small>}
               </div>
             </div>
 
@@ -124,6 +194,9 @@ export default function CreateCourseSectionForm() {
                   <option value="HK1">Học kỳ 1</option>
                   <option value="HK2">Học kỳ 2</option>
                   <option value="HK3">Học kỳ 3</option>
+                  <option value="HK4">Học kỳ 4</option>
+                  <option value="HK5">Học kỳ 5</option>
+                  <option value="HK6">Học kỳ 6</option>
                 </select>
               </div>
               <div className={styles.formGroup}>
@@ -172,7 +245,7 @@ export default function CreateCourseSectionForm() {
           </div>
         )}
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.btnSecondary} onClick={() => router.push('/admin/course-sections')}>
+          <button type="button" className={styles.btnSecondary} onClick={() => router.push(isLecturer ? '/lecturer/sections' : '/admin/course-sections')}>
             Hủy bỏ
           </button>
           <button 

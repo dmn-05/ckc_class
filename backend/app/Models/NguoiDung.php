@@ -39,6 +39,16 @@ class NguoiDung extends Authenticatable
         return $this->mat_khau;
     }
 
+    /**
+     * Get the name of the password attribute for the user.
+     *
+     * @return string
+     */
+    public function getAuthPasswordName()
+    {
+        return 'mat_khau';
+    }
+
     public function sinhVien()
     {
         return $this->hasOne(SinhVien::class, 'nguoi_dung_id');

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styles from './AssignmentsManagement.module.css';
+import { exportToExcel } from '@/utils/exportExcel';
 
 interface ScoresReportModalProps {
   onClose: () => void;
@@ -14,6 +15,19 @@ export default function ScoresReportModal({ onClose }: ScoresReportModalProps) {
     { secId: 'K21-CNTT02', name: 'Thiết kế Giao diện', avgScore: 7.2, highest: 9.5, lowest: 4, totalStudents: 38 },
     { secId: 'K22-DS01', name: 'Cơ sở dữ liệu', avgScore: 8.0, highest: 10, lowest: 6, totalStudents: 42 }
   ];
+
+  const handleExport = () => {
+    const data = reportData.map((row, index) => ({
+      'STT': index + 1,
+      'Mã Lớp HP': row.secId,
+      'Tên môn học': row.name,
+      'Sĩ số': row.totalStudents,
+      'Điểm Trung Bình': row.avgScore,
+      'Điểm Cao nhất': row.highest,
+      'Điểm Thấp nhất': row.lowest,
+    }));
+    exportToExcel(data, 'Bao_cao_diem_tong_hop', 'Báo cáo điểm');
+  };
 
   return (
     <div className={styles.modalOverlay}>
@@ -67,7 +81,7 @@ export default function ScoresReportModal({ onClose }: ScoresReportModalProps) {
           <button type="button" className={styles.btnSecondary} onClick={onClose}>
             Đóng
           </button>
-          <button type="button" className={styles.btnPrimary}>
+          <button type="button" className={styles.btnPrimary} onClick={handleExport}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>

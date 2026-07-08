@@ -23,6 +23,7 @@ interface QuizInterfaceProps {
 
 export default function QuizInterface({ quizTitle, quizId, questions, durationMinutes, onSubmit, onSaveDraft }: QuizInterfaceProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, message: string}>({isOpen: false, message: ''});
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
 
@@ -139,15 +140,14 @@ export default function QuizInterface({ quizTitle, quizId, questions, durationMi
           </div>
 
           <button className={styles.btnSubmitQuiz} onClick={() => {
-            if (window.confirm('Bạn có chắc chắn muốn nộp bài không?')) {
-              handleSubmit();
-            }
+            setConfirmModal({
+              isOpen: true,
+              message: 'Bạn có chắc chắn muốn nộp bài không?'
+            });
           }}>
             Nộp bài ngay
           </button>
-          <button className={styles.btnDraftQuiz} onClick={handleManualDraft}>
-            Lưu nháp
-          </button>
+
         </div>
       </div>
 
@@ -225,9 +225,10 @@ export default function QuizInterface({ quizTitle, quizId, questions, durationMi
               <button 
                 className={`${styles.btnNav} ${styles.btnNavNext}`} 
                 onClick={() => {
-                  if (window.confirm('Đây là câu cuối cùng. Bạn muốn nộp bài?')) {
-                    handleSubmit();
-                  }
+                  setConfirmModal({
+                    isOpen: true,
+                    message: 'Đây là câu cuối cùng. Bạn muốn nộp bài?'
+                  });
                 }}
               >
                 Nộp bài
@@ -249,6 +250,37 @@ export default function QuizInterface({ quizTitle, quizId, questions, durationMi
           </div>
         </div>
       </div>
+
+      {confirmModal.isOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalIconWrapper}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28" style={{ color: '#3525cd' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className={styles.modalTitle}>Xác nhận nộp bài</h3>
+            <p className={styles.modalMessage}>{confirmModal.message}</p>
+            <div className={styles.modalActions}>
+              <button 
+                className={styles.modalBtnCancel} 
+                onClick={() => setConfirmModal({isOpen: false, message: ''})}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                className={styles.modalBtnConfirm} 
+                onClick={() => {
+                  setConfirmModal({isOpen: false, message: ''});
+                  handleSubmit();
+                }}
+              >
+                Nộp bài
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

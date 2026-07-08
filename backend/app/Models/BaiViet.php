@@ -17,8 +17,10 @@ class BaiViet extends Model
     protected $fillable = [
         'tieu_de',
         'noi_dung',
+        'hinh_anh',
         'lop_hoc_phan_id',
         'chu_de_id',
+        'bai_tap_id',
         'nguoi_tao_id',
         'loai_bai_viet', // 'bai_viet','thong_bao','tai_lieu','bai_tap'
         'trang_thai',

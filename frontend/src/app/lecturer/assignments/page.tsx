@@ -1,92 +1,72 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from '@/components/lecturer/assignments/AssignmentsManagement.module.css';
 import AssignmentDashboard from '@/components/lecturer/assignments/AssignmentDashboard';
 import AssignmentGrid, { AssignmentData } from '@/components/lecturer/assignments/AssignmentGrid';
-import AssignmentFormModal from '@/components/lecturer/assignments/AssignmentFormModal';
-import SubmissionsView, { SubmissionData } from '@/components/lecturer/assignments/SubmissionsView';
-import GradingModal from '@/components/lecturer/assignments/GradingModal';
 import ScoresReportModal from '@/components/lecturer/assignments/ScoresReportModal';
+import {
+  getLecturerAssignments,
+  deleteLecturerAssignment,
+} from '@/app/actions/lecturer-assignment';
+import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
 
-// Mock Initial Data
-const INITIAL_ASSIGNMENTS: AssignmentData[] = [
-  {
-    id: 'asg1',
-    title: 'Bài tập thực hành 1: Cấu trúc điều khiển',
-    description: 'Thực hành vòng lặp và câu lệnh rẽ nhánh',
-    instructions: 'Viết chương trình C++ giải quyết 5 bài tập trong file đính kèm.',
-    maxScore: 10,
-    dueDate: '25/10/2023 23:59',
-    allowLate: true,
-    latePenaltyPct: 10,
-    isPublished: true,
-    sectionId: 'sec1',
-    sectionName: 'Lập trình hướng đối tượng',
-    status: 'open',
-    stats: { submitted: 32, total: 40, needsGrading: 32 }
-  },
-  {
-    id: 'asg2',
-    title: 'Đồ án cuối kỳ: Thiết kế Mobile App',
-    description: 'Thiết kế UI/UX cho ứng dụng bán hàng',
-    instructions: 'Sử dụng Figma để tạo prototype có tính tương tác.',
-    maxScore: 10,
-    dueDate: '20/10/2023 23:59',
-    allowLate: false,
-    latePenaltyPct: 10,
-    isPublished: true,
-    sectionId: 'sec2',
-    sectionName: 'Thiết kế Giao diện',
-    status: 'grading',
-    stats: { submitted: 38, total: 40, needsGrading: 38 }
-  },
-  {
-    id: 'asg3',
-    title: 'Lab 2: Truy vấn SQL nâng cao',
-    description: 'Thực hành lệnh JOIN và Subquery',
-    instructions: 'Viết câu lệnh SQL cho 10 yêu cầu trong file doc.',
-    maxScore: 10,
-    dueDate: '30/10/2023 23:59',
-    allowLate: true,
-    latePenaltyPct: 10,
-    isPublished: false,
-    sectionId: 'sec3',
-    sectionName: 'Cơ sở dữ liệu',
-    status: 'draft',
-    stats: { submitted: 0, total: 42, needsGrading: 0 }
-  }
-];
-
-const MOCK_SUBMISSIONS: Record<string, SubmissionData[]> = {
-  'asg1': [
-    { id: 'sub1', studentId: 'sv1', studentName: 'Nguyễn Văn An', studentCode: 'SV001', submittedAt: '24/10/2023 10:20', fileUrl: '#', status: 'submitted' },
-    { id: 'sub2', studentId: 'sv2', studentName: 'Trần Thị Bình', studentCode: 'SV002', submittedAt: '26/10/2023 08:15', fileUrl: '#', status: 'late' },
-    { id: 'sub3', studentId: 'sv3', studentName: 'Lê Hoàng Cường', studentCode: 'SV003', submittedAt: '', fileUrl: '', status: 'missing' },
-    { id: 'sub4', studentId: 'sv4', studentName: 'Phạm Văn Dũng', studentCode: 'SV004', submittedAt: '20/10/2023 15:30', fileUrl: '#', status: 'returned', score: 8.5, feedback: 'Làm bài tốt.' },
-  ],
-  'asg2': [
-    { id: 'sub5', studentId: 'sv1', studentName: 'Nguyễn Văn An', studentCode: 'SV001', submittedAt: '19/10/2023 11:20', fileUrl: '#', status: 'submitted' },
-  ]
-};
+interface SectionOption {
+  id: string;
+  name: string;
+  code: string;
+}
 
 export default function LecturerAssignmentsPage() {
-  const [viewState, setViewState] = useState<'list' | 'submissions'>('list');
-  const [activeAssignment, setActiveAssignment] = useState<AssignmentData | null>(null);
+  const router = useRouter();
   
-  const [assignments, setAssignments] = useState<AssignmentData[]>(INITIAL_ASSIGNMENTS);
-  const [allSubmissions, setAllSubmissions] = useState<Record<string, SubmissionData[]>>(MOCK_SUBMISSIONS);
+  const [assignments, setAssignments] = useState<AssignmentData[]>([]);
+  const [sections, setSections] = useState<SectionOption[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Modals
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingAssignment, setEditingAssignment] = useState<AssignmentData | undefined>(undefined);
+  // Modals (still used for scores)
   const [isScoresReportOpen, setIsScoresReportOpen] = useState(false);
-  const [gradingSubmission, setGradingSubmission] = useState<SubmissionData | null>(null);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [assignmentsData, sectionsData] = await Promise.all([
+          getLecturerAssignments(),
+          getLecturerCourseSections(),
+        ]);
+        setAssignments(assignmentsData);
+        setSections(
+          (sectionsData || []).map((s: any) => ({
+            id: s.id.toString(),
+            name: s.ten_lop || s.mon_hoc?.ten_mon || '',
+            code: s.ma_lop_hoc_phan || '',
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load assignments', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   // Derived Stats
   const totalCount = assignments.length;
@@ -95,214 +75,133 @@ export default function LecturerAssignmentsPage() {
 
   const filteredAssignments = assignments.filter(a => {
     const matchSearch = a.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchSection = sectionFilter ? a.sectionId === sectionFilter : true;
-    const matchStatus = statusFilter ? a.status === statusFilter : true;
+    const matchSection = sectionFilter && sectionFilter !== 'all' ? a.sectionId === sectionFilter : true;
+    const matchStatus = statusFilter && statusFilter !== 'all' ? a.status === statusFilter : true;
     return matchSearch && matchSection && matchStatus;
   });
 
   // Actions for Assignment
   const handleOpenAdd = () => {
-    setEditingAssignment(undefined);
-    setIsFormModalOpen(true);
+    router.push('/lecturer/assignments/create');
   };
 
   const handleOpenEdit = (assignment: AssignmentData) => {
-    setEditingAssignment(assignment);
-    setIsFormModalOpen(true);
+    router.push(`/lecturer/assignments/${assignment.id}/edit`);
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài tập này?")) {
-      setAssignments(prev => prev.filter(a => a.id !== id));
-      setAllSubmissions(prev => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDeleteAction = async () => {
+    if (!deleteConfirmId) return;
+    setDeleting(true);
+    try {
+      await deleteLecturerAssignment(deleteConfirmId);
+      setAssignments(prev => prev.filter(a => a.id !== deleteConfirmId));
+      setToast({ text: 'Đã xóa bài tập thành công!', type: 'success' });
+    } catch (error) {
+      setToast({ text: 'Có lỗi xảy ra khi xóa bài tập.', type: 'error' });
+      console.error(error);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmId(null);
     }
   };
 
-  const handleSaveAssignment = (data: Partial<AssignmentData>) => {
-    if (editingAssignment) {
-      setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? { ...a, ...data } as AssignmentData : a));
-    } else {
-      const newAssignment: AssignmentData = {
-        id: `asg_${Date.now()}`,
-        title: data.title || '',
-        description: data.description || '',
-        instructions: data.instructions || '',
-        maxScore: data.maxScore || 10,
-        dueDate: data.dueDate || '',
-        allowLate: data.allowLate || false,
-        latePenaltyPct: data.latePenaltyPct || 10,
-        isPublished: data.isPublished ?? true,
-        sectionId: data.sectionId || '',
-        sectionName: data.sectionName || '',
-        status: data.isPublished ? 'open' : 'draft',
-        stats: { submitted: 0, total: 40, needsGrading: 0 }
-      };
-      setAssignments(prev => [...prev, newAssignment]);
-      // Initialize empty submissions
-      setAllSubmissions(prev => ({ ...prev, [newAssignment.id]: [] }));
-    }
-    setIsFormModalOpen(false);
-  };
-
-  // Actions for Submissions View
   const handleViewSubmissions = (assignment: AssignmentData) => {
-    setActiveAssignment(assignment);
-    setViewState('submissions');
-  };
-
-  const handleBackToList = () => {
-    setViewState('list');
-    setActiveAssignment(null);
-  };
-
-  // Actions for Grading
-  const handleGrade = (submission: SubmissionData) => {
-    setGradingSubmission(submission);
-  };
-
-  const handleSaveGrade = (submissionId: string, score: number, feedback: string) => {
-    if (!activeAssignment) return;
-    
-    setAllSubmissions(prev => {
-      const subs = prev[activeAssignment.id] || [];
-      const newSubs = subs.map(s => s.id === submissionId ? { ...s, score, feedback, status: 'graded' as const } : s);
-      return { ...prev, [activeAssignment.id]: newSubs };
-    });
-    
-    setGradingSubmission(null);
-  };
-
-  const handleReturnBulk = (submissionIds: string[]) => {
-    if (!activeAssignment) return;
-    
-    if (window.confirm(`Bạn có chắc chắn muốn trả ${submissionIds.length} bài đã chọn? Sinh viên sẽ nhận được thông báo điểm.`)) {
-      setAllSubmissions(prev => {
-        const subs = prev[activeAssignment.id] || [];
-        const newSubs = subs.map(s => submissionIds.includes(s.id) ? { ...s, status: 'returned' as const } : s);
-        return { ...prev, [activeAssignment.id]: newSubs };
-      });
-      
-      // Update assignment stats (needsGrading count decreases)
-      setAssignments(prev => prev.map(a => {
-        if (a.id === activeAssignment.id) {
-          return { ...a, stats: { ...a.stats, needsGrading: Math.max(0, a.stats.needsGrading - submissionIds.length) } };
-        }
-        return a;
-      }));
-    }
+    router.push(`/lecturer/assignments/${assignment.id}/submissions`);
   };
 
   return (
     <div className={styles.pageContainer}>
-      {viewState === 'list' && (
-        <>
-          <div className={styles.pageHeader}>
-            <div>
-              <h1 className={styles.pageTitle}>Quản lý Bài tập</h1>
-              <p className={styles.pageSubtitle}>Quản lý, phân loại và theo dõi tình trạng bài tập của sinh viên.</p>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className={styles.btnSecondary} onClick={() => setIsScoresReportOpen(true)}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Báo cáo điểm
-              </button>
-              <button className={styles.btnPrimary} onClick={handleOpenAdd}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Thêm bài tập mới
-              </button>
-            </div>
+      <div className={styles.pageHeader}>
+        <div>
+          <h1 className={styles.pageTitle}>Quản lý Bài tập</h1>
+          <p className={styles.pageSubtitle}>Quản lý, phân loại và theo dõi tình trạng bài tập của sinh viên.</p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className={styles.btnSecondary} onClick={() => setIsScoresReportOpen(true)}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Báo cáo điểm
+          </button>
+          <button className={styles.btnPrimary} onClick={handleOpenAdd}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Tạo bài tập mới
+          </button>
+        </div>
+      </div>
+
+      <AssignmentDashboard 
+        totalCount={totalCount}
+        openCount={openCount}
+        needsGradingCount={needsGradingCount}
+      />
+
+      <div className={styles.filterBar}>
+        <div className={styles.searchBox}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.searchIcon} width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            className={styles.searchInput}
+            placeholder="Tìm kiếm theo tiêu đề bài tập..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.filters}>
+          <div className={styles.filterSelectWrapper}>
+            <select 
+              className={styles.filterSelect}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="open">Đang mở</option>
+              <option value="closed">Đã đóng</option>
+              <option value="draft">Bản nháp</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
 
-          <AssignmentDashboard 
-            totalCount={totalCount}
-            openCount={openCount}
-            needsGradingCount={needsGradingCount}
-          />
-
-          <div className={styles.filterContainer}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#464555', textTransform: 'uppercase', marginRight: '0.5rem' }}>
-                Bộ lọc:
-              </span>
-              
-              <div className={styles.filterSelectWrapper}>
-                <select 
-                  className={styles.filterSelect}
-                  value={sectionFilter}
-                  onChange={(e) => setSectionFilter(e.target.value)}
-                >
-                  <option value="">Tất cả Lớp học phần</option>
-                  <option value="sec1">Lập trình hướng đối tượng</option>
-                  <option value="sec2">Thiết kế Giao diện</option>
-                  <option value="sec3">Cơ sở dữ liệu</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-
-              <div className={styles.filterSelectWrapper}>
-                <select 
-                  className={styles.filterSelect}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="open">Đang mở</option>
-                  <option value="grading">Chờ chấm điểm</option>
-                  <option value="closed">Đã kết thúc</option>
-                  <option value="draft">Bản nháp</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+          <div className={styles.filterSelectWrapper}>
+            <select 
+              className={styles.filterSelect}
+              value={sectionFilter}
+              onChange={(e) => setSectionFilter(e.target.value)}
+            >
+              <option value="all">Tất cả lớp học phần</option>
+              {sections.map((s, idx) => (
+                <option key={idx} value={s.id}>{s.name} ({s.code})</option>
+              ))}
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={styles.filterSelectIcon} width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
+        </div>
+      </div>
 
-          <AssignmentGrid 
-            assignments={filteredAssignments}
-            onEdit={handleOpenEdit}
-            onDelete={handleDelete}
-            onViewSubmissions={handleViewSubmissions}
-          />
-        </>
-      )}
-
-      {viewState === 'submissions' && activeAssignment && (
-        <SubmissionsView 
-          assignment={activeAssignment}
-          submissions={allSubmissions[activeAssignment.id] || []}
-          onBack={handleBackToList}
-          onGrade={handleGrade}
-          onReturnBulk={handleReturnBulk}
-        />
-      )}
-
-      {/* Modals */}
-      {isFormModalOpen && (
-        <AssignmentFormModal 
-          initialData={editingAssignment}
-          onSave={handleSaveAssignment}
-          onClose={() => setIsFormModalOpen(false)}
-        />
-      )}
-
-      {gradingSubmission && activeAssignment && (
-        <GradingModal 
-          submission={gradingSubmission}
-          maxScore={activeAssignment.maxScore}
-          onSave={handleSaveGrade}
-          onClose={() => setGradingSubmission(null)}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#777587' }}>
+          <p>Đang tải bài tập...</p>
+        </div>
+      ) : (
+        <AssignmentGrid 
+          assignments={filteredAssignments}
+          onEdit={handleOpenEdit}
+          onDelete={handleDelete}
+          onViewSubmissions={handleViewSubmissions}
         />
       )}
 
@@ -310,6 +209,75 @@ export default function LecturerAssignmentsPage() {
         <ScoresReportModal 
           onClose={() => setIsScoresReportOpen(false)}
         />
+      )}
+
+      {deleteConfirmId && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1000 }}>
+          <div className={`${styles.modalContent} ${styles.modalContentSmall}`} style={{ maxWidth: '400px', textAlign: 'center', padding: '2rem 1.75rem', borderRadius: '1rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#fef2f2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="30" height="30">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#191c1e', marginBottom: '0.75rem' }}>
+              Xác nhận xóa bài tập
+            </h3>
+            <p style={{ fontSize: '0.95rem', color: '#464555', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              Bạn có chắc chắn muốn xóa bài tập này không? Hành động này không thể hoàn tác.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <button
+                type="button"
+                className={styles.btnSecondary}
+                style={{ flex: 1, padding: '0.65rem 1rem', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer' }}
+                onClick={() => setDeleteConfirmId(null)}
+                disabled={deleting}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                style={{ flex: 1, padding: '0.65rem 1rem', borderRadius: '0.5rem', backgroundColor: '#ef4444', borderColor: '#ef4444', color: '#ffffff', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.7 : 1 }}
+                onClick={confirmDeleteAction}
+                disabled={deleting}
+              >
+                {deleting ? 'Đang xóa...' : 'Xóa bài tập'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
+          color: '#ffffff',
+          padding: '1rem 1.5rem',
+          borderRadius: '0.75rem',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          zIndex: 2000,
+          animation: 'modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          fontWeight: 600,
+          fontSize: '0.95rem'
+        }}>
+          {toast.type === 'success' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          {toast.text}
+        </div>
       )}
     </div>
   );

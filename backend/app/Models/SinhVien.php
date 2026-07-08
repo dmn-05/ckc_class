@@ -42,4 +42,10 @@ class SinhVien extends Model
     {
         return $this->belongsTo(Khoa::class, 'khoa_id');
     }
+
+    public function lopHocPhans()
+    {
+        return $this->belongsToMany(LopHocPhan::class, 'sinh_vien_lop_hoc_phan', 'sinh_vien_id', 'lop_hoc_phan_id')
+                    ->withPivot('ngay_tao', 'ngay_cap_nhat');
+    }
 }

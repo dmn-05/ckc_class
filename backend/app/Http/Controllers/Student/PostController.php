@@ -11,14 +11,36 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $request->validate(['lop_hoc_phan_id' => 'required|integer']);
+        $user = Auth::user();
 
-        $posts = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
-            ->where('lop_hoc_phan_id', $request->lop_hoc_phan_id)
-            ->where('trang_thai', 'hien_thi')
-            ->orderBy('ngay_tao', 'desc')
-            ->get();
-            
+        // Nếu truyền lop_hoc_phan_id cụ thể thì lọc theo lớp đó
+        if ($request->has('lop_hoc_phan_id') && $request->lop_hoc_phan_id) {
+            $posts = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+                ->where('lop_hoc_phan_id', (int) $request->lop_hoc_phan_id)
+                ->where('trang_thai', 'hien_thi')
+                ->orderBy('ngay_tao', 'desc')
+                ->get();
+
+            return response()->json(['data' => $posts]);
+        }
+
+        // Lấy các lớp sinh viên đã được thêm vào
+        $sinhVien = $user?->sinhVien;
+        $lopHocPhanIds = [];
+
+        if ($sinhVien) {
+            $lopHocPhanIds = $sinhVien->lopHocPhans()->pluck('lop_hoc_phan_id')->toArray();
+        }
+
+        $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+            ->where('trang_thai', 'hien_thi');
+
+        if (!empty($lopHocPhanIds)) {
+            $query->whereIn('lop_hoc_phan_id', $lopHocPhanIds);
+        }
+
+        $posts = $query->orderBy('ngay_tao', 'desc')->get();
+
         return response()->json(['data' => $posts]);
     }
 
@@ -34,7 +56,7 @@ class PostController extends Controller
             ->where('trang_thai', 'hien_thi')
             ->findOrFail($id);
             
-        $post->increment('luot_xem');
+        // $post->increment('luot_xem'); // Column not found in DB
             
         return response()->json(['data' => $post]);
     }
@@ -62,10 +84,16 @@ class PostController extends Controller
         $ten_chu_de = $ten_chu_de_map[$loai_bai_viet] ?? null;
         $chu_de_id = null;
         if ($ten_chu_de) {
-            $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
-                ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
-                ->where('ten_chu_de', $ten_chu_de)
-                ->value('id');
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
+                    $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
+                        ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
+                        ->where('ten_chu_de', $ten_chu_de)
+                        ->value('id');
+                }
+            } catch (\Exception $e) {
+                // Ignore if table doesn't exist
+            }
         }
 
         $post = BaiViet::create([

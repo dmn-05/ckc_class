@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AdminFaculties.module.css';
 import FacultyCard, { FacultyData } from './FacultyCard';
+import { getPaginationRange } from '@/utils/pagination';
 
 interface FacultyListProps {
   faculties: FacultyData[];
@@ -41,10 +42,7 @@ export default function FacultyList({ faculties, filter, onDelete }: FacultyList
   const endIdx = Math.min(currentPage * itemsPerPage, filtered.length);
 
   // Generate page numbers
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  const pageNumbers = getPaginationRange(currentPage, totalPages);
 
   return (
     <div className={styles.rightColumn}>
@@ -95,14 +93,24 @@ export default function FacultyList({ faculties, filter, onDelete }: FacultyList
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             
-            {pageNumbers.map(num => (
-              <button 
-                key={num}
-                className={`${styles.btnPage} ${currentPage === num ? styles.btnPageActive : ''}`}
-                onClick={() => setCurrentPage(num)}
-              >
-                {num}
-              </button>
+            {pageNumbers.map((num, idx) => (
+              typeof num === 'number' ? (
+                <button 
+                  key={num}
+                  className={`${styles.btnPage} ${currentPage === num ? styles.btnPageActive : ''}`}
+                  onClick={() => setCurrentPage(num)}
+                >
+                  {num}
+                </button>
+              ) : (
+                <span 
+                  key={`dots-${idx}`}
+                  className={styles.btnPage}
+                  style={{ border: 'none', background: 'transparent', cursor: 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {num}
+                </span>
+              )
             ))}
 
             <button 

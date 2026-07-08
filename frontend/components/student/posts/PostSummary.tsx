@@ -3,6 +3,18 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
+import { downloadFile } from '@/utils/download';
+
+/** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
+function getInitials(fullName: string): string {
+  if (!fullName) return 'SV';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  const first = parts[0].charAt(0).toUpperCase();
+  const last = parts[parts.length - 1].charAt(0).toUpperCase();
+  return first + last;
+}
+
 interface PostSummaryProps {
   post: {
     title: string;
@@ -22,6 +34,14 @@ interface PostSummaryProps {
 
 export default function PostSummary({ post }: PostSummaryProps) {
   if (!post) return null;
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (post.attachment) {
+      downloadFile(post.attachment.url, post.attachment.name);
+    }
+  };
+
   return (
     <section className={styles.sectionBox}>
       {post.image && (
@@ -38,11 +58,29 @@ export default function PostSummary({ post }: PostSummaryProps) {
           <h3 className={styles.postTitle}>{post.title}</h3>
           
           <div className={styles.authorInfo}>
-            <img 
-              src={post.authorAvatar || "https://ui-avatars.com/api/?name=User&background=3525cd&color=fff"} 
-              alt="Author" 
-              className={styles.authorAvatar} 
-            />
+            {post.authorAvatar ? (
+              <img 
+                src={post.authorAvatar} 
+                alt="Author" 
+                className={styles.authorAvatar} 
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div 
+                className={styles.authorAvatar} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  backgroundColor: '#3b82f6', 
+                  color: '#fff',
+                  fontSize: '0.875rem',
+                  fontWeight: '600'
+                }}
+              >
+                {getInitials(post.authorName)}
+              </div>
+            )}
             <div>
               <p className={styles.authorName}>{post.authorName}</p>
               <p className={styles.authorRole}>{post.authorRole || 'Giảng viên'}</p>
@@ -68,7 +106,11 @@ export default function PostSummary({ post }: PostSummaryProps) {
                 {post.attachment.name}
               </a>
             </div>
-            <a href={post.attachment.url} download style={{ padding: '0.5rem 1rem', border: '1px solid #e0e3e5', borderRadius: '0.25rem', backgroundColor: '#ffffff', color: '#191c1e', cursor: 'pointer', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
+            <a 
+              href={post.attachment.url} 
+              onClick={handleDownload}
+              style={{ padding: '0.5rem 1rem', border: '1px solid #e0e3e5', borderRadius: '0.25rem', backgroundColor: '#ffffff', color: '#191c1e', cursor: 'pointer', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}
+            >
               Tải xuống
             </a>
           </div>

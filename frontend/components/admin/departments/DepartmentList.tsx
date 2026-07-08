@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AdminDepartments.module.css';
 import DepartmentCard, { DepartmentData } from './DepartmentCard';
+import { getPaginationRange } from '@/utils/pagination';
 
 interface DepartmentListProps {
   departments: DepartmentData[];
@@ -42,10 +43,7 @@ export default function DepartmentList({ departments, facultyFilter, statusFilte
   const startIdx = (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, filtered.length);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  const pageNumbers = getPaginationRange(currentPage, totalPages);
 
   return (
     <div className={styles.rightColumn}>
@@ -96,14 +94,24 @@ export default function DepartmentList({ departments, facultyFilter, statusFilte
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             
-            {pageNumbers.map(num => (
-              <button 
-                key={num}
-                className={`${styles.btnPage} ${currentPage === num ? styles.btnPageActive : ''}`}
-                onClick={() => setCurrentPage(num)}
-              >
-                {num}
-              </button>
+            {pageNumbers.map((num, idx) => (
+              typeof num === 'number' ? (
+                <button 
+                  key={num}
+                  className={`${styles.btnPage} ${currentPage === num ? styles.btnPageActive : ''}`}
+                  onClick={() => setCurrentPage(num)}
+                >
+                  {num}
+                </button>
+              ) : (
+                <span 
+                  key={`dots-${idx}`}
+                  className={styles.btnPage}
+                  style={{ border: 'none', background: 'transparent', cursor: 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {num}
+                </span>
+              )
             ))}
 
             <button 

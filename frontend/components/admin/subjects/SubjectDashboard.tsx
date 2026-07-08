@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './AdminSubjects.module.css';
 
 interface SubjectDashboardProps {
@@ -20,6 +20,9 @@ export default function SubjectDashboard({
   pausedCount,
   distributionData
 }: SubjectDashboardProps) {
+  const [showAll, setShowAll] = useState(false);
+  const displayedData = showAll ? distributionData : distributionData.slice(0, 5);
+
   return (
     <div className={styles.leftColumn}>
       {/* Stats Card */}
@@ -59,7 +62,7 @@ export default function SubjectDashboard({
         </h3>
         
         <div className={styles.chartList}>
-          {distributionData.map((item, index) => {
+          {displayedData.map((item, index) => {
             const fillClass = 
               item.theme === 'primary' ? styles.chartBarFillPrimary : 
               item.theme === 'secondary' ? styles.chartBarFillSecondary : 
@@ -78,6 +81,34 @@ export default function SubjectDashboard({
             );
           })}
         </div>
+
+        {distributionData.length > 5 && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              marginTop: '16px',
+              backgroundColor: 'rgba(53, 37, 205, 0.04)',
+              border: '1px dashed #ced4da',
+              borderRadius: '6px',
+              color: '#3525cd',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span>{showAll ? 'Thu gọn' : `Xem thêm (${distributionData.length - 5} khoa)...`}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              {showAll ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Banner */}

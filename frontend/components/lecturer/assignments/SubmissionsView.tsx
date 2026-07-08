@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import styles from './AssignmentsManagement.module.css';
 import { AssignmentData } from './AssignmentGrid';
+import { exportToExcel, formatExportFileName } from '@/utils/exportExcel';
 
 export type SubmissionStatus = 'missing' | 'submitted' | 'late' | 'graded' | 'returned';
 
@@ -72,6 +73,29 @@ export default function SubmissionsView({
     }
   };
 
+  const handleExport = () => {
+    const data = submissions.map((sub, index) => {
+      let statusText = 'Chưa nộp';
+      if (sub.status === 'submitted') statusText = 'Đã nộp';
+      else if (sub.status === 'late') statusText = 'Nộp muộn';
+      else if (sub.status === 'graded') statusText = 'Đã chấm';
+      else if (sub.status === 'returned') statusText = 'Đã trả điểm';
+
+      return {
+        'STT': index + 1,
+        'Mã sinh viên': sub.studentCode || '',
+        'Họ và tên': sub.studentName || '',
+        'Thời gian nộp': sub.submittedAt || '',
+        'Trạng thái': statusText,
+        'Điểm số': sub.score !== undefined && sub.score !== null ? sub.score : '',
+        'Điểm chuẩn hóa': sub.score !== undefined && sub.score !== null ? sub.score : '',
+        'Nhận xét': sub.feedback || '',
+      };
+    });
+    const fileName = formatExportFileName('Bang_diem', assignment.title || 'Assignment');
+    exportToExcel(data, fileName, 'Điểm bài tập');
+  };
+
   const gradableCount = submissions.filter(s => s.status === 'graded').length;
 
   return (
@@ -95,17 +119,26 @@ export default function SubmissionsView({
           </p>
         </div>
         
-        <button 
-          className={styles.btnPrimary} 
-          onClick={handleReturnAction}
-          disabled={selectedIds.size === 0}
-          style={{ opacity: selectedIds.size === 0 ? 0.5 : 1, cursor: selectedIds.size === 0 ? 'not-allowed' : 'pointer' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-          </svg>
-          Trả bài ({selectedIds.size})
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className={styles.btnSecondary} onClick={handleExport}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Xuất bảng điểm
+          </button>
+
+          <button 
+            className={styles.btnPrimary} 
+            onClick={handleReturnAction}
+            disabled={selectedIds.size === 0}
+            style={{ opacity: selectedIds.size === 0 ? 0.5 : 1, cursor: selectedIds.size === 0 ? 'not-allowed' : 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            Trả bài ({selectedIds.size})
+          </button>
+        </div>
       </div>
 
       <div className={styles.tableContainer}>
@@ -160,16 +193,13 @@ export default function SubmissionsView({
                   ) : '-'}
                 </td>
                 <td className={styles.td} style={{ textAlign: 'right' }}>
-                  {sub.status !== 'missing' && sub.status !== 'returned' && (
+                  {sub.status !== 'missing' && (
                     <button 
-                      className={sub.status === 'graded' ? styles.actionBtn : styles.actionBtnPrimary}
+                      className={sub.status === 'graded' || sub.status === 'returned' ? styles.actionBtn : styles.actionBtnPrimary}
                       onClick={() => onGrade(sub)}
                     >
-                      {sub.status === 'graded' ? 'Sửa điểm' : 'Chấm điểm'}
+                      {sub.status === 'graded' || sub.status === 'returned' ? 'Sửa điểm' : 'Chấm điểm'}
                     </button>
-                  )}
-                  {sub.status === 'returned' && (
-                    <span style={{ fontSize: '0.875rem', color: '#777587' }}>Đã hoàn tất</span>
                   )}
                 </td>
               </tr>
