@@ -12,10 +12,15 @@ export default function CreateAssignmentPage() {
   const [sections, setSections] = useState<{ id: string; name: string; code: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
 
   useEffect(() => {
     async function loadData() {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const sId = params.get('sectionId');
+        if (sId) setInitialSectionId(sId);
+
         const sectionsData = await getLecturerCourseSections();
         setSections(
           (sectionsData || []).map((s: any) => ({
@@ -33,7 +38,7 @@ export default function CreateAssignmentPage() {
     loadData();
   }, []);
 
-  const handleSave = async (data: AssignmentFormData, file: File | null, _removeFile: boolean) => {
+  const handleSave = async (data: AssignmentFormData, files: File[], removeFileIds: number[], _removeFile: boolean) => {
     setSaving(true);
     try {
       const formData = new FormData();
@@ -46,12 +51,16 @@ export default function CreateAssignmentPage() {
       formData.append('cho_phep_nop_tre', data.allowLate ? '1' : '0');
       formData.append('tyle_phat_tre', String(data.latePenaltyPct));
       formData.append('trang_thai', data.isPublished ? 'hien_thi' : 'an');
-      if (file) {
-        formData.append('file', file);
-      }
+      files.forEach((file) => {
+        formData.append('files[]', file);
+      });
 
       await createLecturerAssignment(formData);
-      router.push('/lecturer/assignments');
+      if (initialSectionId) {
+        router.push(`/lecturer/sections/${initialSectionId}`);
+      } else {
+        router.push('/lecturer/assignments');
+      }
     } catch (error) {
       alert('Có lỗi xảy ra khi lưu bài tập.');
       console.error(error);
@@ -64,6 +73,14 @@ export default function CreateAssignmentPage() {
     return <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>Đang tải dữ liệu...</div>;
   }
 
+  const handleBack = () => {
+    if (initialSectionId) {
+      router.push(`/lecturer/sections/${initialSectionId}`);
+    } else {
+      router.push('/lecturer/assignments');
+    }
+  };
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
@@ -71,7 +88,7 @@ export default function CreateAssignmentPage() {
           <button
             className={styles.btnSecondary}
             style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            onClick={() => router.push('/lecturer/assignments')}
+            onClick={handleBack}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -84,10 +101,11 @@ export default function CreateAssignmentPage() {
       </div>
 
       <AssignmentFormPage
+        initialData={initialSectionId ? { sectionId: initialSectionId, title: '', description: '', instructions: '', maxScore: 10, dueDate: '', allowLate: false, latePenaltyPct: 0, isPublished: true } as any : undefined}
         sections={sections}
         saving={saving}
         onSave={handleSave}
-        onCancel={() => router.push('/lecturer/assignments')}
+        onCancel={handleBack}
       />
     </div>
   );

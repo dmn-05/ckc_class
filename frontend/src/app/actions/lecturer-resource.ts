@@ -25,16 +25,31 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
 function mapResourceFromApi(item: any) {
-    const fileAttach = item.tep_tin_bai_viet?.[0]?.tep_tin;
-    const fileSize = fileAttach
-        ? (fileAttach.kich_thuoc / (1024 * 1024)).toFixed(1) + ' MB'
+    const fileAttachments = item.tep_tin_bai_viet || [];
+    const firstFile = fileAttachments[0]?.tep_tin;
+    const fileSize = firstFile
+        ? (firstFile.kich_thuoc / (1024 * 1024)).toFixed(1) + ' MB'
         : (item.external_url ? 'Link' : '—');
-    const fileUrl = fileAttach?.duong_dan || item.file_url || '';
+    const fileUrl = firstFile?.duong_dan || item.file_url || '';
     const resourceType = mapLoaiTaiNguyen(item.loai_tai_nguyen || 'document');
+
+    const files = fileAttachments.map((attach: any) => ({
+        id: attach.tep_tin?.id,
+        name: attach.tep_tin?.ten_file,
+        url: attach.tep_tin?.duong_dan,
+        size: attach.tep_tin?.kich_thuoc ?? 0,
+    })).filter((f: any) => f.id);
 
     return {
         id: item.id.toString(),
@@ -46,6 +61,7 @@ function mapResourceFromApi(item: any) {
         createdAt: formatDate(item.ngay_tao),
         fileSize,
         fileUrl,
+        files,
         externalUrl: item.external_url || '',
         isVisible: item.trang_thai === 'hien_thi',
         orderNum: 0,
@@ -173,3 +189,4 @@ export async function getLecturerCourseSectionsForFilter() {
     const { getLecturerCourseSections } = await import('./lecturer-course-section');
     return await getLecturerCourseSections();
 }
+

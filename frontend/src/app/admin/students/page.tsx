@@ -23,7 +23,7 @@ export default function AdminStudentsPage() {
   const [statusFilter, setStatusFilter] = useState<string[]>(['active', 'graduated', 'reserved']); // array of selected statuses
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
   const loadData = useCallback(async () => {
     setLoading(true);

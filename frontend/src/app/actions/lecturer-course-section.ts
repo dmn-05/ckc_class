@@ -22,13 +22,26 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
 export async function getLecturerCourseSections() {
-    const response = await fetchWithAuth('/lecturer/course-sections', { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch course sections');
-    return await response.json();
+    try {
+        const response = await fetchWithAuth('/lecturer/course-sections', { method: 'GET', cache: 'no-store' });
+        if (!response.ok) return [];
+        const data = await response.json().catch(() => null);
+        return Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+    } catch (error) {
+        console.error("Error fetching lecturer course sections:", error);
+        return [];
+    }
 }
 
 export async function createLecturerCourseSection(data: any) {
@@ -56,13 +69,35 @@ export async function updateLecturerCourseSection(id: string, data: any) {
 }
 
 export async function getLecturerCourseSectionById(id: string) {
-    const response = await fetchWithAuth(`/lecturer/course-sections/${id}`, { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch course section');
-    return await response.json();
+    try {
+        const response = await fetchWithAuth(`/lecturer/course-sections/${id}`, { method: 'GET', cache: 'no-store' });
+        if (!response.ok) return null;
+        return await response.json().catch(() => null);
+    } catch (error) {
+        console.error("Error fetching course section by id:", error);
+        return null;
+    }
 }
 
 export async function getCurrentUser() {
-    const response = await fetchWithAuth('/me', { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch current user');
-    return await response.json();
+    try {
+        const response = await fetchWithAuth('/me', { method: 'GET', cache: 'no-store' });
+        if (!response.ok) return null;
+        return await response.json().catch(() => null);
+    } catch (error) {
+        console.error("Error fetching current user:", error);
+        return null;
+    }
+}
+
+export async function getLecturerSectionPosts(sectionId: string) {
+    try {
+        const response = await fetchWithAuth(`/lecturer/posts?lop_hoc_phan_id=${sectionId}`, { method: 'GET', cache: 'no-store' });
+        if (!response.ok) return [];
+        const json = await response.json();
+        return json.data || json || [];
+    } catch (error) {
+        console.error("Error fetching lecturer section posts", error);
+        return [];
+    }
 }

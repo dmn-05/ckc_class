@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Controller;
 use App\Models\BaiKiemTra;
 use App\Models\LopHocPhan;
-use App\Models\DangKyHocPhan;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -144,6 +144,86 @@ class ExamController extends Controller
         return response()->json(['message' => 'Exam deleted successfully']);
     }
 
+    public function getResults($id)
+    {
+        $exam = BaiKiemTra::whereIn('lop_hoc_phan_id', $this->getSectionIds())->findOrFail($id);
+        
+        $results = \App\Models\KetQuaKiemTra::with(['sinhVien.nguoiDung', 'chiTiet.cauHoi'])
+            ->where('bai_kiem_tra_id', $exam->id)
+            ->orderBy('sinh_vien_id')
+            ->orderBy('ngay_tao')
+            ->get();
+
+        $studentAttempts = [];
+        
+        $mappedResults = $results->map(function ($kq) use (&$studentAttempts) {
+            if (!isset($studentAttempts[$kq->sinh_vien_id])) {
+                $studentAttempts[$kq->sinh_vien_id] = 0;
+            }
+            $studentAttempts[$kq->sinh_vien_id]++;
+            $attemptNumber = $studentAttempts[$kq->sinh_vien_id];
+            
+            $essayAnswers = [];
+            foreach ($kq->chiTiet as $ct) {
+                if ($ct->cauHoi->loai === 'essay') {
+                    $essayAnswers[] = [
+                        'questionId' => (string) $ct->cau_hoi_id,
+                        'questionContent' => $ct->cauHoi->noi_dung ?? '',
+                        'maxScore' => $ct->cauHoi->diem ?? 1,
+                        'answer' => $ct->dap_an_tu_luan ?? '',
+                        'score' => $ct->diem_dat,
+                    ];
+                }
+            }
+            
+            return [
+                'id' => (string) $kq->id,
+                'studentId' => (string) $kq->sinh_vien_id,
+                'studentCode' => $kq->sinhVien->ma_sinh_vien ?? '',
+                'studentName' => $kq->sinhVien->nguoiDung->ho_ten ?? '',
+                'attemptNumber' => $attemptNumber,
+                'submittedAt' => $kq->thoi_gian_nop_bai ? $kq->thoi_gian_nop_bai->format('d/m/Y H:i') : null,
+                'status' => $kq->trang_thai === 'da_nop' ? 'needs_grading' : 'graded',
+                'autoScore' => $kq->diem_trac_nghiem,
+                'essayScore' => $kq->diem_tu_luan,
+                'totalScore' => $kq->tong_diem,
+                'essayAnswers' => $essayAnswers,
+            ];
+        });
+
+        return response()->json(['data' => $mappedResults]);
+    }
+
+    public function gradeEssay(Request $request, $id, $attemptId)
+    {
+        $exam = BaiKiemTra::whereIn('lop_hoc_phan_id', $this->getSectionIds())->findOrFail($id);
+        $ketQua = \App\Models\KetQuaKiemTra::where('bai_kiem_tra_id', $exam->id)->findOrFail($attemptId);
+
+        $validated = $request->validate([
+            'essayScore' => 'required|numeric|min:0',
+            'essayAnswers' => 'array',
+        ]);
+
+        $ketQua->diem_tu_luan = $validated['essayScore'];
+        $ketQua->tong_diem = $ketQua->diem_trac_nghiem + $validated['essayScore'];
+        $ketQua->trang_thai = 'da_cham';
+        $ketQua->save();
+
+        if (isset($validated['essayAnswers'])) {
+            foreach ($validated['essayAnswers'] as $ans) {
+                $chiTiet = \App\Models\ChiTietKetQua::where('ket_qua_kiem_tra_id', $ketQua->id)
+                    ->where('cau_hoi_id', $ans['questionId'])
+                    ->first();
+                if ($chiTiet) {
+                    $chiTiet->diem_dat = $ans['score'];
+                    $chiTiet->save();
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Graded successfully']);
+    }
+
     private function format(BaiKiemTra $item): array
     {
         $now   = now();
@@ -179,6 +259,8 @@ class ExamController extends Controller
             'isPublished'        => $item->trang_thai === 'hien_thi',
             'status'             => $status,
             'createdAt'          => $item->ngay_tao,
+            'submittedCount'     => $item->ketQuas()->distinct('sinh_vien_id')->count('sinh_vien_id'),
+            'totalStudents'      => $item->lopHocPhan ? $item->lopHocPhan->sinhViens()->count() : 0,
         ];
     }
 }

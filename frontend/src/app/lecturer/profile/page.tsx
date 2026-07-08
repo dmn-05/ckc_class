@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import LecturerProfile from '../../../../components/lecturer/profile/LecturerProfile';
 
 export const metadata = {
-  title: 'Hồ sơ Giảng viên | Academic Portal',
+  title: 'Hồ sơ cá nhân',
 };
 
 async function getProfile() {

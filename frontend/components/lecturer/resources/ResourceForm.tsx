@@ -8,10 +8,12 @@ export interface ResourceFormData {
   description: string;
   type: string;
   sectionId: string;
-  fileUrl: string;
+  fileUrl: string; // Legacy
   externalUrl: string;
   isVisible: boolean;
-  file?: File;
+  files?: File[];
+  existingFiles?: { id: number; name: string; url: string; size: number }[];
+  removeFileIds?: number[];
 }
 
 interface SectionOption {
@@ -45,7 +47,10 @@ export default function ResourceForm({
     sectionId: '',
     fileUrl: '',
     externalUrl: '',
-    isVisible: true
+    isVisible: true,
+    files: [],
+    existingFiles: [],
+    removeFileIds: []
   });
 
   // Sync initialData
@@ -63,10 +68,25 @@ export default function ResourceForm({
   }, [sections, formData.sectionId, isEditMode]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, file }));
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length > 0) {
+      setFormData(prev => ({ ...prev, files: [...(prev.files || []), ...selectedFiles] }));
     }
+  };
+
+  const removeNewFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      files: (prev.files || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const removeExistingFile = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      existingFiles: (prev.existingFiles || []).filter(f => f.id !== id),
+      removeFileIds: [...(prev.removeFileIds || []), id]
+    }));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -167,17 +187,41 @@ export default function ResourceForm({
             <label className={styles.formLabel}>Đính kèm File (Tải lên)</label>
             <input 
               type="file" 
+              multiple
               className={styles.formInput} 
               onChange={handleFileUpload}
             />
-            {formData.file && (
-              <div style={{ fontSize: '0.875rem', color: '#059669', wordBreak: 'break-all', marginTop: '0.25rem' }}>
-                Đã chọn file: {formData.file.name}
+            
+            {/* Display newly selected files */}
+            {formData.files && formData.files.length > 0 && (
+              <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {formData.files.map((file, index) => (
+                  <div key={index} style={{ fontSize: '0.875rem', color: '#059669', wordBreak: 'break-all', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ecfdf5', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                    <span>Đã chọn: {file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
+                    <button type="button" onClick={() => removeNewFile(index)} style={{ color: '#ef4444', border: 'none', background: 'none', cursor: 'pointer' }}>✕</button>
+                  </div>
+                ))}
               </div>
             )}
-            {formData.fileUrl && !formData.file && (
-              <div style={{ fontSize: '0.875rem', color: '#059669', wordBreak: 'break-all', marginTop: '0.25rem' }}>
-                File hiện tại: <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer">Xem file</a>
+
+            {/* Display existing files */}
+            {formData.existingFiles && formData.existingFiles.length > 0 && (
+              <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {formData.existingFiles.map((file) => (
+                  <div key={file.id} style={{ fontSize: '0.875rem', color: '#374151', wordBreak: 'break-all', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f3f4f6', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none' }}>
+                      File hiện tại: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                    </a>
+                    <button type="button" onClick={() => removeExistingFile(file.id)} style={{ color: '#ef4444', border: 'none', background: 'none', cursor: 'pointer' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Legacy file support */}
+            {formData.fileUrl && (!formData.existingFiles || formData.existingFiles.length === 0) && (
+              <div style={{ fontSize: '0.875rem', color: '#374151', wordBreak: 'break-all', marginTop: '0.5rem' }}>
+                <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none' }}>Xem file cũ</a>
               </div>
             )}
           </div>

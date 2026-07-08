@@ -11,8 +11,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ClassController;
-use App\Http\Controllers\Student\EnrollmentController;
-use App\Http\Controllers\Lecturer\EnrollmentController as LecturerEnrollmentController;
+
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -43,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/classes/{id}', [ClassController::class, 'show']);
         Route::put('/classes/{id}', [ClassController::class, 'update']);
         Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
+        Route::get('/classes/{id}/students', [ClassController::class, 'getStudents']);
+        Route::post('/classes/{id}/students', [ClassController::class, 'addStudent']);
+        Route::delete('/classes/{id}/students/{studentId}', [ClassController::class, 'removeStudent']);
         
         // Course Section routes
         Route::get('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'index']);
@@ -76,9 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/lecturer/course-sections', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'store']);
         Route::get('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'show']);
         Route::put('/lecturer/course-sections/{id}', [\App\Http\Controllers\Lecturer\CourseSectionController::class, 'update']);
-        // Enrollment management by lecturer
-        Route::get('/lecturer/enrollments/{sectionId}', [LecturerEnrollmentController::class, 'bySection']);
-        Route::patch('/lecturer/enrollments/{id}/cancel', [LecturerEnrollmentController::class, 'cancelByLecturer']);
+
         // Resource management by lecturer
         Route::get('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'index']);
         Route::post('/lecturer/resources', [\App\Http\Controllers\Lecturer\ResourceController::class, 'store']);
@@ -90,6 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'index']);
         Route::post('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'store']);
         Route::get('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'show']);
+        Route::get('/lecturer/assignments/{id}/submissions', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'submissions']);
+        Route::post('/lecturer/assignments/{id}/submissions/return', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'returnSubmissions']);
+        Route::post('/lecturer/assignments/{id}/submissions/{submissionId}/grade', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'gradeSubmission']);
         Route::put('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']);
         Route::post('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'update']); // FormData fallback
         Route::delete('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'destroy']);
@@ -110,10 +113,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Student Only Routes
     Route::middleware(\App\Http\Middleware\CheckRole::class.':3')->group(function () {
-        Route::get('/student/available-sections', [EnrollmentController::class, 'availableSections']);
-        Route::get('/student/enrollments', [EnrollmentController::class, 'myEnrollments']);
-        Route::post('/student/enrollments', [EnrollmentController::class, 'enroll']);
-        Route::delete('/student/enrollments/{id}', [EnrollmentController::class, 'cancel']);
     });
 
 
@@ -133,13 +132,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
     Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
     Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
+    Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
+    Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 
     // Post Routes
     Route::get('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'index']);
     Route::get('/student/posts/{id}', [\App\Http\Controllers\Student\PostController::class, 'show']);
     Route::post('/student/posts', [\App\Http\Controllers\Student\PostController::class, 'store']);
+    Route::get('/student/sections', [\App\Http\Controllers\Student\StudentSectionController::class, 'index']);
+    Route::get('/student/sections/{id}', [\App\Http\Controllers\Student\StudentSectionController::class, 'show']);
+    Route::get('/student/quizzes', [\App\Http\Controllers\Student\StudentQuizController::class, 'index']);
+    Route::get('/student/quizzes/{id}', [\App\Http\Controllers\Student\StudentQuizController::class, 'show']);
+    Route::post('/student/quizzes/{id}/submit', [\App\Http\Controllers\Student\StudentQuizController::class, 'submit']);
+    Route::get('/student/quizzes/{id}/result', [\App\Http\Controllers\Student\StudentQuizController::class, 'result']);
+    Route::get('/student/assignments', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'index']);
+    Route::get('/student/assignments/{id}', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'show']);
+    Route::post('/student/assignments/{id}/submit', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'submit']);
 
+    Route::get('lecturer/exams/{id}/results', [\App\Http\Controllers\Lecturer\ExamController::class, 'getResults']);
+    Route::post('lecturer/exams/{id}/results/{attemptId}/grade', [\App\Http\Controllers\Lecturer\ExamController::class, 'gradeEssay']);
+    Route::apiResource('lecturer/exams', \App\Http\Controllers\Lecturer\ExamController::class);
     Route::apiResource('lecturer/posts', \App\Http\Controllers\Lecturer\PostController::class);
+
+    // Student Management by lecturer
+    Route::get('/lecturer/students/search', [\App\Http\Controllers\Lecturer\StudentListController::class, 'search']);
+    Route::get('/lecturer/course-sections/{sectionId}/students', [\App\Http\Controllers\Lecturer\StudentListController::class, 'index']);
+    Route::get('/lecturer/classes', [\App\Http\Controllers\Admin\ClassController::class, 'index']);
+    Route::post('/lecturer/course-sections/{sectionId}/students', [\App\Http\Controllers\Lecturer\StudentListController::class, 'store']);
+    Route::delete('/lecturer/course-sections/{sectionId}/students/{studentId}', [\App\Http\Controllers\Lecturer\StudentListController::class, 'destroy']);
 });
 
 
@@ -169,4 +189,5 @@ Route::get('/fix-hoc-ky', function() {
         return 'Error: ' . $e->getMessage();
     }
 });
+
 

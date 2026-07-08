@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import styles from './AdminCourseSections.module.css';
 
 export type CourseSectionStatus = 'dang_mo' | 'da_khoa' | 'da_ket_thuc';
@@ -22,11 +23,23 @@ interface CourseSectionCardProps {
   section: CourseSectionData;
   onEdit: (section: CourseSectionData) => void;
   onViewStats: (sectionId: string) => void;
+  onManageStudents?: (sectionId: string) => void;
   onDelete: (sectionId: string) => void;
   hideDelete?: boolean;
 }
 
-export default function CourseSectionCard({ section, onEdit, onViewStats, onDelete, hideDelete }: CourseSectionCardProps) {
+export default function CourseSectionCard({ section, onEdit, onViewStats, onManageStudents, onDelete, hideDelete }: CourseSectionCardProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleCardClick = () => {
+    if (pathname?.startsWith('/lecturer')) {
+      router.push(`/lecturer/sections/${section.id}`);
+    } else if (pathname?.startsWith('/admin')) {
+      router.push(`/admin/course-sections/${section.id}`);
+    }
+  };
+
   let statusClass = '';
   let statusText = '';
   let cardClass = '';
@@ -37,41 +50,35 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onDele
   if (section.status === 'dang_mo') {
     cardClass = styles.classCardPrimary;
     iconClass = styles.classIconPrimary;
-    codeClass = styles.classCodePrimary;
+    statusClass = styles.statusPrimary;
     statusText = 'Đang mở';
-    statusClass = styles.statusActive;
+    codeClass = styles.codePrimary;
     statusIcon = (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
+      <span className={styles.statusDot} style={{ backgroundColor: '#2e7d32' }} />
     );
   } else if (section.status === 'da_khoa') {
-    cardClass = styles.classCardSecondary;
-    iconClass = styles.classIconSecondary;
-    codeClass = styles.classCodeSecondary;
+    cardClass = styles.classCardWarning;
+    iconClass = styles.classIconWarning;
+    statusClass = styles.statusWarning;
     statusText = 'Đã khóa';
-    statusClass = styles.statusUpcoming;
+    codeClass = styles.codeWarning;
     statusIcon = (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>
+      <span className={styles.statusDot} style={{ backgroundColor: '#ed6c02' }} />
     );
-  } else if (section.status === 'da_ket_thuc') {
-    cardClass = styles.classCardCompleted;
-    iconClass = styles.classIconCompleted;
-    codeClass = styles.classCodeCompleted;
+  } else {
+    cardClass = styles.classCardNeutral;
+    iconClass = styles.classIconNeutral;
+    statusClass = styles.statusNeutral;
     statusText = 'Đã kết thúc';
-    statusClass = styles.statusCompleted;
+    codeClass = styles.codeNeutral;
     statusIcon = (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
+      <span className={styles.statusDot} style={{ backgroundColor: '#757575' }} />
     );
   }
 
   return (
     <div className={`${styles.glassCard} ${styles.classCard} ${cardClass}`}>
-      <div className={styles.classCardLeft}>
+      <div className={styles.classCardLeft} onClick={handleCardClick} style={{ cursor: 'pointer' }} title="Bấm để vào lớp học phần">
         <div className={`${styles.classIconBox} ${iconClass}`}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="32" height="32">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -80,7 +87,7 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onDele
 
         <div className={styles.classInfo}>
           <div className={styles.classTitleRow}>
-            <h4 className={styles.classTitle}>{section.name || section.subjectName}</h4>
+            <h4 className={styles.classTitle} style={{ color: 'var(--color-primary)' }}>{section.name || section.subjectName}</h4>
             <span className={`${styles.classCodeBadge} ${codeClass}`}>{section.code}</span>
           </div>
           
@@ -115,6 +122,17 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onDele
       </div>
 
       <div className={styles.classCardRight}>
+        {onManageStudents && (
+          <button 
+            className={`${styles.btnActionSmall} ${styles.btnActionSecondary}`}
+            onClick={() => onManageStudents(section.id)}
+            title="Quản lý sinh viên"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </button>
+        )}
         <button 
           className={`${styles.btnActionSmall} ${styles.btnActionStats}`}
           onClick={() => onViewStats(section.id)}

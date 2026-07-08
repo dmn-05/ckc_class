@@ -11,6 +11,11 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $this->call(BaiKiemTraSeeder::class);
+        $this->call([
+            CaoThangSeeder::class,
+            BaiKiemTraSeeder::class,
+            LopHocPhanDataSeeder::class,
+        ]);
     }
 }
+

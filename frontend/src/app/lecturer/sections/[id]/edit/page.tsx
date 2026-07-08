@@ -1,5 +1,10 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import UpdateCourseSectionForm from '@/components/admin/course-sections/UpdateCourseSectionForm';
+
+export const metadata: Metadata = {
+  title: 'Chỉnh sửa lớp học phần',
+};
 
 interface LecturerEditCourseSectionPageProps {
   params: {

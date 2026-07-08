@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AdminSubjects.module.css';
 import SubjectCard, { SubjectData } from './SubjectCard';
+import { getPaginationRange } from '@/utils/pagination';
 
 interface SubjectListProps {
   subjects: SubjectData[];
@@ -21,7 +22,7 @@ export default function SubjectList({
   onEdit, 
   onDelete 
 }: SubjectListProps) {
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -55,19 +56,28 @@ export default function SubjectList({
   );
 
   const renderPaginationButtons = () => {
-    const buttons = [];
-    for (let i = 1; i <= totalPages; i++) {
-      buttons.push(
-        <button 
-          key={i}
-          className={`${styles.btnPage} ${currentPage === i ? styles.btnPageActive : ''}`}
-          onClick={() => setCurrentPage(i)}
+    return getPaginationRange(currentPage, totalPages).map((pageNum, idx) => {
+      if (typeof pageNum === 'number') {
+        return (
+          <button 
+            key={pageNum}
+            className={`${styles.btnPage} ${currentPage === pageNum ? styles.btnPageActive : ''}`}
+            onClick={() => setCurrentPage(pageNum)}
+          >
+            {pageNum}
+          </button>
+        );
+      }
+      return (
+        <span 
+          key={`dots-${idx}`}
+          className={styles.btnPage}
+          style={{ border: 'none', background: 'transparent', cursor: 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          {i}
-        </button>
+          {pageNum}
+        </span>
       );
-    }
-    return buttons;
+    });
   };
 
   return (

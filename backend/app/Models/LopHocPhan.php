@@ -35,8 +35,9 @@ class LopHocPhan extends Model
         return $this->belongsTo(GiangVien::class, 'giang_vien_id');
     }
 
-    public function dangKy()
+    public function sinhViens()
     {
-        return $this->hasMany(DangKyHocPhan::class, 'lop_hoc_phan_id');
+        return $this->belongsToMany(SinhVien::class, 'sinh_vien_lop_hoc_phan', 'lop_hoc_phan_id', 'sinh_vien_id')
+                    ->withPivot('ngay_tao', 'ngay_cap_nhat');
     }
 }

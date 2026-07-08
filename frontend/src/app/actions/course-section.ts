@@ -22,6 +22,13 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
@@ -73,8 +80,15 @@ export async function getSubjects() {
     return await response.json();
 }
 
+export async function getClasses() {
+    const response = await fetchWithAuth('/lecturer/classes', { method: 'GET', cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch classes');
+    return await response.json();
+}
+
 export async function getLecturers() {
     const response = await fetchWithAuth('/lecturers', { method: 'GET', cache: 'no-store' });
     if (!response.ok) throw new Error('Failed to fetch lecturers');
     return await response.json();
 }
+

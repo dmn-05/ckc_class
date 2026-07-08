@@ -22,6 +22,13 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
+    if (response.status === 401 || response.status === 403) {
+        cookieStore.delete("auth_token");
+        cookieStore.delete("vai_tro_id");
+        cookieStore.delete("user");
+        const { redirect } = await import("next/navigation");
+        redirect("/login");
+    }
     return response;
 }
 
@@ -72,3 +79,4 @@ export async function getFaculties() {
     if (!response.ok) throw new Error('Failed to fetch faculties');
     return await response.json();
 }
+

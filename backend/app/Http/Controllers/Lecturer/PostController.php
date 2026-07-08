@@ -48,10 +48,16 @@ class PostController extends Controller
         $ten_chu_de = $ten_chu_de_map[$validated['loai_bai_viet']] ?? null;
         $chu_de_id = null;
         if ($ten_chu_de) {
-            $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
-                ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
-                ->where('ten_chu_de', $ten_chu_de)
-                ->value('id');
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
+                    $chu_de_id = \Illuminate\Support\Facades\DB::table('chu_de')
+                        ->where('lop_hoc_phan_id', $validated['lop_hoc_phan_id'])
+                        ->where('ten_chu_de', $ten_chu_de)
+                        ->value('id');
+                }
+            } catch (\Exception $e) {
+                // Ignore if table doesn't exist
+            }
         }
 
         // Upload ảnh bìa lên Cloudinary

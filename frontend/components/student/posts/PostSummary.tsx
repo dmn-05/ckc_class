@@ -3,6 +3,8 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
+import { downloadFile } from '@/utils/download';
+
 /** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
 function getInitials(fullName: string): string {
   if (!fullName) return 'SV';
@@ -32,6 +34,14 @@ interface PostSummaryProps {
 
 export default function PostSummary({ post }: PostSummaryProps) {
   if (!post) return null;
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (post.attachment) {
+      downloadFile(post.attachment.url, post.attachment.name);
+    }
+  };
+
   return (
     <section className={styles.sectionBox}>
       {post.image && (
@@ -96,7 +106,11 @@ export default function PostSummary({ post }: PostSummaryProps) {
                 {post.attachment.name}
               </a>
             </div>
-            <a href={post.attachment.url} download style={{ padding: '0.5rem 1rem', border: '1px solid #e0e3e5', borderRadius: '0.25rem', backgroundColor: '#ffffff', color: '#191c1e', cursor: 'pointer', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
+            <a 
+              href={post.attachment.url} 
+              onClick={handleDownload}
+              style={{ padding: '0.5rem 1rem', border: '1px solid #e0e3e5', borderRadius: '0.25rem', backgroundColor: '#ffffff', color: '#191c1e', cursor: 'pointer', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}
+            >
               Tải xuống
             </a>
           </div>

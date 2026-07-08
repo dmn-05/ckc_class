@@ -93,8 +93,6 @@ export default function StudentPostFormModal({ isOpen, onClose, onSubmit }: Stud
               >
                 <option value="bai_viet">Thảo luận / Hỏi đáp</option>
                 <option value="thong_bao">Thông báo</option>
-                <option value="tai_lieu">Tài liệu</option>
-                <option value="bai_tap">Bài tập</option>
               </select>
             </div>
             <div>

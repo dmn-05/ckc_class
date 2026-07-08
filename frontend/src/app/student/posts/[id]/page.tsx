@@ -7,7 +7,7 @@ import CommentInput from '../../../../../components/student/posts/CommentInput';
 import CommentThread, { CommentData } from '../../../../../components/student/posts/CommentThread';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getProfileAction } from '../../../../../src/app/student/profile/actions';
 import { authHeaders } from '../../../../../src/lib/auth';
 
@@ -15,6 +15,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function PostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
   const [postData, setPostData] = useState<any>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -78,7 +79,8 @@ export default function PostDetailPage() {
                       json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
                       json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
             attachment: attachment,
-            image: json.data.hinh_anh || null
+            image: json.data.hinh_anh || null,
+            lop_hoc_phan_id: json.data.lop_hoc_phan_id
           });
 
         // Map backend comments
@@ -212,15 +214,38 @@ export default function PostDetailPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <header className={styles.pageHeader} style={{ alignItems: 'flex-start', flexDirection: 'column' }}>
-        <h2 className={styles.pageTitle}>Bài viết</h2>
-        <div className={styles.breadcrumb}>
-          <Link href="/student/posts" className={styles.btnCancel} style={{ padding: '0 0.5rem 0 0', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Quay lại danh sách
-          </Link>
+      <header className={styles.pageHeader} style={{ alignItems: 'flex-start', flexDirection: 'column', padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-outline-variant)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+          {/* Back button */}
+          <button 
+            onClick={() => {
+              if (window.history.length > 2) {
+                router.back();
+              } else {
+                router.push(postData?.lop_hoc_phan_id ? `/student/courses/${postData.lop_hoc_phan_id}?tab=stream` : "/student/courses");
+              }
+            }}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'transparent', 
+              color: 'var(--color-on-surface-variant)', 
+              borderRadius: '50%', 
+              textDecoration: 'none', 
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-container-highest)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            title="Quay lại lớp học"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>arrow_back</span>
+          </button>
+          <h2 className={styles.pageTitle} style={{ margin: 0 }}>Chi tiết bài đăng</h2>
         </div>
       </header>
 
