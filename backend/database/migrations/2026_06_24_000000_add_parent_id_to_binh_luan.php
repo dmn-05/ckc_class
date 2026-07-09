@@ -11,13 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('binh_luan')) {
-            Schema::table('binh_luan', function (Blueprint $table) {
-                if (Schema::hasColumn('binh_luan', 'binh_luan_cha_id')) {
-                    $table->dropColumn('binh_luan_cha_id');
-                }
-            });
-
+        if (Schema::hasTable('binh_luan') && !Schema::hasColumn('binh_luan', 'binh_luan_cha_id')) {
             Schema::table('binh_luan', function (Blueprint $table) {
                 $table->foreignId('binh_luan_cha_id')->nullable()->after('bai_viet_id')->constrained('binh_luan')->onDelete('cascade');
             });

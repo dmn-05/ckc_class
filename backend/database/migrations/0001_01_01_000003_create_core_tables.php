@@ -8,14 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('vai_tro', function (Blueprint $table) {
+        if (!Schema::hasTable('vai_tro')) {
+            Schema::create('vai_tro', function (Blueprint $table) {
             $table->id();
             $table->string('ten_vai_tro', 50)->unique();
             $table->string('mo_ta', 255)->nullable();
             $table->timestamps();
         });
+        }
 
-        Schema::create('khoa', function (Blueprint $table) {
+        if (!Schema::hasTable('khoa')) {
+            Schema::create('khoa', function (Blueprint $table) {
             $table->id();
             $table->string('ma_khoa', 50)->unique();
             $table->string('ten_khoa', 255);
@@ -23,8 +26,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('bo_mon', function (Blueprint $table) {
+        if (!Schema::hasTable('bo_mon')) {
+            Schema::create('bo_mon', function (Blueprint $table) {
             $table->id();
             $table->string('ma_bo_mon', 50)->unique();
             $table->string('ten_bo_mon', 255);
@@ -33,8 +38,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('mon_hoc', function (Blueprint $table) {
+        if (!Schema::hasTable('mon_hoc')) {
+            Schema::create('mon_hoc', function (Blueprint $table) {
             $table->id();
             $table->string('ma_mon', 50)->unique();
             $table->string('ten_mon', 255);
@@ -45,8 +52,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('lop', function (Blueprint $table) {
+        if (!Schema::hasTable('lop')) {
+            Schema::create('lop', function (Blueprint $table) {
             $table->id();
             $table->string('ma_lop', 50)->unique();
             $table->string('ten_lop', 255);
@@ -56,8 +65,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('nguoi_dung', function (Blueprint $table) {
+        if (!Schema::hasTable('nguoi_dung')) {
+            Schema::create('nguoi_dung', function (Blueprint $table) {
             $table->id();
             $table->string('ho_ten', 255);
             $table->string('email', 255)->unique();
@@ -67,15 +78,19 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('quen_mat_khau', function (Blueprint $table) {
+        if (!Schema::hasTable('quen_mat_khau')) {
+            Schema::create('quen_mat_khau', function (Blueprint $table) {
             $table->id();
             $table->string('email')->index();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
+        }
 
-        Schema::create('giang_vien', function (Blueprint $table) {
+        if (!Schema::hasTable('giang_vien')) {
+            Schema::create('giang_vien', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nguoi_dung_id')->constrained('nguoi_dung')->onDelete('cascade');
             $table->string('ma_giang_vien', 50)->unique();
@@ -89,8 +104,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('sinh_vien', function (Blueprint $table) {
+        if (!Schema::hasTable('sinh_vien')) {
+            Schema::create('sinh_vien', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nguoi_dung_id')->constrained('nguoi_dung')->onDelete('cascade');
             $table->string('ma_sinh_vien', 50)->unique();
@@ -105,8 +122,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('lop_hoc_phan', function (Blueprint $table) {
+        if (!Schema::hasTable('lop_hoc_phan')) {
+            Schema::create('lop_hoc_phan', function (Blueprint $table) {
             $table->id();
             $table->string('ma_lop_hoc_phan', 50)->unique();
             $table->string('ten_lop', 255);
@@ -119,8 +138,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('chu_de', function (Blueprint $table) {
+        if (!Schema::hasTable('chu_de')) {
+            Schema::create('chu_de', function (Blueprint $table) {
             $table->id();
             $table->string('ten_chu_de', 255);
             $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
@@ -129,8 +150,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('tai_lieu', function (Blueprint $table) {
+        if (!Schema::hasTable('tai_lieu')) {
+            Schema::create('tai_lieu', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
             $table->text('mo_ta')->nullable();
@@ -141,8 +164,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('thong_bao', function (Blueprint $table) {
+        if (!Schema::hasTable('thong_bao')) {
+            Schema::create('thong_bao', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
             $table->text('noi_dung')->nullable();
@@ -152,8 +177,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('bai_viet', function (Blueprint $table) {
+        if (!Schema::hasTable('bai_viet')) {
+            Schema::create('bai_viet', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
             $table->text('noi_dung')->nullable();
@@ -166,8 +193,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('binh_luan', function (Blueprint $table) {
+        if (!Schema::hasTable('binh_luan')) {
+            Schema::create('binh_luan', function (Blueprint $table) {
             $table->id();
             $table->text('noi_dung');
             $table->foreignId('nguoi_dung_id')->constrained('nguoi_dung')->onDelete('cascade');
@@ -177,8 +206,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('tep_tin', function (Blueprint $table) {
+        if (!Schema::hasTable('tep_tin')) {
+            Schema::create('tep_tin', function (Blueprint $table) {
             $table->id();
             $table->string('ten_file', 255);
             $table->string('ten_file_luu', 255);
@@ -189,15 +220,19 @@ return new class extends Migration
             $table->string('trang_thai', 50)->default('dang_hoat_dong');
             $table->timestamp('ngay_tao')->nullable();
         });
+        }
 
-        Schema::create('tep_tin_bai_viet', function (Blueprint $table) {
+        if (!Schema::hasTable('tep_tin_bai_viet')) {
+            Schema::create('tep_tin_bai_viet', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tep_tin_id')->constrained('tep_tin')->onDelete('cascade');
             $table->foreignId('bai_viet_id')->constrained('bai_viet')->onDelete('cascade');
             $table->timestamp('ngay_tao')->nullable();
         });
+        }
 
-        Schema::create('bai_tap', function (Blueprint $table) {
+        if (!Schema::hasTable('bai_tap')) {
+            Schema::create('bai_tap', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
             $table->text('noi_dung')->nullable();
@@ -215,8 +250,10 @@ return new class extends Migration
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
 
-        Schema::create('bai_nop', function (Blueprint $table) {
+        if (!Schema::hasTable('bai_nop')) {
+            Schema::create('bai_nop', function (Blueprint $table) {
             $table->id();
             $table->foreignId('bai_tap_id')->constrained('bai_tap')->onDelete('cascade');
             $table->foreignId('sinh_vien_id')->constrained('sinh_vien')->onDelete('cascade');
@@ -229,6 +266,7 @@ return new class extends Migration
             $table->datetime('ngay_nop')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
+        }
     }
 
     public function down(): void

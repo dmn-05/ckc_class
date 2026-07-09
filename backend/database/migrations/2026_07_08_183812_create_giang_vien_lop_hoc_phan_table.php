@@ -16,12 +16,14 @@ return new class extends Migration
 
         Schema::create('giang_vien_lop_hoc_phan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
-            $table->foreignId('giang_vien_id')->constrained('giang_vien')->onDelete('cascade');
+            $table->integer('lop_hoc_phan_id');
+            $table->integer('giang_vien_id');
             $table->string('vai_tro', 50)->default('chinh')->nullable();
             $table->timestamp('ngay_tao')->useCurrent();
             $table->timestamp('ngay_cap_nhat')->useCurrent()->useCurrentOnUpdate();
 
+            $table->foreign('lop_hoc_phan_id')->references('id')->on('lop_hoc_phan')->onDelete('cascade');
+            $table->foreign('giang_vien_id')->references('id')->on('giang_vien')->onDelete('cascade');
             $table->unique(['lop_hoc_phan_id', 'giang_vien_id']);
         });
 
@@ -30,10 +32,10 @@ return new class extends Migration
         foreach ($existing as $row) {
             DB::table('giang_vien_lop_hoc_phan')->insertOrIgnore([
                 'lop_hoc_phan_id' => $row->id,
-                'giang_vien_id' => $row->giang_vien_id,
-                'vai_tro' => 'chinh',
-                'ngay_tao' => now(),
-                'ngay_cap_nhat' => now(),
+                'giang_vien_id'   => $row->giang_vien_id,
+                'vai_tro'         => 'chinh',
+                'ngay_tao'        => now(),
+                'ngay_cap_nhat'   => now(),
             ]);
         }
     }
