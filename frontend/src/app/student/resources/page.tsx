@@ -2,11 +2,11 @@
 
 import React, { useState, useMemo } from 'react';
 import styles from '@/components/student/resources/ResourcesManagement.module.css';
-import ResourcesHeader from '../../../../components/student/resources/ResourcesHeader';
-import CategoryTabs from '../../../../components/student/resources/CategoryTabs';
-import ResourceCard, { ResourceData } from '../../../../components/student/resources/ResourceCard';
-import FeaturedSection from '../../../../components/student/resources/FeaturedSection';
-import MediaModal from '../../../../components/student/resources/MediaModal';
+import ResourcesHeader from '@/components/student/resources/ResourcesHeader';
+import CategoryTabs from '@/components/student/resources/CategoryTabs';
+import ResourceCard, { ResourceData } from '@/components/student/resources/ResourceCard';
+import FeaturedSection from '@/components/student/resources/FeaturedSection';
+import MediaModal from '@/components/student/resources/MediaModal';
 
 // Mock Data
 const MOCK_RESOURCES: ResourceData[] = [

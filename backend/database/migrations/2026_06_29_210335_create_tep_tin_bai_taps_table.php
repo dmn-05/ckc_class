@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tep_tin_bai_tap', function (Blueprint $table) {
-            $table->id();
-            $table->integer('bai_tap_id');
-            $table->integer('tep_tin_id');
-            $table->timestamps();
-
-            $table->foreign('bai_tap_id')->references('id')->on('bai_tap')->onDelete('cascade');
-            $table->foreign('tep_tin_id')->references('id')->on('tep_tin')->onDelete('cascade');
-        });
+        if (!Schema::hasTable('tep_tin_bai_tap')) {
+            Schema::create('tep_tin_bai_tap', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('bai_tap_id')->constrained('bai_tap')->onDelete('cascade');
+                $table->foreignId('tep_tin_id')->constrained('tep_tin')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

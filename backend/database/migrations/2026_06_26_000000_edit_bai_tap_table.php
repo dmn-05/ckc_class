@@ -15,6 +15,9 @@ return new class extends Migration
                 $table->string('tieu_de', 255);
                 $table->text('noi_dung')->nullable();
                 $table->text('huong_dan')->nullable();
+                $table->text('mo_ta')->nullable();
+                $table->string('file_url', 500)->nullable();
+                $table->string('file_name', 255)->nullable();
                 $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
                 $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
                 $table->decimal('diem_toi_da', 5, 1)->default(10);
@@ -35,6 +38,15 @@ return new class extends Migration
             }
             if (!Schema::hasColumn('bai_tap', 'huong_dan')) {
                 $table->text('huong_dan')->nullable()->after('noi_dung');
+            }
+            if (!Schema::hasColumn('bai_tap', 'mo_ta')) {
+                $table->text('mo_ta')->nullable()->after('huong_dan');
+            }
+            if (!Schema::hasColumn('bai_tap', 'file_url')) {
+                $table->string('file_url', 500)->nullable()->after('mo_ta');
+            }
+            if (!Schema::hasColumn('bai_tap', 'file_name')) {
+                $table->string('file_name', 255)->nullable()->after('file_url');
             }
             if (!Schema::hasColumn('bai_tap', 'diem_toi_da')) {
                 $table->decimal('diem_toi_da', 5, 1)->default(10)->after('nguoi_tao_id');

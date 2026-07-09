@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('tieu_de', 255);
             $table->text('mo_ta')->nullable();                          // Mô tả / hướng dẫn chung
 
-            // Liên kết lớp học phần và người tạo (int thường, không dùng FK vì bảng gốc dùng int signed)
-            $table->integer('lop_hoc_phan_id')->index();
+            // Liên kết lớp học phần và người tạo
+            $table->foreignId('lop_hoc_phan_id')->index();
             $table->unsignedBigInteger('nguoi_tao_id');
             $table->foreign('nguoi_tao_id')->references('id')->on('nguoi_dung')->onDelete('cascade');
 

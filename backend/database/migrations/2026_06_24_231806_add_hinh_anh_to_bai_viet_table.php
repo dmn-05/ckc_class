@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bai_viet', function (Blueprint $table) {
-            $table->string('hinh_anh')->nullable()->after('noi_dung');
-        });
+        if (!Schema::hasColumn('bai_viet', 'hinh_anh')) {
+            Schema::table('bai_viet', function (Blueprint $table) {
+                $table->string('hinh_anh')->nullable()->after('noi_dung');
+            });
+        }
     }
 
     /**

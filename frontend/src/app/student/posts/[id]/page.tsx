@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import styles from '@/components/student/posts/PostsManagement.module.css';
-import PostSummary from '../../../../../components/student/posts/PostSummary';
-import CommentInput from '../../../../../components/student/posts/CommentInput';
-import CommentThread, { CommentData } from '../../../../../components/student/posts/CommentThread';
+import PostSummary from '@/components/student/posts/PostSummary';
+import CommentInput from '@/components/student/posts/CommentInput';
+import CommentThread, { CommentData } from '@/components/student/posts/CommentThread';
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { getProfileAction } from '../../../../../src/app/student/profile/actions';
-import { authHeaders } from '../../../../../src/lib/auth';
+import { getProfileAction } from '@/app/student/profile/actions';
+import { authHeaders } from '@/lib/auth';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 

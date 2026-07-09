@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import styles from '@/components/admin/course-sections/AdminCourseSections.module.css';
 import CourseSectionList from '@/components/admin/course-sections/CourseSectionList';
 import CourseSectionDashboard from '@/components/admin/course-sections/CourseSectionDashboard';
@@ -27,18 +26,28 @@ export default function LecturerSectionsPage() {
     setLoading(true);
     try {
       const data = await getLecturerCourseSections();
-      const formattedSections: CourseSectionData[] = data.map((item: any) => ({
-        id: item.id.toString(),
-        code: item.ma_lop_hoc_phan,
-        name: item.ten_lop || '',
-        subjectName: item.mon_hoc?.ten_mon || 'Không rõ',
-        lecturerName: item.giang_vien?.nguoi_dung?.ho_ten || 'Chưa phân công',
-        semester: item.hoc_ky || 'HK1',
-        academicYear: item.nam_hoc || '',
-        faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
-        maxStudents: item.si_so_toi_da || 0,
-        status: item.trang_thai || 'dang_mo'
-      }));
+      const formattedSections: CourseSectionData[] = data.map((item: any) => {
+        const lecturerNames = Array.isArray(item.giang_viens) && item.giang_viens.length > 0
+          ? item.giang_viens.map((gv: any) => gv.nguoi_dung?.ho_ten).filter(Boolean)
+          : (item.giang_vien?.nguoi_dung?.ho_ten ? [item.giang_vien.nguoi_dung.ho_ten] : []);
+
+        return {
+          id: item.id.toString(),
+          code: item.ma_lop_hoc_phan,
+          name: item.ten_lop || '',
+          subjectName: item.mon_hoc?.ten_mon || 'Không rõ',
+          lecturerName: lecturerNames.length > 0 ? lecturerNames.join(', ') : 'Chưa phân công',
+          lecturerNames: lecturerNames,
+          giang_vien_ids: Array.isArray(item.giang_viens) && item.giang_viens.length > 0
+            ? item.giang_viens.map((gv: any) => gv.id.toString())
+            : (item.giang_vien_id ? [item.giang_vien_id.toString()] : []),
+          semester: item.hoc_ky || 'HK1',
+          academicYear: item.nam_hoc || '',
+          faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
+          maxStudents: item.si_so_toi_da || 0,
+          status: item.trang_thai || 'dang_mo'
+        };
+      });
       setSections(formattedSections);
     } catch (error) {
       console.error('Failed to load course sections', error);
@@ -81,13 +90,6 @@ export default function LecturerSectionsPage() {
           <h1 className={styles.pageTitle}>Quản Lý Lớp Học Phần</h1>
           <p className={styles.pageSubtitle}>Quản lý danh sách các lớp học phần được phân công cho bạn.</p>
         </div>
-
-        <Link href="/lecturer/sections/create" className={styles.btnAddClass}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Thêm lớp học phần
-        </Link>
       </div>
 
       <div className={styles.layoutGrid}>
@@ -109,6 +111,8 @@ export default function LecturerSectionsPage() {
             onManageStudents={handleOpenManageStudents}
             onDelete={() => {}} // Disabled for lecturer, but passed to prevent error
             hideDelete={true}
+            hideEdit={true}
+            onViewDetail={(sectionId) => router.push(`/lecturer/sections/${sectionId}`)}
           />
         )}
       </div>
