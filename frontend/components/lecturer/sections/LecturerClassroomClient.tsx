@@ -30,6 +30,54 @@ export default function LecturerClassroomClient({
   const subjectName = section.mon_hoc?.ten_mon || section.subjectName || courseName;
   const teacherName = section.giang_vien?.nguoi_dung?.ho_ten || section.lecturerName || 'Bạn';
 
+  const getLecturersList = () => {
+    const list: any[] = [];
+    const addedIds = new Set();
+
+    if (section.giang_vien && section.giang_vien.id) {
+      addedIds.add(section.giang_vien.id);
+      list.push({
+        ...section.giang_vien,
+        pivot: { vai_tro: 'chinh' }
+      });
+    }
+
+    if (section.giang_viens && Array.isArray(section.giang_viens)) {
+      section.giang_viens.forEach((gv: any) => {
+        if (!addedIds.has(gv.id)) {
+          addedIds.add(gv.id);
+          list.push(gv);
+        } else if (gv.id === section.giang_vien?.id && gv.pivot?.vai_tro) {
+          list[0] = { ...list[0], pivot: gv.pivot };
+        }
+      });
+    }
+
+    if (list.length === 0 && teacherName) {
+      list.push({
+        id: 'fallback',
+        nguoi_dung: { ho_ten: teacherName },
+        pivot: { vai_tro: 'chinh' }
+      });
+    }
+
+    return list;
+  };
+
+  const getLecturerRoleLabel = (gv: any, index: number) => {
+    const vaiTro = gv.pivot?.vai_tro;
+    if (vaiTro === 'chinh' || gv.id === section.giang_vien_id || (index === 0 && !vaiTro)) {
+      return 'Giảng viên chính';
+    }
+    if (vaiTro === 'tro_giang') {
+      return 'Trợ giảng';
+    }
+    if (vaiTro === 'dong_giang') {
+      return 'Giảng viên đồng giảng';
+    }
+    return 'Giảng viên';
+  };
+
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Vừa xong';
     try {
@@ -63,16 +111,6 @@ export default function LecturerClassroomClient({
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
             Quản lý sinh viên ({students.length})
-          </button>
-          <button
-            onClick={() => router.push(`/lecturer/sections/${section.id}/edit`)}
-            style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Chỉnh sửa lớp học phần
           </button>
         </div>
       </div>
@@ -397,15 +435,30 @@ export default function LecturerClassroomClient({
             <div className={styles.widget} style={{ border: '1px solid #e0e3e5', padding: '2rem', background: '#ffffff', borderRadius: '1rem' }}>
               <div style={{ borderBottom: '2px solid #3525cd', paddingBottom: '0.75rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ color: '#3525cd', fontSize: '20px', fontWeight: 700, margin: 0 }}>Giảng viên</h2>
+                {getLecturersList().length > 1 && (
+                  <span style={{ fontSize: '14px', color: '#3525cd', fontWeight: 600 }}>{getLecturersList().length} giảng viên</span>
+                )}
               </div>
-              <div className={styles.memberItem} style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '48px', height: '48px', fontSize: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  <span>{teacherName ? teacherName.charAt(0).toUpperCase() : 'GV'}</span>
-                </div>
-                <div>
-                  <span style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', display: 'block' }}>{teacherName}</span>
-                  <span style={{ fontSize: '13px', color: '#64748b' }}>Giảng viên chính</span>
-                </div>
+              <div style={{ marginBottom: '2.5rem' }}>
+                {getLecturersList().map((gv: any, index: number) => {
+                  const name = gv.nguoi_dung?.ho_ten || gv.ho_ten || teacherName || 'Giảng viên';
+                  const email = gv.nguoi_dung?.email || gv.email || '';
+                  const roleLabel = getLecturerRoleLabel(gv, index);
+                  return (
+                    <div key={gv.id || index} className={styles.memberItem} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: index < getLecturersList().length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '48px', height: '48px', fontSize: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                          <span>{name ? name.charAt(0).toUpperCase() : 'GV'}</span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', display: 'block' }}>{name}</span>
+                          <span style={{ fontSize: '13px', color: '#64748b' }}>{roleLabel}</span>
+                        </div>
+                      </div>
+                      {email && <span style={{ fontSize: '13px', color: '#64748b' }}>{email}</span>}
+                    </div>
+                  );
+                })}
               </div>
 
               <div style={{ borderBottom: '2px solid #3525cd', paddingBottom: '0.75rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -475,14 +528,22 @@ export default function LecturerClassroomClient({
           {/* Teacher Info Widget */}
           <div className={styles.widget} style={{ border: '1px solid #e0e3e5', background: '#ffffff', borderRadius: '1rem', padding: '1.5rem' }}>
             <h3 className={styles.widgetTitle} style={{ margin: '0 0 1rem 0', fontSize: '16px', fontWeight: 600, color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>Giảng viên phụ trách</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                <span>{teacherName ? teacherName.charAt(0).toUpperCase() : 'GV'}</span>
-              </div>
-              <div>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{teacherName}</p>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Giảng viên chính</p>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {getLecturersList().map((gv: any, index: number) => {
+                const name = gv.nguoi_dung?.ho_ten || gv.ho_ten || teacherName || 'Giảng viên';
+                const roleLabel = getLecturerRoleLabel(gv, index);
+                return (
+                  <div key={gv.id || index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                      <span>{name ? name.charAt(0).toUpperCase() : 'GV'}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: '#1e293b' }}>{name}</p>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>{roleLabel}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </aside>

@@ -19,6 +19,54 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
   const courseCode = section.ten_lop || section.ma_lop_hoc_phan || "Mã lớp";
   const courseName = section.mon_hoc?.ten_mon || "Tên môn học";
   const teacherName = section.giang_vien?.nguoi_dung?.ho_ten || 'Giảng viên chưa cập nhật';
+
+  const getLecturersList = () => {
+    const list: any[] = [];
+    const addedIds = new Set();
+
+    if (section.giang_vien && section.giang_vien.id) {
+      addedIds.add(section.giang_vien.id);
+      list.push({
+        ...section.giang_vien,
+        pivot: { vai_tro: 'chinh' }
+      });
+    }
+
+    if (section.giang_viens && Array.isArray(section.giang_viens)) {
+      section.giang_viens.forEach((gv: any) => {
+        if (!addedIds.has(gv.id)) {
+          addedIds.add(gv.id);
+          list.push(gv);
+        } else if (gv.id === section.giang_vien?.id && gv.pivot?.vai_tro) {
+          list[0] = { ...list[0], pivot: gv.pivot };
+        }
+      });
+    }
+
+    if (list.length === 0 && teacherName) {
+      list.push({
+        id: 'fallback',
+        nguoi_dung: { ho_ten: teacherName },
+        pivot: { vai_tro: 'chinh' }
+      });
+    }
+
+    return list;
+  };
+
+  const getLecturerRoleLabel = (gv: any, index: number) => {
+    const vaiTro = gv.pivot?.vai_tro;
+    if (vaiTro === 'chinh' || gv.id === section.giang_vien_id || (index === 0 && !vaiTro)) {
+      return 'Giảng viên chính';
+    }
+    if (vaiTro === 'tro_giang') {
+      return 'Trợ giảng';
+    }
+    if (vaiTro === 'dong_giang') {
+      return 'Giảng viên đồng giảng';
+    }
+    return 'Giảng viên';
+  };
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -293,12 +341,32 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
 
           {activeTab === 'people' && (
             <div className={styles.widget} style={{ border: 'none' }}>
-              <div style={{ borderBottom: '1px solid var(--color-primary)', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                <h2 style={{ color: 'var(--color-primary)', fontSize: '24px', fontWeight: 600 }}>Giáo viên</h2>
+              <div style={{ borderBottom: '1px solid var(--color-primary)', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ color: 'var(--color-primary)', fontSize: '24px', fontWeight: 600 }}>Giảng viên</h2>
+                {getLecturersList().length > 1 && (
+                  <span style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 500 }}>{getLecturersList().length} giảng viên</span>
+                )}
               </div>
-              <div className={styles.memberItem} style={{ marginBottom: '2rem' }}>
-                 <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>GV</div>
-                 <span style={{ fontSize: '1rem', fontWeight: 500 }}>{teacherName}</span>
+              <div style={{ marginBottom: '2.5rem' }}>
+                {getLecturersList().map((gv: any, index: number) => {
+                  const name = gv.nguoi_dung?.ho_ten || gv.ho_ten || teacherName || 'Giảng viên';
+                  const email = gv.nguoi_dung?.email || gv.email || '';
+                  const roleLabel = getLecturerRoleLabel(gv, index);
+                  return (
+                    <div key={gv.id || index} className={styles.memberItem} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid color-mix(in srgb, var(--color-outline-variant) 20%, transparent)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
+                          <span>{name ? name.charAt(0).toUpperCase() : 'GV'}</span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '15px', fontWeight: 600, display: 'block' }}>{name}</span>
+                          <span style={{ fontSize: '13px', color: '#5f6368' }}>{roleLabel}</span>
+                        </div>
+                      </div>
+                      {email && <span style={{ fontSize: '13px', color: '#5f6368' }}>{email}</span>}
+                    </div>
+                  );
+                })}
               </div>
 
               <div style={{ borderBottom: '1px solid var(--color-primary)', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -368,13 +436,22 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
           {/* Teachers Widget */}
           <div className={styles.widget}>
             <h3 className={styles.widgetTitle} style={{ marginBottom: '1.5rem' }}>Giảng viên & Trợ giảng</h3>
-            
-            <div className={styles.memberItem}>
-              <div className={styles.avatar}>GV</div>
-              <div className={styles.memberInfo}>
-                <p className={styles.memberName}>{teacherName}</p>
-                <p className={styles.memberRole}>Giảng viên chính</p>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {getLecturersList().map((gv: any, index: number) => {
+                const name = gv.nguoi_dung?.ho_ten || gv.ho_ten || teacherName || 'Giảng viên';
+                const roleLabel = getLecturerRoleLabel(gv, index);
+                return (
+                  <div key={gv.id || index} className={styles.memberItem} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
+                      <span>{name ? name.charAt(0).toUpperCase() : 'GV'}</span>
+                    </div>
+                    <div className={styles.memberInfo}>
+                      <p className={styles.memberName}>{name}</p>
+                      <p className={styles.memberRole}>{roleLabel}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </aside>

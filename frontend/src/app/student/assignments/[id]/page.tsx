@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from '@/components/student/assignments/AssignmentsManagement.module.css';
-import SubmitModal from '../../../../../components/student/assignments/SubmitModal';
+import SubmitModal from '@/components/student/assignments/SubmitModal';
 import { getStudentAssignmentById } from '@/app/actions/student-assignment';
 
 interface ApiAssignment {

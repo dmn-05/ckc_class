@@ -20,10 +20,30 @@ class CourseSectionController extends Controller
     public function index()
     {
         $giangVienId = $this->getGiangVienId();
-        $sections = LopHocPhan::where('giang_vien_id', $giangVienId)
-            ->with(['monHoc.khoa', 'giangVien.nguoiDung'])
-            ->get();
+        $sections = LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })
+        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        ->get();
         return response()->json($sections);
+    }
+
+    private function syncLecturersWithRoles($section, $mainId, $subIds = [])
+    {
+        $syncData = [
+            $mainId => ['vai_tro' => 'chinh', 'ngay_tao' => now(), 'ngay_cap_nhat' => now()]
+        ];
+        if (!empty($subIds) && is_array($subIds)) {
+            foreach ($subIds as $subId) {
+                if ($subId && $subId != $mainId) {
+                    $syncData[$subId] = ['vai_tro' => 'phu', 'ngay_tao' => now(), 'ngay_cap_nhat' => now()];
+                }
+            }
+        }
+        $section->giangViens()->sync($syncData);
     }
 
     public function store(Request $request)
@@ -34,19 +54,29 @@ class CourseSectionController extends Controller
             'ma_lop_hoc_phan' => 'required|string|max:30|unique:lop_hoc_phan,ma_lop_hoc_phan',
             'ten_lop' => 'required|string|max:100',
             'mon_hoc_id' => 'required|exists:mon_hoc,id',
-            // giang_vien_id is forced
-            'hoc_ky' => 'required|in:HK1,HK2,HK3,HK4,HK5,HK6',
+            'giang_vien_phu_ids' => 'nullable|array',
+            'giang_vien_phu_ids.*' => 'exists:giang_vien,id',
+            'hoc_ky' => 'required',
             'nam_hoc' => 'required|string|max:20',
             'si_so_toi_da' => 'required|integer|min:1',
             'trang_thai' => 'required|in:dang_mo,da_khoa,da_ket_thuc',
             'base_class_id' => 'nullable|exists:lop,id'
         ]);
-        
+
+        if (isset($validated['hoc_ky'])) {
+            $val = $validated['hoc_ky'];
+            $validated['hoc_ky'] = is_string($val) && preg_match('/(\d+)/', $val, $m) ? (int)$m[1] : (int)$val;
+        }
+
+        $subLecturerIds = $validated['giang_vien_phu_ids'] ?? [];
+        unset($validated['giang_vien_phu_ids']);
+
         $validated['giang_vien_id'] = $giangVienId;
         $baseClassId = $validated['base_class_id'] ?? null;
         unset($validated['base_class_id']);
 
         $section = LopHocPhan::create($validated);
+        $this->syncLecturersWithRoles($section, $giangVienId, $subLecturerIds);
 
         if ($baseClassId) {
             $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
@@ -65,29 +95,48 @@ class CourseSectionController extends Controller
     public function show($id)
     {
         $giangVienId = $this->getGiangVienId();
-        $section = LopHocPhan::where('giang_vien_id', $giangVienId)
-            ->with(['monHoc.khoa', 'giangVien.nguoiDung'])
-            ->findOrFail($id);
+        $section = LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })
+        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        ->findOrFail($id);
         return response()->json($section);
     }
 
     public function update(Request $request, $id)
     {
         $giangVienId = $this->getGiangVienId();
-        $section = LopHocPhan::where('giang_vien_id', $giangVienId)->findOrFail($id);
+        $section = LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->findOrFail($id);
 
         $validated = $request->validate([
             'ma_lop_hoc_phan' => 'required|string|max:30|unique:lop_hoc_phan,ma_lop_hoc_phan,' . $id,
             'ten_lop' => 'required|string|max:100',
             'mon_hoc_id' => 'required|exists:mon_hoc,id',
-            // giang_vien_id is forced
-            'hoc_ky' => 'required|in:HK1,HK2,HK3,HK4,HK5,HK6',
+            'giang_vien_phu_ids' => 'nullable|array',
+            'giang_vien_phu_ids.*' => 'exists:giang_vien,id',
+            'hoc_ky' => 'required',
             'nam_hoc' => 'required|string|max:20',
             'si_so_toi_da' => 'required|integer|min:1',
             'trang_thai' => 'required|in:dang_mo,da_khoa,da_ket_thuc',
             'base_class_id' => 'nullable|exists:lop,id'
         ]);
-        
+
+        if (isset($validated['hoc_ky'])) {
+            $val = $validated['hoc_ky'];
+            $validated['hoc_ky'] = is_string($val) && preg_match('/(\d+)/', $val, $m) ? (int)$m[1] : (int)$val;
+        }
+
+        $subLecturerIds = $validated['giang_vien_phu_ids'] ?? [];
+        unset($validated['giang_vien_phu_ids']);
+
         $validated['giang_vien_id'] = $giangVienId;
         $baseClassId = $validated['base_class_id'] ?? null;
         unset($validated['base_class_id']);
@@ -100,6 +149,7 @@ class CourseSectionController extends Controller
         }
 
         $section->update($validated);
+        $this->syncLecturersWithRoles($section, $giangVienId, $subLecturerIds);
 
         if ($baseClassId) {
             $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)

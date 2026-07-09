@@ -1,6 +1,6 @@
 import React from 'react';
 import { cookies } from 'next/headers';
-import LecturerProfile from '../../../../components/lecturer/profile/LecturerProfile';
+import LecturerProfile from '@/components/lecturer/profile/LecturerProfile';
 
 export const metadata = {
   title: 'Hồ sơ cá nhân',

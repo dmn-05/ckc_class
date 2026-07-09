@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('nguoi_dung', function (Blueprint $table) {
-            $table->string('avatar')->nullable()->after('trang_thai');
-        });
+        if (!Schema::hasColumn('nguoi_dung', 'avatar')) {
+            Schema::table('nguoi_dung', function (Blueprint $table) {
+                $table->string('avatar')->nullable()->after('trang_thai');
+            });
+        }
     }
 
     /**

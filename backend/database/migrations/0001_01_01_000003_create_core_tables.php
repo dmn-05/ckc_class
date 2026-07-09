@@ -8,6 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('vai_tro', function (Blueprint $table) {
+            $table->id();
+            $table->string('ten_vai_tro', 50)->unique();
+            $table->string('mo_ta', 255)->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('khoa', function (Blueprint $table) {
             $table->id();
             $table->string('ma_khoa', 50)->unique();
@@ -55,10 +62,17 @@ return new class extends Migration
             $table->string('ho_ten', 255);
             $table->string('email', 255)->unique();
             $table->string('mat_khau', 255);
-            $table->integer('vai_tro_id')->default(1);
+            $table->foreignId('vai_tro_id')->default(1)->constrained('vai_tro')->onDelete('cascade');
             $table->string('trang_thai', 50)->default('dang_hoat_dong');
             $table->timestamp('ngay_tao')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
+        });
+
+        Schema::create('quen_mat_khau', function (Blueprint $table) {
+            $table->id();
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('giang_vien', function (Blueprint $table) {
@@ -106,6 +120,39 @@ return new class extends Migration
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
 
+        Schema::create('chu_de', function (Blueprint $table) {
+            $table->id();
+            $table->string('ten_chu_de', 255);
+            $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
+            $table->integer('thu_tu')->default(0);
+            $table->string('trang_thai', 50)->default('dang_mo');
+            $table->timestamp('ngay_tao')->nullable();
+            $table->timestamp('ngay_cap_nhat')->nullable();
+        });
+
+        Schema::create('tai_lieu', function (Blueprint $table) {
+            $table->id();
+            $table->string('tieu_de', 255);
+            $table->text('mo_ta')->nullable();
+            $table->string('duong_dan_file', 500)->nullable();
+            $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
+            $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
+            $table->string('trang_thai', 50)->default('hien_thi');
+            $table->timestamp('ngay_tao')->nullable();
+            $table->timestamp('ngay_cap_nhat')->nullable();
+        });
+
+        Schema::create('thong_bao', function (Blueprint $table) {
+            $table->id();
+            $table->string('tieu_de', 255);
+            $table->text('noi_dung')->nullable();
+            $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
+            $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
+            $table->string('trang_thai', 50)->default('hien_thi');
+            $table->timestamp('ngay_tao')->nullable();
+            $table->timestamp('ngay_cap_nhat')->nullable();
+        });
+
         Schema::create('bai_viet', function (Blueprint $table) {
             $table->id();
             $table->string('tieu_de', 255);
@@ -136,8 +183,8 @@ return new class extends Migration
             $table->string('ten_file', 255);
             $table->string('ten_file_luu', 255);
             $table->string('duong_dan', 255);
-            $table->string('loai_file', 50)->nullable();
-            $table->integer('kich_thuoc')->default(0);
+            $table->string('loai_file', 255)->nullable();
+            $table->decimal('kich_thuoc', 15, 2)->default(0);
             $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
             $table->string('trang_thai', 50)->default('dang_hoat_dong');
             $table->timestamp('ngay_tao')->nullable();
@@ -155,28 +202,55 @@ return new class extends Migration
             $table->string('tieu_de', 255);
             $table->text('noi_dung')->nullable();
             $table->text('huong_dan')->nullable();
+            $table->text('mo_ta')->nullable();
+            $table->string('file_url', 500)->nullable();
+            $table->string('file_name', 255)->nullable();
+            $table->decimal('diem_toi_da', 5, 1)->default(10);
+            $table->datetime('han_nop')->nullable();
+            $table->boolean('cho_phep_nop_tre')->default(false);
+            $table->integer('tyle_phat_tre')->default(10);
             $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
             $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
-            $table->string('trang_thai', 50)->default('dang_hoat_dong');
+            $table->string('trang_thai', 50)->default('hien_thi');
             $table->timestamp('ngay_tao')->nullable();
+            $table->timestamp('ngay_cap_nhat')->nullable();
+        });
+
+        Schema::create('bai_nop', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('bai_tap_id')->constrained('bai_tap')->onDelete('cascade');
+            $table->foreignId('sinh_vien_id')->constrained('sinh_vien')->onDelete('cascade');
+            $table->string('duong_dan_file', 500)->nullable();
+            $table->decimal('diem', 5, 2)->nullable();
+            $table->text('nhan_xet')->nullable();
+            $table->string('trang_thai', 50)->default('da_nop');
+            $table->datetime('ngay_cham')->nullable();
+            $table->foreignId('giang_vien_cham_id')->nullable()->constrained('giang_vien')->onDelete('set null');
+            $table->datetime('ngay_nop')->nullable();
             $table->timestamp('ngay_cap_nhat')->nullable();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('bai_nop');
         Schema::dropIfExists('bai_tap');
         Schema::dropIfExists('tep_tin_bai_viet');
         Schema::dropIfExists('tep_tin');
         Schema::dropIfExists('binh_luan');
         Schema::dropIfExists('bai_viet');
+        Schema::dropIfExists('thong_bao');
+        Schema::dropIfExists('tai_lieu');
+        Schema::dropIfExists('chu_de');
         Schema::dropIfExists('lop_hoc_phan');
         Schema::dropIfExists('sinh_vien');
         Schema::dropIfExists('giang_vien');
+        Schema::dropIfExists('quen_mat_khau');
         Schema::dropIfExists('nguoi_dung');
         Schema::dropIfExists('lop');
         Schema::dropIfExists('mon_hoc');
         Schema::dropIfExists('bo_mon');
         Schema::dropIfExists('khoa');
+        Schema::dropIfExists('vai_tro');
     }
 };

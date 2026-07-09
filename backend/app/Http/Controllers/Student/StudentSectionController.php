@@ -18,7 +18,7 @@ class StudentSectionController extends Controller
         $student = $user->sinhVien;
 
         $sections = $student->lopHocPhans()
-            ->with(['giangVien.nguoiDung', 'monHoc'])
+            ->with(['giangVien.nguoiDung', 'monHoc', 'giangViens.nguoiDung'])
             ->withCount('sinhViens')
             ->get();
 
@@ -36,7 +36,7 @@ class StudentSectionController extends Controller
 
         // Check if student is enrolled in this section
         $section = $student->lopHocPhans()
-            ->with(['giangVien.nguoiDung', 'monHoc', 'sinhViens.nguoiDung'])
+            ->with(['giangVien.nguoiDung', 'monHoc', 'sinhViens.nguoiDung', 'giangViens.nguoiDung'])
             ->find($id);
 
         if (!$section) {
