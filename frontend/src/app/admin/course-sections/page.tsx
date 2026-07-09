@@ -27,18 +27,28 @@ export default function CourseSectionsPage() {
     setLoading(true);
     try {
       const data = await getCourseSections();
-      const formattedSections: CourseSectionData[] = data.map((item: any) => ({
-        id: item.id.toString(),
-        code: item.ma_lop_hoc_phan,
-        name: item.ten_lop || '',
-        subjectName: item.mon_hoc?.ten_mon || 'Không rõ',
-        lecturerName: item.giang_vien?.nguoi_dung?.ho_ten || 'Chưa phân công',
-        semester: item.hoc_ky || 'HK1',
-        academicYear: item.nam_hoc || '',
-        faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
-        maxStudents: item.si_so_toi_da || 0,
-        status: item.trang_thai || 'dang_mo'
-      }));
+      const formattedSections: CourseSectionData[] = data.map((item: any) => {
+        const lecturerNames = Array.isArray(item.giang_viens) && item.giang_viens.length > 0
+          ? item.giang_viens.map((gv: any) => gv.nguoi_dung?.ho_ten).filter(Boolean)
+          : (item.giang_vien?.nguoi_dung?.ho_ten ? [item.giang_vien.nguoi_dung.ho_ten] : []);
+
+        return {
+          id: item.id.toString(),
+          code: item.ma_lop_hoc_phan,
+          name: item.ten_lop || '',
+          subjectName: item.mon_hoc?.ten_mon || 'Không rõ',
+          lecturerName: lecturerNames.length > 0 ? lecturerNames.join(', ') : 'Chưa phân công',
+          lecturerNames: lecturerNames,
+          giang_vien_ids: Array.isArray(item.giang_viens) && item.giang_viens.length > 0
+            ? item.giang_viens.map((gv: any) => gv.id.toString())
+            : (item.giang_vien_id ? [item.giang_vien_id.toString()] : []),
+          semester: item.hoc_ky || 'HK1',
+          academicYear: item.nam_hoc || '',
+          faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
+          maxStudents: item.si_so_toi_da || 0,
+          status: item.trang_thai || 'dang_mo'
+        };
+      });
       setSections(formattedSections);
     } catch (error) {
       console.error('Failed to load course sections', error);

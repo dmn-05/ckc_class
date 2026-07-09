@@ -338,8 +338,10 @@
 }
 
 .classCardPrimary { border-left-color: #3525cd; }
+.classCardWarning { border-left-color: #ed6c02; }
+.classCardNeutral { border-left-color: #64748b; opacity: 0.9; }
 .classCardSecondary { border-left-color: #6063ee; }
-.classCardCompleted { border-left-color: #777587; opacity: 0.8; }
+.classCardCompleted { border-left-color: #777587; opacity: 0.85; }
 
 .classCardLeft {
   display: flex;
@@ -357,8 +359,10 @@
   flex-shrink: 0;
 }
 
-.classIconPrimary { background-color: rgba(53, 37, 205, 0.05); color: #3525cd; }
-.classIconSecondary { background-color: rgba(96, 99, 238, 0.05); color: #6063ee; }
+.classIconPrimary { background-color: rgba(53, 37, 205, 0.12); color: #3525cd; }
+.classIconWarning { background-color: rgba(237, 108, 2, 0.14); color: #ed6c02; }
+.classIconNeutral { background-color: rgba(100, 116, 139, 0.15); color: #475569; }
+.classIconSecondary { background-color: rgba(96, 99, 238, 0.12); color: #6063ee; }
 .classIconCompleted { background-color: #f2f4f6; color: #777587; }
 
 .classInfo {
@@ -388,9 +392,10 @@
   text-transform: uppercase;
 }
 
-.classCodePrimary { background-color: rgba(53, 37, 205, 0.1); color: #3525cd; }
-.classCodeSecondary { background-color: rgba(96, 99, 238, 0.1); color: #6063ee; }
-.classCodeCompleted { background-color: #e6e8ea; color: #464555; }
+.classCodePrimary, .codePrimary { background-color: rgba(53, 37, 205, 0.12); color: #3525cd; }
+.classCodeWarning, .codeWarning { background-color: rgba(237, 108, 2, 0.14); color: #c25e00; }
+.classCodeCompleted, .codeNeutral { background-color: rgba(100, 116, 139, 0.15); color: #475569; }
+.classCodeSecondary { background-color: rgba(96, 99, 238, 0.12); color: #6063ee; }
 
 .classDetailsRow {
   display: flex;
@@ -419,9 +424,17 @@
   font-weight: 500;
 }
 
-.statusActive { color: #3525cd; }
-.statusUpcoming { color: #a44100; }
-.statusCompleted { color: #777587; }
+.statusActive, .statusPrimary { color: #2e7d32; font-weight: 600; }
+.statusUpcoming, .statusWarning { color: #ed6c02; font-weight: 600; }
+.statusCompleted, .statusNeutral { color: #475569; font-weight: 600; }
+
+.statusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
 
 .classCardRight {
   display: flex;
@@ -467,6 +480,16 @@
 .btnActionStats:hover {
   background-color: rgba(96, 99, 238, 0.1);
   color: #6063ee;
+}
+
+.btnActionView {
+  background-color: rgba(53, 37, 205, 0.1);
+  color: #3525cd;
+}
+
+.btnActionView:hover {
+  background-color: #3525cd;
+  color: #ffffff;
 }
 
 /* Modal Overlay */

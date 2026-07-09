@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/components/student/quizzes/QuizzesManagement.module.css';
-import QuizList from '../../../../components/student/quizzes/QuizList';
-import { QuizData } from '../../../../components/student/quizzes/QuizCard';
+import QuizList from '@/components/student/quizzes/QuizList';
+import { QuizData } from '@/components/student/quizzes/QuizCard';
 import { getStudentQuizzes } from '@/app/actions/student-quiz';
 
 export default function StudentQuizzesPage() {

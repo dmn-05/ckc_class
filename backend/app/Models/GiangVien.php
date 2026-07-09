@@ -36,4 +36,10 @@ class GiangVien extends Model
     {
         return $this->belongsTo(BoMon::class, 'bo_mon_id');
     }
+
+    public function lopHocPhans()
+    {
+        return $this->belongsToMany(LopHocPhan::class, 'giang_vien_lop_hoc_phan', 'giang_vien_id', 'lop_hoc_phan_id')
+                    ->withPivot('vai_tro', 'ngay_tao', 'ngay_cap_nhat');
+    }
 }

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getStudentCourseSection, getStudentCoursePosts } from '@/app/actions/student-section';
 import { getStudentAssignments } from '@/app/actions/student-assignment';
 import { getStudentQuizzes } from '@/app/actions/student-quiz';
-import ClassroomClient from '../../../../../components/student/courses/ClassroomClient';
+import ClassroomClient from '@/components/student/courses/ClassroomClient';
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const { id } = await params;

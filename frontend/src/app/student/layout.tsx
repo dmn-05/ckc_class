@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import StudentSidebar from '../../../components/student/layout/StudentSidebar';
-import StudentHeader from '../../../components/student/layout/StudentHeader';
+import StudentSidebar from '@/components/student/layout/StudentSidebar';
+import StudentHeader from '@/components/student/layout/StudentHeader';
 
 import styles from '@/components/student/layout/StudentLayout.module.css';
 

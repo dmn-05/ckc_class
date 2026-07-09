@@ -1,6 +1,6 @@
 import React from 'react';
 import { cookies } from 'next/headers';
-import StudentProfile from '../../../../components/student/profile/StudentProfile';
+import StudentProfile from '@/components/student/profile/StudentProfile';
 
 export const metadata = {
   title: 'Hồ sơ cá nhân',

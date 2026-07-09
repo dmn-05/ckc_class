@@ -11,22 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('chi_tiet_ket_qua', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ket_qua_kiem_tra_id')->constrained('ket_qua_kiem_tra')->onDelete('cascade');
-            $table->foreignId('cau_hoi_id')->constrained('cau_hoi')->onDelete('cascade');
-            // For single_choice / true_false
-            $table->foreignId('dap_an_id')->nullable()->constrained('dap_an')->onDelete('set null');
-            // For multiple_choice (comma separated or JSON)
-            $table->json('dap_an_ids')->nullable();
-            // For essay
-            $table->text('dap_an_tu_luan')->nullable();
-            
-            $table->float('diem_dat')->default(0);
-            
-            $table->timestamp('ngay_tao')->useCurrent();
-            $table->timestamp('ngay_cap_nhat')->useCurrent()->useCurrentOnUpdate();
-        });
+        if (!Schema::hasTable('chi_tiet_ket_qua')) {
+            Schema::create('chi_tiet_ket_qua', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('ket_qua_kiem_tra_id')->constrained('ket_qua_kiem_tra')->onDelete('cascade');
+                $table->foreignId('cau_hoi_id')->constrained('cau_hoi')->onDelete('cascade');
+                // For single_choice / true_false
+                $table->foreignId('dap_an_id')->nullable()->constrained('dap_an')->onDelete('set null');
+                // For multiple_choice (comma separated or JSON)
+                $table->json('dap_an_ids')->nullable();
+                // For essay
+                $table->text('dap_an_tu_luan')->nullable();
+                
+                $table->float('diem_dat')->default(0);
+                
+                $table->timestamp('ngay_tao')->useCurrent();
+                $table->timestamp('ngay_cap_nhat')->useCurrent()->useCurrentOnUpdate();
+            });
+        }
     }
 
     /**
