@@ -12,6 +12,8 @@ import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section
 export default function LecturerSectionsPage() {
   const [sections, setSections] = useState<CourseSectionData[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [selectedSemester, setSelectedSemester] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -45,6 +47,7 @@ export default function LecturerSectionsPage() {
           academicYear: item.nam_hoc || '',
           faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
           maxStudents: item.si_so_toi_da || 0,
+          enrolledStudents: item.sinh_viens_count ?? 0,
           status: item.trang_thai || 'dang_mo'
         };
       });
@@ -72,7 +75,7 @@ export default function LecturerSectionsPage() {
   // Stats mock data generator
   const activeStatsSection = sections.find(s => s.id === statsSectionId);
   const mockStats = activeStatsSection ? {
-    enrolled: Math.floor(Math.random() * activeStatsSection.maxStudents),
+    enrolled: activeStatsSection.enrolledStudents ?? 0,
     max: activeStatsSection.maxStudents || 40,
     assignments: Math.floor(Math.random() * 5),
     quizzes: Math.floor(Math.random() * 3),
@@ -94,11 +97,16 @@ export default function LecturerSectionsPage() {
 
       <div className={styles.layoutGrid}>
         <CourseSectionDashboard
+          sections={sections}
           activeCount={activeCount}
           lockedCount={lockedCount}
           completedCount={completedCount}
           currentFilter={filter}
           onFilterChange={setFilter}
+          selectedSemester={selectedSemester}
+          onSemesterChange={setSelectedSemester}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
         />
 
         {loading ? (
@@ -113,6 +121,8 @@ export default function LecturerSectionsPage() {
             hideDelete={true}
             hideEdit={true}
             onViewDetail={(sectionId) => router.push(`/lecturer/sections/${sectionId}`)}
+            selectedSemester={selectedSemester}
+            selectedYear={selectedYear}
           />
         )}
       </div>

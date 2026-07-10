@@ -1,5 +1,6 @@
 import styles from "@/app/page.module.css";
 import { LoginForm } from "./login-form";
+import { CommunityStatsBadge } from "../CommunityStatsBadge";
 
 export default function Login() {
     return (
@@ -24,14 +25,7 @@ export default function Login() {
                         giảng dạy và nâng cao chất lượng đào tạo thế hệ tương lai.
                     </p>
 
-                    <div className={styles.community}>
-                        <div className={styles.avatarStack} aria-hidden="true">
-                            <span>GV</span>
-                            <span>SV</span>
-                            <span>QT</span>
-                        </div>
-                        <span>Tham gia cùng +2,000 giảng viên</span>
-                    </div>
+                    <CommunityStatsBadge />
                 </div>
 
                 <div className={styles.loginCard}>
@@ -49,27 +43,6 @@ export default function Login() {
                     </div>
 
                     <LoginForm />
-
-                    <div className={styles.divider}>
-                        <span />
-                        <p>HOẶC ĐĂNG NHẬP VỚI</p>
-                        <span />
-                    </div>
-
-                    <div className={styles.ssoGrid}>
-                        <button type="button">
-                            <span aria-hidden="true">G</span>
-                            Google
-                        </button>
-                        <button type="button">
-                            <span aria-hidden="true">M</span>
-                            Office 365
-                        </button>
-                    </div>
-
-                    <p className={styles.signup}>
-                        Chưa có tài khoản? <a href="/register">Đăng ký</a>
-                    </p>
                 </div>
             </section>
         </main>

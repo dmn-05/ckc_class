@@ -260,6 +260,74 @@
   border-radius: 9999px;
 }
 
+.filtersCard {
+  padding: 1.5rem;
+}
+
+.filterTitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #3525cd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.filterLabel {
+  font-size: 0.75rem;
+  color: #464555;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-weight: 600;
+}
+
+.filterSelect {
+  width: 100%;
+  background-color: #f7f9fb;
+  border: 1px solid rgba(199, 196, 216, 0.5);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #191c1e;
+  outline: none;
+  transition: all 0.2s;
+  margin-bottom: 1.25rem;
+}
+
+.filterSelect:focus {
+  border-color: #4648d4;
+  box-shadow: 0 0 0 2px rgba(70, 72, 212, 0.1);
+}
+
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filterTag {
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #464555;
+  border: 1px solid rgba(199, 196, 216, 0.5);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterTag:hover {
+  background-color: #e6e8ea;
+}
+
+.filterTagActive {
+  background-color: rgba(70, 72, 212, 0.1);
+  color: #4648d4;
+  border-color: rgba(70, 72, 212, 0.3);
+  font-weight: 700;
+}
+
 .bannerCard {
   height: 12rem;
   border-radius: 1.5rem;

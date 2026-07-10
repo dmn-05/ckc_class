@@ -9,11 +9,16 @@ import CourseSectionDashboard from '@/components/admin/course-sections/CourseSec
 import CourseSectionStatsModal from '@/components/admin/course-sections/CourseSectionStatsModal';
 import { CourseSectionData } from '@/components/admin/course-sections/CourseSectionCard';
 import { getCourseSections, deleteCourseSection } from '@/app/actions/course-section';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function CourseSectionsPage() {
   const [sections, setSections] = useState<CourseSectionData[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [selectedSemester, setSelectedSemester] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   // Modals state
@@ -46,6 +51,7 @@ export default function CourseSectionsPage() {
           academicYear: item.nam_hoc || '',
           faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
           maxStudents: item.si_so_toi_da || 0,
+          enrolledStudents: item.sinh_viens_count ?? 0,
           status: item.trang_thai || 'dang_mo'
         };
       });
@@ -61,14 +67,21 @@ export default function CourseSectionsPage() {
     loadData();
   }, [loadData]);
 
-  const handleDeleteSection = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa lớp học phần này?')) {
-      try {
-        await deleteCourseSection(id);
-        setSections(prev => prev.filter(s => s.id !== id));
-      } catch (error) {
-        alert('Xóa thất bại');
-      }
+  const handleDeleteSection = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTargetId) return;
+    setDeleting(true);
+    try {
+      await deleteCourseSection(deleteTargetId);
+      setSections(prev => prev.filter(s => s.id !== deleteTargetId));
+      setDeleteTargetId(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -113,11 +126,16 @@ export default function CourseSectionsPage() {
 
       <div className={styles.layoutGrid}>
         <CourseSectionDashboard
+          sections={sections}
           activeCount={activeCount}
           lockedCount={lockedCount}
           completedCount={completedCount}
           currentFilter={filter}
           onFilterChange={setFilter}
+          selectedSemester={selectedSemester}
+          onSemesterChange={setSelectedSemester}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
         />
 
         {loading ? (
@@ -129,6 +147,8 @@ export default function CourseSectionsPage() {
             onViewStats={setStatsSectionId}
             onManageStudents={handleManageStudents}
             onDelete={handleDeleteSection}
+            selectedSemester={selectedSemester}
+            selectedYear={selectedYear}
           />
         )}
       </div>
@@ -140,6 +160,17 @@ export default function CourseSectionsPage() {
           onClose={() => setStatsSectionId(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        title="Xác nhận xóa Lớp học phần"
+        message="Bạn có chắc chắn muốn xóa Lớp học phần này khỏi hệ thống? Tất cả dữ liệu liên quan sẽ không thể khôi phục."
+        confirmText="Xóa ngay"
+        cancelText="Huỷ bỏ"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteTargetId(null)}
+        isLoading={deleting}
+      />
     </div>
   );
 }

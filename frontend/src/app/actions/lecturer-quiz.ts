@@ -27,7 +27,7 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         headers,
     });
 
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
         cookieStore.delete("auth_token");
         cookieStore.delete("vai_tro_id");
         cookieStore.delete("user");

@@ -5,11 +5,27 @@ import styles from './AdminCreateStudents.module.css';
 import { createStudent, getClasses } from '@/app/actions/student';
 import { getFaculties } from '@/app/actions/faculty';
 import { useRouter } from 'next/navigation';
+import AlertModal from '@/components/common/AlertModal';
 
 export default function CreateStudentForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    variant: 'warning' | 'error' | 'success' | 'info';
+  }>({
+    isOpen: false,
+    message: '',
+    variant: 'warning',
+  });
+
+  const showAlert = (message: string, variant: 'warning' | 'error' | 'success' | 'info' = 'warning', title?: string) => {
+    setAlertConfig({ isOpen: true, message, variant, title });
+  };
 
   const [faculties, setFaculties] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
@@ -22,6 +38,8 @@ export default function CreateStudentForm() {
     ho_ten: '',
     email: '',
     so_dien_thoai: '',
+    cccd: '',
+    dia_chi: '',
     ngay_sinh: '',
     gioi_tinh: 'nam',
     ma_sinh_vien: '',
@@ -57,6 +75,11 @@ export default function CreateStudentForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === 'so_dien_thoai' || name === 'cccd') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+      return;
+    }
     if (name === 'khoa_id') {
       const filteredClasses = classes.filter(c => c.khoa_id.toString() === value);
       setFormData(prev => ({
@@ -83,12 +106,27 @@ export default function CreateStudentForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate số điện thoại phải đủ 10 số
+    if (!formData.so_dien_thoai || !/^\d{10}$/.test(formData.so_dien_thoai.trim())) {
+      showAlert('Số điện thoại phải nhập đúng 10 chữ số.', 'warning', 'Kiểm tra Số điện thoại');
+      return;
+    }
+
+    // Validate CCCD nếu có nhập thì phải 12 số
+    if (formData.cccd && !/^\d{12}$/.test(formData.cccd.trim())) {
+      showAlert('Số Căn cước công dân (CCCD) phải bao gồm đúng 12 chữ số.', 'warning', 'Kiểm tra Số CCCD');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const submitData = new FormData();
     submitData.append('ho_ten', formData.ho_ten);
     submitData.append('email', formData.email);
     submitData.append('so_dien_thoai', formData.so_dien_thoai);
+    if (formData.cccd) submitData.append('cccd', formData.cccd);
+    if (formData.dia_chi) submitData.append('dia_chi', formData.dia_chi);
     submitData.append('ngay_sinh', formData.ngay_sinh);
     submitData.append('gioi_tinh', formData.gioi_tinh);
     submitData.append('ma_sinh_vien', formData.ma_sinh_vien);
@@ -106,7 +144,7 @@ export default function CreateStudentForm() {
         router.push('/admin/students');
       }, 1500);
     } catch (err: any) {
-      alert(err.message || 'Thêm sinh viên thất bại');
+      showAlert(err.message || 'Thêm sinh viên thất bại', 'error', 'Lỗi thêm sinh viên');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }
@@ -140,12 +178,12 @@ export default function CreateStudentForm() {
           <p className={styles.avatarHelpText}>
             Tải lên ảnh chân dung. Tối đa 5MB. Định dạng JPG hoặc PNG.
           </p>
-          <button className={styles.btnUpload} type="button" onClick={triggerFileInput}>Tải ảnh lên</button>
+          <button className={styles.btnUpload} type="button" onClick={triggerFileInput}>Chọn ảnh</button>
         </section>
 
         <section className={styles.card}>
           <h3 className={styles.cardTitle}>
-            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>assignment_ind</span>
+            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>badge</span>
             Thông tin định danh
           </h3>
           <div className={styles.formGroup}>
@@ -156,11 +194,23 @@ export default function CreateStudentForm() {
               name="ma_sinh_vien"
               value={formData.ma_sinh_vien}
               onChange={handleChange}
-              placeholder="Ví dụ: STU-2024-001"
+              placeholder="Ví dụ: 23010001"
               required
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
+            <label className={styles.formLabel}>Số CCCD / CMND</label>
+            <input
+              className={styles.formInput}
+              type="text"
+              name="cccd"
+              maxLength={12}
+              value={formData.cccd}
+              onChange={handleChange}
+              placeholder="Nhập 12 chữ số CCCD"
+            />
+          </div>
+          <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
             <label className={styles.formLabel}>Trạng thái</label>
             <select
               className={`${styles.formInput} ${styles.formSelect}`}
@@ -176,7 +226,7 @@ export default function CreateStudentForm() {
         </section>
       </div>
 
-      {/* Right Column: Personal & Academic Info */}
+      {/* Right Column: Personal, Contact & Academic Info */}
       <div className={styles.rightColumn}>
         <form onSubmit={handleSubmit} className={styles.leftColumn}>
           {/* Personal Info Card */}
@@ -253,19 +303,32 @@ export default function CreateStudentForm() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="student@university.edu"
+                  placeholder="student@ckc.edu.vn"
                   required
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Số điện thoại</label>
+                <label className={styles.formLabel}>Số điện thoại (10 số) *</label>
                 <input
                   className={styles.formInput}
-                  type="tel"
+                  type="text"
                   name="so_dien_thoai"
+                  maxLength={10}
                   value={formData.so_dien_thoai}
                   onChange={handleChange}
-                  placeholder="+84 000 000 000"
+                  placeholder="Ví dụ: 0912345678"
+                  required
+                />
+              </div>
+              <div className={styles.colSpan2}>
+                <label className={styles.formLabel}>Địa chỉ liên hệ</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  name="dia_chi"
+                  value={formData.dia_chi}
+                  onChange={handleChange}
+                  placeholder="Nhập địa chỉ của sinh viên..."
                 />
               </div>
             </div>
@@ -345,6 +408,14 @@ export default function CreateStudentForm() {
           </div>
         </form>
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

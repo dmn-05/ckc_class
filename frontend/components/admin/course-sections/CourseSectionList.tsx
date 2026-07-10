@@ -14,17 +14,47 @@ interface CourseSectionListProps {
   hideDelete?: boolean;
   hideEdit?: boolean;
   onViewDetail?: (sectionId: string) => void;
+  selectedSemester?: string;
+  selectedYear?: string;
 }
 
-export default function CourseSectionList({ sections, onEdit, onViewStats, onManageStudents, onDelete, hideDelete, hideEdit, onViewDetail }: CourseSectionListProps) {
+export default function CourseSectionList({
+  sections,
+  onEdit,
+  onViewStats,
+  onManageStudents,
+  onDelete,
+  hideDelete,
+  hideEdit,
+  onViewDetail,
+  selectedSemester = 'all',
+  selectedYear = 'all'
+}: CourseSectionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4; // Adjust as needed
+  const itemsPerPage = 5; // Hiển thị 5 lớp học phần/1 trang
 
-  const filteredSections = sections.filter(sec => 
-    sec.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sec.code?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const matchesSemester = (sec: CourseSectionData, semCode: string) => {
+    if (semCode === 'all') return true;
+    if (!sec.semester) return false;
+    const numMatch = semCode.match(/\d+/);
+    if (numMatch) {
+      return sec.semester.includes(numMatch[0]);
+    }
+    return sec.semester === semCode;
+  };
+
+  const filteredSections = sections.filter(sec => {
+    const matchesSearch =
+      sec.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sec.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sec.subjectName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchSem = matchesSemester(sec, selectedSemester);
+    const matchYear = selectedYear === 'all' || sec.academicYear === selectedYear;
+
+    return matchesSearch && matchSem && matchYear;
+  });
 
   const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
   const currentSections = filteredSections.slice(
@@ -32,10 +62,10 @@ export default function CourseSectionList({ sections, onEdit, onViewStats, onMan
     currentPage * itemsPerPage
   );
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search or filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, selectedSemester, selectedYear]);
 
   return (
     <div className={styles.rightColumn}>
@@ -71,7 +101,7 @@ export default function CourseSectionList({ sections, onEdit, onViewStats, onMan
 
         {filteredSections.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#777587', backgroundColor: '#ffffff', borderRadius: '1.5rem', border: '1px dashed #c7c4d8' }}>
-            Không tìm thấy lớp học phần nào phù hợp.
+            Không tìm thấy lớp học phần nào phù hợp cho học kỳ đã chọn.
           </div>
         )}
       </div>

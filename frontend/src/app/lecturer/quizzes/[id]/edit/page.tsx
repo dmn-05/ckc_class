@@ -48,6 +48,9 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
                 router.push('/lecturer/quizzes');
             }
         } catch (err: any) {
+            if (err?.message?.includes('NEXT_REDIRECT') || err?.digest?.includes('NEXT_REDIRECT')) {
+                return;
+            }
             alert(err.message || 'Lưu thất bại');
         }
     };

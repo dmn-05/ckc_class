@@ -10,6 +10,7 @@ interface SubjectListProps {
   departments?: any[];
   currentFilter: string;
   onFilterChange: (filter: string) => void;
+  statusFilter?: string;
   onEdit: (subject: SubjectData) => void;
   onDelete: (id: string) => void;
 }
@@ -19,6 +20,7 @@ export default function SubjectList({
   departments = [],
   currentFilter,
   onFilterChange,
+  statusFilter = 'all',
   onEdit, 
   onDelete 
 }: SubjectListProps) {
@@ -29,10 +31,14 @@ export default function SubjectList({
   // Reset page when filter, search or subjects change
   useEffect(() => {
     setCurrentPage(1);
-  }, [subjects, currentFilter, searchTerm]);
+  }, [subjects, currentFilter, statusFilter, searchTerm]);
 
   // Filter and search logic
   const filteredSubjects = subjects.filter(subject => {
+    // Status Filter
+    if (statusFilter === 'active' && subject.status !== 'active') return false;
+    if (statusFilter === 'inactive' && subject.status !== 'inactive') return false;
+
     // Department Filter
     if (currentFilter !== 'all' && subject.departmentId?.toString() !== currentFilter) {
       return false;
@@ -95,28 +101,6 @@ export default function SubjectList({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className={`${styles.glassCard} ${styles.btnFilter}`}>
-            <span className="material-symbols-outlined">filter_list</span>
-          </button>
-        </div>
-
-        <div className={styles.filterTagScroll}>
-          <button 
-            className={`${styles.filterTagScrollBtn} ${currentFilter === 'all' ? styles.filterTagScrollBtnActive : ''}`}
-            onClick={() => onFilterChange('all')}
-          >
-            Tất cả môn học
-          </button>
-          
-          {departments.filter(d => d.status === 'active').map(dept => (
-            <button 
-              key={dept.id}
-              className={`${styles.filterTagScrollBtn} ${currentFilter === dept.id ? styles.filterTagScrollBtnActive : ''}`}
-              onClick={() => onFilterChange(dept.id)}
-            >
-              {dept.name}
-            </button>
-          ))}
         </div>
       </div>
 

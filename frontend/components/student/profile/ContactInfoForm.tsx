@@ -13,14 +13,14 @@ export default function ContactInfoForm({ profileData, formData, onChange }: { p
           <label className={styles.label} htmlFor="email">Email sinh viên</label>
           <div className={styles.inputGlow}>
             <span className={`material-symbols-outlined ${styles.inputIcon}`}>alternate_email</span>
-            <input className={styles.inputField} id="email" type="email" value={formData?.email || ''} onChange={onChange} />
+            <input className={styles.inputField} id="email" type="email" placeholder="vidu@ckc.edu.vn" value={formData?.email || ''} onChange={onChange} />
           </div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="so_dien_thoai">Số điện thoại</label>
+          <label className={styles.label} htmlFor="so_dien_thoai">Số điện thoại (10 chữ số)</label>
           <div className={styles.inputGlow}>
             <span className={`material-symbols-outlined ${styles.inputIcon}`}>phone_iphone</span>
-            <input className={styles.inputField} id="so_dien_thoai" type="tel" value={formData?.so_dien_thoai || ''} onChange={onChange} />
+            <input className={styles.inputField} id="so_dien_thoai" type="tel" maxLength={10} placeholder="Nhập đúng 10 chữ số" value={formData?.so_dien_thoai || ''} onChange={onChange} />
           </div>
         </div>
         <div className={styles.formGroupFull}>

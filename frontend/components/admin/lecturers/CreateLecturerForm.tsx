@@ -5,12 +5,28 @@ import { useRouter } from 'next/navigation';
 import { getFaculties } from '@/app/actions/faculty';
 import { getDepartments } from '@/app/actions/department';
 import { createLecturer } from '@/app/actions/lecturer';
+import AlertModal from '@/components/common/AlertModal';
 import styles from './AdminCreateLecturers.module.css';
 
 export default function CreateLecturerForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    variant: 'warning' | 'error' | 'success' | 'info';
+  }>({
+    isOpen: false,
+    message: '',
+    variant: 'warning',
+  });
+
+  const showAlert = (message: string, variant: 'warning' | 'error' | 'success' | 'info' = 'warning', title?: string) => {
+    setAlertConfig({ isOpen: true, message, variant, title });
+  };
 
   const [faculties, setFaculties] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -68,6 +84,17 @@ export default function CreateLecturerForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.phone && !/^\d{10}$/.test(formData.phone.trim())) {
+      showAlert('Số điện thoại phải nhập đúng 10 chữ số.', 'warning', 'Kiểm tra Số điện thoại');
+      return;
+    }
+
+    if (formData.cccd && !/^\d{12}$/.test(formData.cccd.trim())) {
+      showAlert('Số Căn cước công dân (CCCD) phải nhập đúng 12 chữ số.', 'warning', 'Kiểm tra Số CCCD');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const submitData = new FormData();
@@ -93,7 +120,7 @@ export default function CreateLecturerForm() {
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      alert('Có lỗi xảy ra khi thêm giảng viên: ' + (error.message || 'Lỗi không xác định'));
+      showAlert('Có lỗi xảy ra khi thêm giảng viên: ' + (error.message || 'Lỗi không xác định'), 'error', 'Lỗi thêm giảng viên');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }
@@ -183,15 +210,14 @@ export default function CreateLecturerForm() {
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>CCCD / CMND</label>
+                <label className={styles.formLabel}>CCCD / CMND (12 số)</label>
                 <input
                   className={styles.formInput}
                   type="text"
-                  placeholder="Nhập số CCCD/CMND"
-                  required
-                  maxLength={20}
+                  placeholder="Nhập 12 chữ số CCCD"
+                  maxLength={12}
                   value={formData.cccd}
-                  onChange={(e) => setFormData({...formData, cccd: e.target.value})}
+                  onChange={(e) => setFormData({...formData, cccd: e.target.value.replace(/\D/g, '')})}
                 />
               </div>
               <div>
@@ -253,14 +279,14 @@ export default function CreateLecturerForm() {
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Số điện thoại</label>
+                <label className={styles.formLabel}>Số điện thoại (10 số)</label>
                 <input
                   className={styles.formInput}
-                  type="tel"
-                  placeholder="09xx xxx xxx"
-                  maxLength={20}
+                  type="text"
+                  placeholder="Ví dụ: 0912345678"
+                  maxLength={10}
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})}
                 />
               </div>
               <div className={styles.colSpan2}>
@@ -341,6 +367,14 @@ export default function CreateLecturerForm() {
           </div>
         </form>
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

@@ -42,6 +42,7 @@ export default function AssignmentFormPage({
   onSave,
   onCancel,
 }: AssignmentFormPageProps) {
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState<AssignmentFormData>({
     title: '',
     sectionId: '',
@@ -131,8 +132,29 @@ export default function AssignmentFormPage({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const getMinDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (formData.dueDate) {
+      const due = new Date(formData.dueDate);
+      const now = new Date();
+      if (due.getTime() < now.getTime()) {
+        setError('Hạn nộp không được đặt ở thời điểm trong quá khứ. Vui lòng chọn thời điểm hiện tại hoặc tương lai.');
+        return;
+      }
+    }
+
     onSave(formData, selectedFiles, removeFileIds, removeFile);
   };
 
@@ -147,6 +169,26 @@ export default function AssignmentFormPage({
 
   return (
     <div style={{ backgroundColor: '#fff', borderRadius: '0.75rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      {error && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '12px 16px',
+          borderRadius: '10px',
+          marginBottom: '1.25rem',
+          border: '1px solid #fecaca',
+          fontSize: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontWeight: 600
+        }}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
         {/* Row 1: Lớp học phần + Trạng thái */}
@@ -380,6 +422,7 @@ export default function AssignmentFormPage({
               className={styles.formInput}
               value={formData.dueDate}
               onChange={handleChange}
+              min={getMinDateTime()}
             />
           </div>
         </div>

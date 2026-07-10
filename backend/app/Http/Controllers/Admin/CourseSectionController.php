@@ -10,7 +10,9 @@ class CourseSectionController extends Controller
 {
     public function index()
     {
-        $sections = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])->get();
+        $sections = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+            ->withCount('sinhViens')
+            ->get();
         return response()->json($sections);
     }
 

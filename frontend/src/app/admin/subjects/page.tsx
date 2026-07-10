@@ -8,6 +8,8 @@ import { SubjectData } from '@/components/admin/subjects/SubjectCard';
 import Link from 'next/link';
 import { getSubjects, getSubjectStats, deleteSubject } from '@/app/actions/subject';
 import { getDepartments } from '@/app/actions/department';
+import ConfirmModal from '@/components/common/ConfirmModal';
+import AlertModal from '@/components/common/AlertModal';
 
 export default function SubjectsManagementPage() {
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
@@ -19,7 +21,34 @@ export default function SubjectsManagementPage() {
     distributionData: []
   });
   const [filter, setFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+
+  // Delete modal state
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Alert modal state
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'success' | 'error' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'success'
+  });
+
+  const showAlert = (message: string, variant: 'success' | 'error' | 'warning' = 'success', title?: string) => {
+    setAlertConfig({
+      isOpen: true,
+      title: title || (variant === 'success' ? 'Thành công' : variant === 'error' ? 'Lỗi' : 'Thông báo'),
+      message,
+      variant
+    });
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -34,7 +63,7 @@ export default function SubjectsManagementPage() {
       setDepartments(deptsData);
     } catch (error) {
       console.error('Error loading subjects data:', error);
-      alert('Không thể tải dữ liệu môn học. Vui lòng thử lại.');
+      showAlert('Không thể tải dữ liệu môn học. Vui lòng thử lại.', 'error');
     } finally {
       setLoading(false);
     }
@@ -48,15 +77,23 @@ export default function SubjectsManagementPage() {
     window.location.href = `/admin/subjects/${subject.id}/edit`;
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa Môn học này?')) {
-      try {
-        await deleteSubject(id);
-        alert('Xóa môn học thành công!');
-        loadData();
-      } catch (error: any) {
-        alert(error.message || 'Có lỗi xảy ra khi xóa môn học.');
-      }
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await deleteSubject(deleteId);
+      setDeleteId(null);
+      showAlert('Xóa môn học thành công!', 'success');
+      loadData();
+    } catch (error: any) {
+      setDeleteId(null);
+      showAlert(error.message || 'Có lỗi xảy ra khi xóa môn học.', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -80,6 +117,11 @@ export default function SubjectsManagementPage() {
           activeCount={stats.activeCount}
           pausedCount={stats.pausedCount}
           distributionData={stats.distributionData}
+          departments={departments}
+          currentFilter={filter}
+          onFilterChange={setFilter}
+          currentStatusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
         />
 
         {loading ? (
@@ -92,11 +134,31 @@ export default function SubjectsManagementPage() {
             departments={departments}
             currentFilter={filter}
             onFilterChange={setFilter}
+            statusFilter={statusFilter}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Xác nhận xóa Môn học"
+        message="Bạn có chắc chắn muốn xóa Môn học này khỏi hệ thống? Dữ liệu không thể khôi phục sau khi xóa."
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteId(null)}
+        isLoading={deleting}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

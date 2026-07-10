@@ -57,37 +57,40 @@ export default function DepartmentCard({ department, onDelete }: DepartmentCardP
             <span className={`${styles.departmentCodeBadge} ${codeBadgeClass}`}>
               {department.code}
             </span>
+            {department.status === 'active' ? (
+              <span className={styles.statusActive}>
+                <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>check_circle</span>
+                Đang hoạt động
+              </span>
+            ) : department.status === 'pending' ? (
+              <span className={styles.statusPending}>
+                <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>info</span>
+                Đang chờ phê duyệt
+              </span>
+            ) : (
+              <span className={styles.statusPending} style={{ color: '#dc2626', background: 'rgba(239, 68, 68, 0.1)' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>cancel</span>
+                Ngừng hoạt động
+              </span>
+            )}
           </div>
           
           <div className={styles.departmentDetailsGrid}>
             <div className={styles.detailItem}>
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>domain</span>
-              Khoa: {department.facultyName}
+              <span><strong>Khoa:</strong> {department.facultyName.replace(/^Khoa\s+/i, '')}</span>
             </div>
             
             <div className={styles.detailItem}>
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>person</span>
-              {department.head ? `Trưởng bộ môn: ${department.head}` : 'Chưa bổ nhiệm Trưởng bộ môn'}
+              <span>
+                {department.head ? (
+                  <><strong>Trưởng BM:</strong> {department.head}</>
+                ) : (
+                  <span style={{ fontStyle: 'italic', color: '#94a3b8' }}>Chưa bổ nhiệm Trưởng BM</span>
+                )}
+              </span>
             </div>
-          </div>
-          
-          <div className={styles.departmentStatusRow}>
-            {department.status === 'active' ? (
-              <div className={`${styles.detailItem} ${styles.statusActive}`}>
-                <span className={`material-symbols-outlined ${styles.detailIcon}`}>check_circle</span>
-                Đang hoạt động
-              </div>
-            ) : department.status === 'pending' ? (
-              <div className={`${styles.detailItem} ${styles.statusPending}`}>
-                <span className={`material-symbols-outlined ${styles.detailIcon}`}>info</span>
-                Đang chờ phê duyệt
-              </div>
-            ) : (
-              <div className={`${styles.detailItem} ${styles.statusPending}`}>
-                <span className={`material-symbols-outlined ${styles.detailIcon}`}>cancel</span>
-                Ngừng hoạt động
-              </div>
-            )}
           </div>
         </div>
       </div>

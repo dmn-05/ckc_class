@@ -148,3 +148,10 @@ export async function returnLecturerSubmissions(assignmentId: string, submission
     return await response.json();
 }
 
+export async function getLecturerScoresReport() {
+    const response = await fetchWithAuth('/lecturer/assignments/scores-report', { method: 'GET', cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch scores report');
+    const json = await response.json();
+    return json.data || [];
+}
+

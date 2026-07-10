@@ -14,6 +14,7 @@ interface QuizSettingsModalProps {
 
 export default function QuizSettingsForm({ initialData, onSave, onClose, sections = [] }: QuizSettingsModalProps) {
   const defaultSectionId = sections.length > 0 ? sections[0].id : '';
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     sectionId: defaultSectionId,
@@ -28,6 +29,16 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
     showResultAfter: true,
     isPublished: true
   });
+
+  const getMinDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
   useEffect(() => {
     if (sections.length > 0 && !formData.sectionId) {
@@ -56,6 +67,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    setError('');
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
@@ -70,6 +82,35 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const now = new Date();
+
+    if (formData.startTime) {
+      const start = new Date(formData.startTime);
+      if (start.getTime() < now.getTime()) {
+        setError('Thời gian mở không được đặt ở thời điểm trong quá khứ. Vui lòng chọn thời điểm hiện tại hoặc tương lai.');
+        return;
+      }
+    }
+
+    if (formData.endTime) {
+      const end = new Date(formData.endTime);
+      if (end.getTime() <= now.getTime()) {
+        setError('Thời gian đóng không được đặt trong quá khứ. Vui lòng chọn thời gian lớn hơn thời điểm hiện tại.');
+        return;
+      }
+    }
+
+    if (formData.startTime && formData.endTime) {
+      const start = new Date(formData.startTime);
+      const end = new Date(formData.endTime);
+      if (end.getTime() <= start.getTime()) {
+        setError('Thời gian đóng phải lớn hơn (sau) thời gian mở.');
+        return;
+      }
+    }
+
     const section = sections.find(s => s.id === formData.sectionId);
     onSave({ ...formData, sectionName: section ? `${section.subjectName} - ${section.name}` : '' });
   };
@@ -90,6 +131,26 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
       </div>
 
       <div style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '1rem', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)', border: '1px solid #f3f4f6' }}>
+        {error && (
+          <div style={{
+            backgroundColor: '#fef2f2',
+            color: '#dc2626',
+            padding: '12px 16px',
+            borderRadius: '10px',
+            marginBottom: '1.5rem',
+            border: '1px solid #fecaca',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontWeight: 600
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
             
@@ -153,6 +214,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <input 
                   type="datetime-local" name="startTime" className={styles.formInput} 
                   value={formData.startTime} onChange={handleChange}
+                  min={getMinDateTime()}
                 />
               </div>
               <div className={styles.formGroup}>
@@ -160,6 +222,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <input 
                   type="datetime-local" name="endTime" className={styles.formInput} 
                   value={formData.endTime} onChange={handleChange}
+                  min={formData.startTime || getMinDateTime()}
                 />
               </div>
             </div>

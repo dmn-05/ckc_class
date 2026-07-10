@@ -67,7 +67,7 @@ export default function SubjectCard({ subject, onEdit, onDelete }: SubjectCardPr
             
             <div className={styles.detailItem}>
               <span className={`material-symbols-outlined ${styles.detailIcon}`}>domain</span>
-              Khoa {subject.facultyName}
+              Khoa: {subject.facultyName.replace(/^Khoa\s+/i, '')}
             </div>
           </div>
           

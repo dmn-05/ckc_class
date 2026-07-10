@@ -7,12 +7,15 @@ import DepartmentList from '@/components/admin/departments/DepartmentList';
 import { DepartmentData } from '@/components/admin/departments/DepartmentCard';
 import Link from 'next/link';
 import { getDepartments, deleteDepartment } from '@/app/actions/department';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function DepartmentsManagementPage() {
   const [departments, setDepartments] = useState<DepartmentData[]>([]);
   const [facultyFilter, setFacultyFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -32,15 +35,21 @@ export default function DepartmentsManagementPage() {
   const pendingCount = departments.filter(d => d.status === 'pending').length;
   const inactiveCount = departments.filter(d => d.status === 'inactive').length;
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa Bộ môn này?')) {
-      try {
-        await deleteDepartment(id);
-        setDepartments(prev => prev.filter(d => d.id !== id));
-      } catch (error) {
-        alert('Có lỗi xảy ra khi xóa Bộ môn.');
-        console.error(error);
-      }
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTargetId) return;
+    setDeleting(true);
+    try {
+      await deleteDepartment(deleteTargetId);
+      setDepartments(prev => prev.filter(d => d.id !== deleteTargetId));
+      setDeleteTargetId(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -53,7 +62,7 @@ export default function DepartmentsManagementPage() {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Quản lý Bộ môn</h1>
-          <p className={styles.pageSubtitle}>Tổ chức và quản lý các đơn vị học thuật trực thuộc các Khoa trong hệ thống CKC.</p>
+          <p className={styles.pageSubtitle}>Tổ chức và điều hành các Bộ môn theo từng Khoa chuyên ngành.</p>
         </div>
 
         <Link href="/admin/departments/create" className={styles.btnAddDepartment}>
@@ -85,6 +94,17 @@ export default function DepartmentsManagementPage() {
           />
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        title="Xác nhận xóa Bộ môn"
+        message="Bạn có chắc chắn muốn xóa Bộ môn này khỏi hệ thống? Dữ liệu này không thể khôi phục sau khi xóa."
+        confirmText="Xóa ngay"
+        cancelText="Huỷ bỏ"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteTargetId(null)}
+        isLoading={deleting}
+      />
     </div>
   );
 }

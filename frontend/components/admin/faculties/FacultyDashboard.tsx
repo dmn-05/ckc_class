@@ -95,19 +95,6 @@ export default function FacultyDashboard({
           </div>
         </div>
       </div>
-
-      {/* Banner */}
-      <div className={`${styles.glassCard} ${styles.bannerCard}`}>
-        <img 
-          alt="Modern laboratory" 
-          className={styles.bannerImage} 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtNGZMObEJYpIQHnypLJFA9DCOVL5olhKIABTBsjekYHGBFQEsNY-EV3ZF8VKJ3yfdasFYNhuSVR4CRMx-zqblrLRYtWY6qRGo9cjmA4thplJnunEe6aYj3twjGLdQCzxZBkwAd2BXpFwB1w84HA6-dT0WNEIHZa4VHWpJL1OsSo33rCprMqYnSw7opcuoYJKtGVUF7S7Ze6mJd5uvElJtN7dp5KtTMuNnFlsmkzGuCPF0J-GZYP-ZwIIv22mHoeX-GCjpwBWPksI"
-        />
-        <div className={styles.bannerContent}>
-          <p className={styles.bannerTitle}>CKC Lab Tech</p>
-          <p className={styles.bannerSubtitle}>Hệ thống quản lý thông minh</p>
-        </div>
-      </div>
     </div>
   );
 }
