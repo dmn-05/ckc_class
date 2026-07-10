@@ -104,19 +104,6 @@ export default function LecturerDashboard({
           </div>
         </div>
       </div>
-
-      {/* Banner */}
-      <div className={`${styles.glassCard} ${styles.bannerCard}`}>
-        <img 
-          alt="Academics" 
-          className={styles.bannerImage} 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg5Hgz6L5una61NHHIDr0lyqV6chp-vk2_Kk1Z0QYDp_u-VRfEZz-rWfs56btXQyz58EWP-89BbDO8U-43P_PS5L-Zo9GFqeFDHrJ9PsdBP1EQ_WNZqpBP7OL-QWywaIaMadRQUHWk9WadxkLcAObnctcovxB5MIVkeEqU4DL7OjY5g3gz7FRBHUYJtv-gPJB4KTv3d8ty_1Cee-4mpOIqPQcgzSas9s_GCoUhLsSoawfKRp-2Kn0IhyHjLY1XUpwTb-KVToYyahM"
-        />
-        <div className={styles.bannerContent}>
-          <p className={styles.bannerTitle}>Chuyên môn & Tận tâm</p>
-          <p className={styles.bannerSubtitle}>Cộng đồng học thuật CKC</p>
-        </div>
-      </div>
     </div>
   );
 }

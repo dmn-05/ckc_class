@@ -5,6 +5,8 @@ import styles from './AdminUpdateStudents.module.css';
 import { getStudentById, updateStudent, resetStudentPassword, getClasses } from '@/app/actions/student';
 import { getFaculties } from '@/app/actions/faculty';
 import { useRouter } from 'next/navigation';
+import AlertModal from '@/components/common/AlertModal';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 interface UpdateStudentFormProps {
   studentId: string;
@@ -17,6 +19,23 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
   const [isResetting, setIsResetting] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Modals state
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    variant: 'warning' | 'error' | 'success' | 'info';
+  }>({
+    isOpen: false,
+    message: '',
+    variant: 'warning',
+  });
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
+
+  const showAlert = (message: string, variant: 'warning' | 'error' | 'success' | 'info' = 'warning', title?: string) => {
+    setAlertConfig({ isOpen: true, message, variant, title });
+  };
+
   const [faculties, setFaculties] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
 
@@ -28,6 +47,8 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     ho_ten: '',
     email: '',
     so_dien_thoai: '',
+    cccd: '',
+    dia_chi: '',
     ngay_sinh: '',
     gioi_tinh: 'nam',
     ma_sinh_vien: '',
@@ -51,9 +72,11 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         setFormData({
           ho_ten: studentData.ho_ten || '',
           email: studentData.email || '',
-          so_dien_thoai: studentData.so_dien_thoai || '',
-          ngay_sinh: studentData.ngay_sinh || '',
-          gioi_tinh: studentData.gioi_tinh || 'nam',
+          so_dien_thoai: studentData.so_dien_thoai || studentData.sinh_vien?.so_dien_thoai || '',
+          cccd: studentData.sinh_vien?.cccd || '',
+          dia_chi: studentData.sinh_vien?.dia_chi || '',
+          ngay_sinh: studentData.ngay_sinh || studentData.sinh_vien?.ngay_sinh || '',
+          gioi_tinh: studentData.gioi_tinh || studentData.sinh_vien?.gioi_tinh || 'nam',
           ma_sinh_vien: studentData.sinh_vien?.ma_sinh_vien || '',
           khoa_id: studentData.sinh_vien?.khoa_id?.toString() || '',
           lop_id: studentData.sinh_vien?.lop_id?.toString() || '',
@@ -62,7 +85,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         });
       } catch (err) {
         console.error('Failed to load data', err);
-        alert('Không thể tải thông tin sinh viên');
+        showAlert('Không thể tải thông tin sinh viên', 'error', 'Lỗi tải dữ liệu');
       } finally {
         setLoading(false);
       }
@@ -74,6 +97,11 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === 'so_dien_thoai' || name === 'cccd') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+      return;
+    }
     if (name === 'khoa_id') {
       const filteredClasses = classes.filter(c => c.khoa_id.toString() === value);
       setFormData(prev => ({
@@ -100,13 +128,28 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate số điện thoại phải đủ 10 số nếu có nhập
+    if (formData.so_dien_thoai && !/^\d{10}$/.test(formData.so_dien_thoai.trim())) {
+      showAlert('Số điện thoại phải nhập đúng 10 chữ số.', 'warning', 'Kiểm tra Số điện thoại');
+      return;
+    }
+
+    // Validate CCCD nếu nhập phải 12 số
+    if (formData.cccd && !/^\d{12}$/.test(formData.cccd.trim())) {
+      showAlert('Số Căn cước công dân (CCCD) phải nhập đúng 12 chữ số.', 'warning', 'Kiểm tra Số CCCD');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const submitData = new FormData();
-    submitData.append('_method', 'PUT'); // For Laravel
+    submitData.append('_method', 'PUT');
     submitData.append('ho_ten', formData.ho_ten);
     submitData.append('email', formData.email);
     submitData.append('so_dien_thoai', formData.so_dien_thoai);
+    submitData.append('cccd', formData.cccd);
+    submitData.append('dia_chi', formData.dia_chi);
     submitData.append('ngay_sinh', formData.ngay_sinh);
     submitData.append('gioi_tinh', formData.gioi_tinh);
     submitData.append('ma_sinh_vien', formData.ma_sinh_vien);
@@ -124,27 +167,35 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         router.push('/admin/students');
       }, 1500);
     } catch (err: any) {
-      alert(err.message || 'Cập nhật sinh viên thất bại');
+      showAlert(err.message || 'Cập nhật sinh viên thất bại', 'error', 'Lỗi cập nhật');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!confirm('Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên này (Mật khẩu sẽ là 123456)?')) return;
+  const executeResetPassword = async () => {
+    setShowConfirmReset(false);
     setIsResetting(true);
     try {
-      await resetStudentPassword(studentId);
-      alert('Đặt lại mật khẩu thành công!');
+      const result = await resetStudentPassword(studentId);
+      if (result.success) {
+        showAlert('Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)', 'success', 'Hoàn tất');
+      } else {
+        showAlert('Đặt lại mật khẩu thất bại: ' + result.error, 'error', 'Lỗi');
+      }
     } catch (err: any) {
-      alert(err.message || 'Lỗi khi đặt lại mật khẩu');
+      showAlert('Có lỗi xảy ra: ' + err.message, 'error', 'Lỗi');
     } finally {
       setIsResetting(false);
     }
   };
 
+  const handleResetPassword = () => {
+    setShowConfirmReset(true);
+  };
+
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải thông tin...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải thông tin sinh viên...</div>;
   }
 
   return (
@@ -154,12 +205,16 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         <section className={`${styles.card} ${styles.cardCenter}`}>
           <div className={styles.avatarUploadWrapper} onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
             <div className={styles.avatarBox}>
-              <img
-                src={avatarPreview || formData.anh_dai_dien || "https://ui-avatars.com/api/?name=User"}
-                alt="Student Profile"
-                className={styles.avatarImg}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-              />
+              {avatarPreview || formData.anh_dai_dien ? (
+                <img 
+                  src={avatarPreview || formData.anh_dai_dien} 
+                  alt="Avatar" 
+                  className={styles.avatarImg}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                />
+              ) : (
+                <span className={`material-symbols-outlined ${styles.avatarIcon}`}>person</span>
+              )}
             </div>
             <div className={styles.avatarOverlay}>
               <span className={`material-symbols-outlined ${styles.avatarIcon}`} style={{ color: '#fff', opacity: 0.8 }}>edit</span>
@@ -181,7 +236,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
 
         <section className={styles.card}>
           <h3 className={styles.cardTitle}>
-            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>assignment_ind</span>
+            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>badge</span>
             Thông tin định danh
           </h3>
           <div className={styles.formGroup}>
@@ -195,7 +250,19 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               required
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
+            <label className={styles.formLabel}>Số CCCD / CMND (12 số)</label>
+            <input
+              className={styles.formInput}
+              type="text"
+              name="cccd"
+              maxLength={12}
+              value={formData.cccd}
+              onChange={handleChange}
+              placeholder="Nhập 12 chữ số CCCD"
+            />
+          </div>
+          <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
             <label className={styles.formLabel}>Trạng thái</label>
             <select
               className={`${styles.formInput} ${styles.formSelect}`}
@@ -208,6 +275,25 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               <option value="da_tot_nghiep">Đã tốt nghiệp</option>
             </select>
           </div>
+        </section>
+
+        <section className={styles.card}>
+          <h3 className={styles.cardTitle}>
+            <span className={`material-symbols-outlined ${styles.cardTitleIcon}`}>lock_reset</span>
+            Bảo mật tài khoản
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
+            Nếu sinh viên quên mật khẩu, bạn có thể đặt lại mật khẩu mặc định là <strong>123456</strong>.
+          </p>
+          <button
+            type="button"
+            className={styles.btnDiscard}
+            style={{ width: '100%', borderColor: '#f59e0b', color: '#d97706' }}
+            onClick={handleResetPassword}
+            disabled={isResetting}
+          >
+            {isResetting ? 'Đang đặt lại...' : 'Đặt lại mật khẩu mặc định'}
+          </button>
         </section>
       </div>
 
@@ -291,13 +377,26 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
                 />
               </div>
               <div>
-                <label className={styles.formLabel}>Số điện thoại</label>
+                <label className={styles.formLabel}>Số điện thoại (10 số)</label>
                 <input
                   className={styles.formInput}
-                  type="tel"
+                  type="text"
                   name="so_dien_thoai"
+                  maxLength={10}
                   value={formData.so_dien_thoai}
                   onChange={handleChange}
+                  placeholder="Ví dụ: 0912345678"
+                />
+              </div>
+              <div className={styles.colSpan2}>
+                <label className={styles.formLabel}>Địa chỉ liên hệ</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  name="dia_chi"
+                  value={formData.dia_chi}
+                  onChange={handleChange}
+                  placeholder="Nhập địa chỉ của sinh viên..."
                 />
               </div>
             </div>
@@ -347,16 +446,6 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
             <button
               type="button"
               className={styles.btnDiscard}
-              onClick={handleResetPassword}
-              disabled={isResetting}
-            >
-              <span className="material-symbols-outlined" style={{ marginRight: '8px', fontSize: '18px', verticalAlign: 'middle' }}>lock_reset</span>
-              {isResetting ? 'Đang đặt lại...' : 'Đặt lại mật khẩu'}
-            </button>
-            <div style={{ flex: 1 }}></div>
-            <button
-              type="button"
-              className={styles.btnDiscard}
               onClick={() => router.push('/admin/students')}
             >
               Hủy
@@ -375,18 +464,35 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               ) : submitStatus === 'success' ? (
                 <>
                   <span className="material-symbols-outlined">check_circle</span>
-                  Cập nhật Thành Công
+                  Lưu thay đổi
                 </>
               ) : (
                 <>
                   <span className="material-symbols-outlined">save</span>
-                  Cập Nhật
+                  Lưu Thay Đổi
                 </>
               )}
             </button>
           </div>
         </form>
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <ConfirmModal
+        isOpen={showConfirmReset}
+        title="Xác nhận đặt lại mật khẩu"
+        message="Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên này về mặc định (123456) không?"
+        confirmText="Đặt lại"
+        onCancel={() => setShowConfirmReset(false)}
+        onConfirm={executeResetPassword}
+      />
     </div>
   );
 }

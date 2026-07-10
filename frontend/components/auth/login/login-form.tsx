@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import styles from "@/app/page.module.css";
 import { loginAction } from "@/app/actions/auth";
 
@@ -86,7 +87,7 @@ export function LoginForm() {
       <div className={styles.fieldGroup}>
         <div className={styles.labelRow}>
           <label htmlFor="password">MẬT KHẨU</label>
-          <a href="#">Quên mật khẩu?</a>
+          <Link href="/forgot-password">Quên mật khẩu?</Link>
         </div>
         <div className={styles.inputWrap}>
           <span className={styles.inputIcon} aria-hidden="true">

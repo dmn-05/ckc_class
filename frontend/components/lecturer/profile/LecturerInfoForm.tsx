@@ -78,11 +78,13 @@ export default function LecturerInfoForm({ profileData, formData, onChange }: { 
 
           {/* Số CCCD / CMND */}
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="cccd">Số CCCD / CMND</label>
+            <label className={styles.label} htmlFor="cccd">Số CCCD / CMND (12 chữ số)</label>
             <div className={styles.inputGlow}>
               <input 
                 type="text" 
                 id="cccd"
+                maxLength={12}
+                placeholder="Nhập đúng 12 chữ số CCCD"
                 className={styles.inputField} 
                 value={formData?.cccd || ''}
                 onChange={onChange}
@@ -118,12 +120,13 @@ export default function LecturerInfoForm({ profileData, formData, onChange }: { 
           
           {/* Email */}
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="email">Email liên hệ</label>
+            <label className={styles.label} htmlFor="email">Email liên hệ (@ckc.edu.vn)</label>
             <div className={styles.inputGlow}>
               <span className={`material-symbols-outlined ${styles.inputIcon}`}>alternate_email</span>
               <input 
                 type="email" 
                 id="email"
+                placeholder="vidu@ckc.edu.vn"
                 className={styles.inputField} 
                 value={formData?.email || ''}
                 onChange={onChange}
@@ -133,12 +136,14 @@ export default function LecturerInfoForm({ profileData, formData, onChange }: { 
 
           {/* Số điện thoại */}
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="so_dien_thoai">Số điện thoại</label>
+            <label className={styles.label} htmlFor="so_dien_thoai">Số điện thoại (10 chữ số)</label>
             <div className={styles.inputGlow}>
               <span className={`material-symbols-outlined ${styles.inputIcon}`}>smartphone</span>
               <input 
                 type="tel" 
                 id="so_dien_thoai"
+                maxLength={10}
+                placeholder="Nhập đúng 10 chữ số điện thoại"
                 className={styles.inputField} 
                 value={formData?.so_dien_thoai || ''}
                 onChange={onChange}

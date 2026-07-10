@@ -23,7 +23,13 @@ class ExamController extends Controller
 
     private function getSectionIds()
     {
-        return LopHocPhan::where('giang_vien_id', $this->getGiangVienId())->pluck('id');
+        $giangVienId = $this->getGiangVienId();
+        return LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->pluck('id');
     }
 
     public function index()
@@ -48,7 +54,7 @@ class ExamController extends Controller
             'mo_ta'                => 'nullable|string',
             'lop_hoc_phan_id'      => 'required|integer|exists:lop_hoc_phan,id',
             'thoi_gian_bat_dau'    => 'nullable|date',
-            'thoi_gian_ket_thuc'   => 'nullable|date|after_or_equal:thoi_gian_bat_dau',
+            'thoi_gian_ket_thuc'   => 'nullable|date|after:thoi_gian_bat_dau',
             'thoi_gian_lam_bai'    => 'nullable|integer|min:1|max:480',
             'diem_toi_da'          => 'nullable|numeric|min:1|max:100',
             'diem_dat'             => 'nullable|numeric|min:0|max:100',
@@ -104,7 +110,7 @@ class ExamController extends Controller
             'tieu_de'             => 'sometimes|string|max:255',
             'mo_ta'               => 'nullable|string',
             'thoi_gian_bat_dau'   => 'nullable|date',
-            'thoi_gian_ket_thuc'  => 'nullable|date',
+            'thoi_gian_ket_thuc'  => 'nullable|date|after:thoi_gian_bat_dau',
             'thoi_gian_lam_bai'   => 'nullable|integer|min:1|max:480',
             'diem_toi_da'         => 'nullable|numeric|min:1|max:100',
             'diem_dat'            => 'nullable|numeric|min:0|max:100',

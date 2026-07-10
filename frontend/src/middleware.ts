@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token')?.value
     const role = request.cookies.get('vai_tro_id')?.value
 
-    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register')
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')
 
     // If unauthenticated and trying to access protected routes
     if (!token && !isAuthRoute && pathname !== '/') {

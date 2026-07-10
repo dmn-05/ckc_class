@@ -23,7 +23,12 @@ class AssignmentController extends Controller
     private function getSectionIds()
     {
         $giangVienId = $this->getGiangVienId();
-        return LopHocPhan::where('giang_vien_id', $giangVienId)->pluck('id');
+        return LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->pluck('id');
     }
 
     public function index()
@@ -327,6 +332,37 @@ class AssignmentController extends Controller
             ]);
 
         return response()->json(['message' => 'Submissions returned successfully']);
+    }
+
+    public function scoresReport()
+    {
+        $sectionIds = $this->getSectionIds();
+
+        $sections = LopHocPhan::with('monHoc')
+            ->whereIn('id', $sectionIds)
+            ->get();
+
+        $report = $sections->map(function ($sec) {
+            $scores = \Illuminate\Support\Facades\DB::table('bai_nop')
+                ->join('bai_tap', 'bai_nop.bai_tap_id', '=', 'bai_tap.id')
+                ->where('bai_tap.lop_hoc_phan_id', $sec->id)
+                ->whereNotNull('bai_nop.diem')
+                ->pluck('bai_nop.diem');
+
+            $totalStudents = $sec->sinhViens()->count();
+
+            return [
+                'secId' => $sec->ma_lop_hoc_phan,
+                'name' => $sec->monHoc ? $sec->monHoc->ten_mon_hoc : $sec->ten_lop,
+                'avgScore' => $scores->count() > 0 ? round($scores->avg(), 1) : 0,
+                'highest' => $scores->count() > 0 ? (float) $scores->max() : 0,
+                'lowest' => $scores->count() > 0 ? (float) $scores->min() : 0,
+                'totalStudents' => $totalStudents,
+                'gradedCount' => $scores->count(),
+            ];
+        })->values();
+
+        return response()->json(['data' => $report]);
     }
 
     private function formatAssignment($item, int $totalStudents)

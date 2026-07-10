@@ -79,14 +79,6 @@ export default function ClassDashboard({
           </div>
         </div>
       </div>
-
-      {/* Banner */}
-      <div className={`${styles.glassCard} ${styles.bannerCard}`}>
-        <div className={styles.bannerContent}>
-          <p className={styles.bannerTitle}>CKC Teaching</p>
-          <p className={styles.bannerSubtitle}>Môi trường giảng dạy trực tuyến</p>
-        </div>
-      </div>
     </div>
   );
 }

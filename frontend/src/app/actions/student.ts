@@ -145,3 +145,20 @@ export async function getClasses() {
     }
 }
 
+export async function importStudentsJson(studentsData: any[]) {
+    try {
+        const response = await fetchWithAuth('/students/import-json', {
+            method: 'POST',
+            body: JSON.stringify({ students: studentsData })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Lỗi khi nhập danh sách sinh viên');
+        }
+        return data;
+    } catch (error) {
+        console.error('Error importing students:', error);
+        throw error;
+    }
+}
+

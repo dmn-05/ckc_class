@@ -27,6 +27,7 @@ class CourseSectionController extends Controller
               });
         })
         ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        ->withCount('sinhViens')
         ->get();
         return response()->json($sections);
     }

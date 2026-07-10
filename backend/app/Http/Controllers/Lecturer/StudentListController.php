@@ -22,7 +22,12 @@ class StudentListController extends Controller
         
         $query = \App\Models\LopHocPhan::query();
         if ($giangVienId) {
-            $query->where('giang_vien_id', $giangVienId);
+            $query->where(function ($q) use ($giangVienId) {
+                $q->where('giang_vien_id', $giangVienId)
+                  ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                      $q2->where('giang_vien.id', $giangVienId);
+                  });
+            });
         }
         $section = $query->findOrFail($sectionId);
 
@@ -45,7 +50,12 @@ class StudentListController extends Controller
         
         $query = \App\Models\LopHocPhan::query();
         if ($giangVienId) {
-            $query->where('giang_vien_id', $giangVienId);
+            $query->where(function ($q) use ($giangVienId) {
+                $q->where('giang_vien_id', $giangVienId)
+                  ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                      $q2->where('giang_vien.id', $giangVienId);
+                  });
+            });
         }
         $section = $query->findOrFail($sectionId);
 
@@ -87,7 +97,12 @@ class StudentListController extends Controller
         
         $query = \App\Models\LopHocPhan::query();
         if ($giangVienId) {
-            $query->where('giang_vien_id', $giangVienId);
+            $query->where(function ($q) use ($giangVienId) {
+                $q->where('giang_vien_id', $giangVienId)
+                  ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                      $q2->where('giang_vien.id', $giangVienId);
+                  });
+            });
         }
         $section = $query->findOrFail($sectionId);
 

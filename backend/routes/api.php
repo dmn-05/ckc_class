@@ -13,7 +13,11 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ClassController;
 
 
+Route::get('/public/stats', [AuthController::class, 'publicStats']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password/verify-email', [AuthController::class, 'verifyForgotEmail']);
+Route::post('/forgot-password/verify-cccd', [AuthController::class, 'verifyForgotCccd']);
+Route::post('/forgot-password/reset', [AuthController::class, 'resetForgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -32,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/students', [UserController::class, 'getStudents']);
         Route::get('/students/{id}', [UserController::class, 'getStudentById']);
         Route::post('/students', [UserController::class, 'storeStudent']);
+        Route::post('/students/import-json', [UserController::class, 'importStudentsJson']);
+        Route::post('/students/batch', [UserController::class, 'importStudentsJson']);
         Route::put('/students/{id}', [UserController::class, 'updateStudent']);
         Route::delete('/students/{id}', [UserController::class, 'destroyStudent']);
         Route::post('/students/{id}/reset-password', [UserController::class, 'resetStudentPassword']);
@@ -88,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/lecturer/resources/{id}/toggle-visibility', [\App\Http\Controllers\Lecturer\ResourceController::class, 'toggleVisibility']);
         // Assignment management by lecturer
         Route::get('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'index']);
+        Route::get('/lecturer/assignments/scores-report', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'scoresReport']);
         Route::post('/lecturer/assignments', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'store']);
         Route::get('/lecturer/assignments/{id}', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'show']);
         Route::get('/lecturer/assignments/{id}/submissions', [\App\Http\Controllers\Lecturer\AssignmentController::class, 'submissions']);
@@ -132,6 +139,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
     Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
     Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
+    Route::get('/lecturer/dashboard/stats', [\App\Http\Controllers\Lecturer\DashboardController::class, 'stats']);
     Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
     Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 

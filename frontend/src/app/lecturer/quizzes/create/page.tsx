@@ -32,6 +32,9 @@ export default function CreateQuizPage() {
                 router.push('/lecturer/quizzes');
             }
         } catch (err: any) {
+            if (err?.message?.includes('NEXT_REDIRECT') || err?.digest?.includes('NEXT_REDIRECT')) {
+                return;
+            }
             alert(err.message || 'Lưu thất bại');
         }
     };

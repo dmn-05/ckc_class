@@ -35,3 +35,38 @@ export async function getDashboardStats() {
         };
     }
 }
+
+export async function getLecturerDashboardStats() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturer/dashboard/stats`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch lecturer stats: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching lecturer stats", error);
+        return {
+            sections: 0,
+            students: 0,
+            exams: 0,
+            assignments: 0,
+            resources: 0
+        };
+    }
+}

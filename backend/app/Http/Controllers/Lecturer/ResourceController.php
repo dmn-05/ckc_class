@@ -22,9 +22,12 @@ class ResourceController extends Controller
     public function index()
     {
         $giangVienId = $this->getGiangVienId();
-
-        $sectionIds = LopHocPhan::where('giang_vien_id', $giangVienId)
-            ->pluck('id');
+        $sectionIds = LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->pluck('id');
 
         $resources = BaiViet::with(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao'])
             ->where('loai_bai_viet', 'tai_lieu')
@@ -49,9 +52,12 @@ class ResourceController extends Controller
             'trang_thai' => 'nullable|string|in:hien_thi,an',
         ]);
 
-        $section = LopHocPhan::where('giang_vien_id', $giangVienId)
-            ->where('id', $validated['lop_hoc_phan_id'])
-            ->firstOrFail();
+        $section = LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->where('id', $validated['lop_hoc_phan_id'])->firstOrFail();
 
         $chu_de_id = null;
         try {

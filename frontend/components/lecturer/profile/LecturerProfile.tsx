@@ -63,6 +63,30 @@ export default function LecturerProfile({ profileData }: { profileData?: any }) 
   };
 
   const handleSave = () => {
+    if (formData.email) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@ckc\.edu\.vn$/i;
+      if (!emailRegex.test(formData.email.trim())) {
+        showToast("Email không hợp lệ. Email phải đúng định dạng đuôi @ckc.edu.vn", "error");
+        return;
+      }
+    }
+
+    if (formData.so_dien_thoai) {
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(formData.so_dien_thoai.trim())) {
+        showToast("Số điện thoại không hợp lệ. Số điện thoại phải gồm đúng 10 chữ số", "error");
+        return;
+      }
+    }
+
+    if (formData.cccd) {
+      const cccdRegex = /^\d{12}$/;
+      if (!cccdRegex.test(formData.cccd.trim())) {
+        showToast("Số CCCD / CMND không hợp lệ. CCCD phải gồm đúng 12 chữ số", "error");
+        return;
+      }
+    }
+
     startTransition(async () => {
       if (avatarFile) {
         const avatarResult = await updateAvatarAction(avatarFile);

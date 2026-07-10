@@ -26,12 +26,17 @@ class LecturerProfileController extends Controller
 
         $validatedData = $request->validate([
             'ho_ten' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255|unique:nguoi_dung,email,' . $user->id,
+            'email' => ['nullable', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@ckc\.edu\.vn$/i', 'unique:nguoi_dung,email,' . $user->id],
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'nullable|in:nam,nu,khac',
-            'cccd' => 'nullable|string|max:20',
-            'so_dien_thoai' => 'nullable|string|max:20',
+            'cccd' => 'nullable|regex:/^\d{12}$/',
+            'so_dien_thoai' => 'nullable|regex:/^\d{10}$/',
             'dia_chi' => 'nullable|string|max:255',
+        ], [
+            'email.email' => 'Email không đúng chuẩn email.',
+            'email.regex' => 'Email phải có đuôi @ckc.edu.vn.',
+            'cccd.regex' => 'Số CCCD / CMND phải gồm đúng 12 chữ số.',
+            'so_dien_thoai.regex' => 'Số điện thoại phải gồm đúng 10 chữ số.',
         ]);
 
         if (isset($validatedData['ho_ten'])) {

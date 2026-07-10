@@ -12,13 +12,23 @@ interface SubjectDashboardProps {
     percentage: number;
     theme: 'primary' | 'secondary' | 'tertiary';
   }[];
+  departments?: any[];
+  currentFilter?: string;
+  onFilterChange?: (filter: string) => void;
+  currentStatusFilter?: string;
+  onStatusFilterChange?: (status: string) => void;
 }
 
 export default function SubjectDashboard({
   totalCount,
   activeCount,
   pausedCount,
-  distributionData
+  distributionData,
+  departments = [],
+  currentFilter = 'all',
+  onFilterChange,
+  currentStatusFilter = 'all',
+  onStatusFilterChange
 }: SubjectDashboardProps) {
   const [showAll, setShowAll] = useState(false);
   const displayedData = showAll ? distributionData : distributionData.slice(0, 5);
@@ -111,18 +121,55 @@ export default function SubjectDashboard({
         )}
       </div>
 
-      {/* Banner */}
-      <div className={`${styles.glassCard} ${styles.bannerCard}`}>
-        <img 
-          alt="Modern learning" 
-          className={styles.bannerImage} 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg5Hgz6L5una61NHHIDr0lyqV6chp-vk2_Kk1Z0QYDp_u-VRfEZz-rWfs56btXQyz58EWP-89BbDO8U-43P_PS5L-Zo9GFqeFDHrJ9PsdBP1EQ_WNZqpBP7OL-QWywaIaMadRQUHWk9WadxkLcAObnctcovxB5MIVkeEqU4DL7OjY5g3gz7FRBHUYJtv-gPJB4KTv3d8ty_1Cee-4mpOIqPQcgzSas9s_GCoUhLsSoawfKRp-2Kn0IhyHjLY1XUpwTb-KVToYyahM"
-        />
-        <div className={styles.bannerContent}>
-          <p className={styles.bannerTitle}>Nâng tầm học thuật</p>
-          <p className={styles.bannerSubtitle}>Hệ thống giáo dục thông minh v2.0</p>
+      {/* Filters */}
+      {onFilterChange && (
+        <div className={`${styles.glassCard} ${styles.filtersCard}`}>
+          <h3 className={styles.filterTitle}>BỘ LỌC DỮ LIỆU</h3>
+          
+          <div>
+            <label className={styles.filterLabel}>Lọc theo Bộ môn</label>
+            <select 
+              className={styles.filterSelect}
+              value={currentFilter}
+              onChange={(e) => onFilterChange(e.target.value)}
+            >
+              <option value="all">Tất cả bộ môn</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>{dept.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {onStatusFilterChange && (
+            <div>
+              <label className={styles.filterLabel}>Trạng thái</label>
+              <div className={styles.filterTags}>
+                <button 
+                  type="button"
+                  className={`${styles.filterTag} ${currentStatusFilter === 'all' ? styles.filterTagActive : ''}`}
+                  onClick={() => onStatusFilterChange('all')}
+                >
+                  Tất cả
+                </button>
+                <button 
+                  type="button"
+                  className={`${styles.filterTag} ${currentStatusFilter === 'active' ? styles.filterTagActive : ''}`}
+                  onClick={() => onStatusFilterChange('active')}
+                >
+                  Đang mở
+                </button>
+                <button 
+                  type="button"
+                  className={`${styles.filterTag} ${currentStatusFilter === 'inactive' ? styles.filterTagActive : ''}`}
+                  onClick={() => onStatusFilterChange('inactive')}
+                >
+                  Tạm ngưng
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

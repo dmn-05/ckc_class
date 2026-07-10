@@ -17,7 +17,13 @@ class QuestionController extends Controller
         if (!$user || !$user->giangVien) {
             abort(403, 'Unauthorized');
         }
-        return \App\Models\LopHocPhan::where('giang_vien_id', $user->giangVien->id)->pluck('id');
+        $giangVienId = $user->giangVien->id;
+        return \App\Models\LopHocPhan::where(function ($q) use ($giangVienId) {
+            $q->where('giang_vien_id', $giangVienId)
+              ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
+                  $q2->where('giang_vien.id', $giangVienId);
+              });
+        })->pluck('id');
     }
 
     private function findExam($examId)

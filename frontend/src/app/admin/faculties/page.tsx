@@ -7,11 +7,14 @@ import FacultyList from '@/components/admin/faculties/FacultyList';
 import { FacultyData } from '@/components/admin/faculties/FacultyCard';
 import Link from 'next/link';
 import { getFaculties, deleteFaculty } from '@/app/actions/faculty';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function FacultiesManagementPage() {
   const [faculties, setFaculties] = useState<FacultyData[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -31,15 +34,21 @@ export default function FacultiesManagementPage() {
   const pendingCount = faculties.filter(f => f.status === 'pending').length;
   const inactiveCount = faculties.filter(f => f.status === 'inactive').length;
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa Khoa này?')) {
-      try {
-        await deleteFaculty(id);
-        setFaculties(prev => prev.filter(f => f.id !== id));
-      } catch (error) {
-        alert('Có lỗi xảy ra khi xóa Khoa.');
-        console.error(error);
-      }
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTargetId) return;
+    setDeleting(true);
+    try {
+      await deleteFaculty(deleteTargetId);
+      setFaculties(prev => prev.filter(f => f.id !== deleteTargetId));
+      setDeleteTargetId(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -76,6 +85,17 @@ export default function FacultiesManagementPage() {
           />
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        title="Xác nhận xóa Khoa"
+        message="Bạn có chắc chắn muốn xóa Khoa này khỏi hệ thống? Dữ liệu này không thể khôi phục sau khi xóa."
+        confirmText="Xóa ngay"
+        cancelText="Huỷ bỏ"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteTargetId(null)}
+        isLoading={deleting}
+      />
     </div>
   );
 }

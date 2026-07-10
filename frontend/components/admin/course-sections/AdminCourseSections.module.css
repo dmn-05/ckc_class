@@ -719,3 +719,122 @@
 .rightColumn { grid-column: span 12 / span 12; display: flex; flex-direction: column; min-height: 80vh; }
 @media (min-width: 1024px) { .rightColumn { grid-column: span 8 / span 12; } }
 .classCardContainer { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+
+/* Semester & Year Filter Bar */
+.filterBarContainer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #ffffff;
+  padding: 0.875rem 1.25rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  margin-bottom: 0.5rem;
+}
+
+.semesterFilterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.semesterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #464555;
+  margin-right: 0.25rem;
+}
+
+.semesterChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.semesterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #525266;
+  background: #f4f5f8;
+  border: 1px solid #e2e4ea;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.semesterChip:hover {
+  background: #eef0f6;
+  color: #3525cd;
+  border-color: #c7caed;
+  transform: translateY(-1px);
+}
+
+.semesterChipActive {
+  background: linear-gradient(135deg, #3525cd 0%, #5243e8 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(53, 37, 205, 0.25);
+}
+
+.semesterChipActive:hover {
+  background: linear-gradient(135deg, #2d1fb3 0%, #4637db 100%);
+  color: #ffffff;
+}
+
+.semesterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.4rem;
+  border-radius: 9999px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+}
+
+.semesterChipActive .semesterBadge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.yearFilterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yearSelect {
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #3525cd;
+  background: #f4f5f8;
+  border: 1px solid #e2e4ea;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.yearSelect:hover,
+.yearSelect:focus {
+  border-color: #3525cd;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(53, 37, 205, 0.1);
+}
+

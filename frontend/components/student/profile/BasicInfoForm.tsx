@@ -41,9 +41,9 @@ export default function BasicInfoForm({ profileData, formData, onChange }: { pro
           </div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="cccd">Số CCCD / CMND</label>
+          <label className={styles.label} htmlFor="cccd">Số CCCD / CMND (12 chữ số)</label>
           <div className={styles.inputGlow}>
-            <input className={styles.inputField} id="cccd" type="text" value={formData?.cccd || ''} onChange={onChange} />
+            <input className={styles.inputField} id="cccd" type="text" maxLength={12} placeholder="Nhập đúng 12 chữ số CCCD" value={formData?.cccd || ''} onChange={onChange} />
           </div>
         </div>
         <div className={styles.formGroup}>
