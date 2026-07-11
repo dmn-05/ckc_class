@@ -9,9 +9,17 @@ return new class extends Migration
 {
     public function up(): void
     {
+        $isMysql = DB::getDriverName() === 'mysql';
+
         // Nếu cột duong_dan_file tồn tại thì đổi tên thành file_url
         if (Schema::hasColumn('bai_tap', 'duong_dan_file') && !Schema::hasColumn('bai_tap', 'file_url')) {
-            DB::statement("ALTER TABLE bai_tap CHANGE duong_dan_file file_url TEXT NULL");
+            if ($isMysql) {
+                DB::statement("ALTER TABLE bai_tap CHANGE duong_dan_file file_url TEXT NULL");
+            } else {
+                Schema::table('bai_tap', function (Blueprint $table) {
+                    $table->text('file_url')->nullable()->after('huong_dan');
+                });
+            }
         }
 
         // Nếu cả hai đều không tồn tại thì tạo mới
