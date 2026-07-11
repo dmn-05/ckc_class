@@ -24,9 +24,13 @@ return new class extends Migration
             }
         });
 
-        // Ensure ENUM for trang_thai contains 'cho_phe_duyet' in both tables
-        DB::statement("ALTER TABLE khoa MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong', 'cho_phe_duyet') DEFAULT 'dang_hoat_dong'");
-        DB::statement("ALTER TABLE bo_mon MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong', 'cho_phe_duyet') DEFAULT 'dang_hoat_dong'");
+        // MODIFY COLUMN ENUM is MySQL-only syntax — skip on SQLite (Railway production)
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql') {
+            DB::statement("ALTER TABLE khoa MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong', 'cho_phe_duyet') DEFAULT 'dang_hoat_dong'");
+            DB::statement("ALTER TABLE bo_mon MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong', 'cho_phe_duyet') DEFAULT 'dang_hoat_dong'");
+        }
+        // On SQLite: trang_thai is stored as TEXT so any value including 'cho_phe_duyet' is already valid
     }
 
     /**
@@ -46,8 +50,10 @@ return new class extends Migration
             }
         });
 
-        // Reverting the ENUM might drop the new state if it exists in data, so we usually just leave the ENUM type alone or revert it carefully
-        DB::statement("ALTER TABLE khoa MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong') DEFAULT 'dang_hoat_dong'");
-        DB::statement("ALTER TABLE bo_mon MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong') DEFAULT 'dang_hoat_dong'");
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql') {
+            DB::statement("ALTER TABLE khoa MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong') DEFAULT 'dang_hoat_dong'");
+            DB::statement("ALTER TABLE bo_mon MODIFY COLUMN trang_thai ENUM('dang_hoat_dong', 'ngung_hoat_dong') DEFAULT 'dang_hoat_dong'");
+        }
     }
 };
