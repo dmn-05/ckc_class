@@ -29,7 +29,7 @@ export default function GradingModal({ submission, maxScore, onSave, onClose }: 
 
   const handleDownload = (e: React.MouseEvent) => {
     e.preventDefault();
-    const fileName = submission.fileUrl.split('/').pop() || 'submission.pdf';
+    const fileName = submission.fileName || submission.fileUrl.split('/').pop() || 'submission.pdf';
     downloadFile(submission.fileUrl.replace('/fl_attachment/', '/'), fileName);
   };
 
@@ -67,7 +67,7 @@ export default function GradingModal({ submission, maxScore, onSave, onClose }: 
                 onClick={handleDownload}
                 style={{ color: '#4f46e5', textDecoration: 'underline', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}
               >
-                Tải file đính kèm
+                {submission.fileName ? `Tải file: ${submission.fileName}` : 'Tải file đính kèm'}
               </a>
             </div>
           </div>

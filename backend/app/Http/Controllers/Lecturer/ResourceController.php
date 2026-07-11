@@ -84,13 +84,29 @@ class ResourceController extends Controller
         if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
             foreach ($request->file('files') as $file) {
-                $result = $cloudinary->uploadApi()->upload(
-                    $file->getRealPath(),
-                    [
-                        'folder' => 'files',
-                        'resource_type' => 'auto'
-                    ]
-                );
+                if ($file->getSize() === 0) continue;
+                $originalFileName = $file->getClientOriginalName();
+                try {
+                    $result = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'files',
+                            'resource_type' => 'auto',
+                            'filename_override' => $originalFileName,
+                            'use_filename' => true,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    $result = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'files',
+                            'resource_type' => 'raw',
+                            'filename_override' => $originalFileName,
+                            'use_filename' => true,
+                        ]
+                    );
+                }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file' => $file->getClientOriginalName(),

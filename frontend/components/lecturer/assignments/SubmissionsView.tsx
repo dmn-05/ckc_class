@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import styles from './AssignmentsManagement.module.css';
 import { AssignmentData } from './AssignmentGrid';
 import { exportToExcel, formatExportFileName } from '@/utils/exportExcel';
+import { downloadFile } from '@/utils/download';
 
 export type SubmissionStatus = 'missing' | 'submitted' | 'late' | 'graded' | 'returned';
 
@@ -14,6 +15,7 @@ export interface SubmissionData {
   studentCode: string;
   submittedAt: string;
   fileUrl: string;
+  fileName?: string;
   status: SubmissionStatus;
   score?: number;
   feedback?: string;
@@ -157,6 +159,7 @@ export default function SubmissionsView({
               <th className={styles.th}>Sinh viên</th>
               <th className={styles.th}>Mã SV</th>
               <th className={styles.th}>Thời gian nộp</th>
+              <th className={styles.th}>File bài nộp</th>
               <th className={styles.th}>Trạng thái</th>
               <th className={styles.th}>Điểm số</th>
               <th className={styles.th} style={{ textAlign: 'right' }}>Thao tác</th>
@@ -184,6 +187,37 @@ export default function SubmissionsView({
                 </td>
                 <td className={styles.td}>{sub.studentCode}</td>
                 <td className={styles.td}>{sub.submittedAt || '-'}</td>
+                <td className={styles.td}>
+                  {sub.fileUrl ? (
+                    <a
+                      href={sub.fileUrl}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const fname = sub.fileName || sub.fileUrl.split('/').pop() || 'submission.pdf';
+                        downloadFile(sub.fileUrl.replace('/fl_attachment/', '/'), fname);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#4f46e5',
+                        textDecoration: 'underline',
+                        fontWeight: 500,
+                        fontSize: '0.85rem',
+                        maxWidth: '220px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={`Tải file: ${sub.fileName || 'submission.pdf'}`}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16" style={{ flexShrink: 0 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {sub.fileName || 'Tải file'}
+                    </a>
+                  ) : '-'}
+                </td>
                 <td className={styles.td}>{getStatusBadge(sub.status)}</td>
                 <td className={styles.td}>
                   {sub.score !== undefined ? (
