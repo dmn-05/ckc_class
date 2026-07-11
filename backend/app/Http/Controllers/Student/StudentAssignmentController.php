@@ -30,6 +30,7 @@ class StudentAssignmentController extends Controller
                     'id' => $sub->id,
                     'ngay_nop' => $sub->ngay_nop ? \Carbon\Carbon::parse($sub->ngay_nop)->format('H:i, d/m/Y') : null,
                     'duong_dan_file' => $sub->duong_dan_file,
+                    'ten_file' => $sub->ten_file ?? ($sub->duong_dan_file ? basename($sub->duong_dan_file) : null),
                     'trang_thai' => $displayStatus,
                     'diem' => $isReturned ? $sub->diem : null,
                     'nhan_xet' => $isReturned ? $sub->nhan_xet : null,
@@ -134,16 +135,41 @@ class StudentAssignmentController extends Controller
         ]);
 
         $fileUrl = null;
+        $originalFileName = null;
         if ($request->hasFile('file') && env('CLOUDINARY_URL')) {
+            $file = $request->file('file');
+            if ($file->getSize() === 0) {
+                return response()->json(['message' => 'File bài làm đang trống (0 KB). Vui lòng chọn file có nội dung trước khi nộp!'], 400);
+            }
+            $originalFileName = $file->getClientOriginalName();
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
-                $request->file('file')->getRealPath(),
-                [
-                    'folder' => 'submissions',
-                    'resource_type' => 'auto'
-                ]
-            );
-            $fileUrl = $result['secure_url'];
+            try {
+                $result = $cloudinary->uploadApi()->upload(
+                    $file->getRealPath(),
+                    [
+                        'folder' => 'submissions',
+                        'resource_type' => 'auto',
+                        'filename_override' => $originalFileName,
+                        'use_filename' => true,
+                    ]
+                );
+                $fileUrl = $result['secure_url'];
+            } catch (\Exception $e) {
+                try {
+                    $result = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'submissions',
+                            'resource_type' => 'raw',
+                            'filename_override' => $originalFileName,
+                            'use_filename' => true,
+                        ]
+                    );
+                    $fileUrl = $result['secure_url'];
+                } catch (\Exception $ex) {
+                    return response()->json(['message' => 'Lỗi tải file lên server: ' . $ex->getMessage()], 400);
+                }
+            }
         } else {
             return response()->json(['message' => 'Server missing Cloudinary configuration'], 500);
         }
@@ -165,6 +191,7 @@ class StudentAssignmentController extends Controller
             ],
             [
                 'duong_dan_file' => $fileUrl,
+                'ten_file' => $originalFileName,
                 'trang_thai' => $trangThai,
                 'ngay_nop' => $now,
                 'ngay_cap_nhat' => $now

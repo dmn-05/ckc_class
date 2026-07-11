@@ -87,13 +87,29 @@ class AssignmentController extends Controller
         if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
             $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
             foreach ($request->file('files') as $file) {
-                $result = $cloudinary->uploadApi()->upload(
-                    $file->getRealPath(),
-                    [
-                        'folder'        => 'assignments',
-                        'resource_type' => 'auto',
-                    ]
-                );
+                if ($file->getSize() === 0) continue;
+                $originalFileName = $file->getClientOriginalName();
+                try {
+                    $result = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder'        => 'assignments',
+                            'resource_type' => 'auto',
+                            'filename_override' => $originalFileName,
+                            'use_filename'  => true,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    $result = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder'        => 'assignments',
+                            'resource_type' => 'raw',
+                            'filename_override' => $originalFileName,
+                            'use_filename'  => true,
+                        ]
+                    );
+                }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file'     => $file->getClientOriginalName(),
@@ -254,6 +270,7 @@ class AssignmentController extends Controller
                 'sinh_vien.ma_sinh_vien as student_code',
                 'bai_nop.ngay_nop',
                 'bai_nop.duong_dan_file',
+                'bai_nop.ten_file',
                 'bai_nop.trang_thai',
                 'bai_nop.diem',
                 'bai_nop.nhan_xet'
@@ -273,6 +290,7 @@ class AssignmentController extends Controller
                     'studentCode' => $sub->student_code,
                     'submittedAt' => \Carbon\Carbon::parse($sub->ngay_nop)->format('d/m/Y H:i'),
                     'fileUrl' => $sub->duong_dan_file,
+                    'fileName' => $sub->ten_file ?: ($sub->duong_dan_file ? basename($sub->duong_dan_file) : 'submission.pdf'),
                     'status' => $status,
                     'score' => $sub->diem !== null ? (float)$sub->diem : null,
                     'feedback' => $sub->nhan_xet
