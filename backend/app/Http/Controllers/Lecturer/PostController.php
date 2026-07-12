@@ -107,7 +107,7 @@ class PostController extends Controller
             "Thông báo mới: " . $post->tieu_de,
             "Giảng viên vừa đăng bài viết/thông báo mới trong lớp học phần.",
             'bai_viet_moi',
-            '/student/courses/' . $post->lop_hoc_phan_id,
+            '/student/posts/' . $post->id,
             Auth::id()
         );
 

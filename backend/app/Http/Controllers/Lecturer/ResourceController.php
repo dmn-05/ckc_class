@@ -135,7 +135,7 @@ class ResourceController extends Controller
             "Tài liệu mới: " . $post->tieu_de,
             "Giảng viên vừa tải lên tài liệu mới cho lớp học phần.",
             'tai_lieu_moi',
-            '/student/courses/' . $post->lop_hoc_phan_id,
+            '/student/posts/' . $post->id,
             Auth::id()
         );
 
