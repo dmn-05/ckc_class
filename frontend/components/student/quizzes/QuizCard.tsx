@@ -38,6 +38,16 @@ export default function QuizCard({ quiz, onStart, onViewResult }: QuizCardProps)
   const canTake = quiz.attemptsUsed < quiz.maxAttempts && !isNotStarted && !isEnded;
   const hasAttempt = quiz.attemptsUsed > 0;
 
+  const formatCardDate = (d: Date | null) => {
+    if (!d || isNaN(d.getTime())) return '';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
+
   return (
     <div className={styles.quizCard}>
       <div className={`${styles.cardTopContainer} ${isCompleted ? styles.cardTopCompleted : (quiz.id === 'q1' ? styles.cardTopPrimary : styles.cardTopSecondary)}`}>
@@ -83,7 +93,7 @@ export default function QuizCard({ quiz, onStart, onViewResult }: QuizCardProps)
         <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
           {isNotStarted && (
             <button className={styles.btnStart} disabled style={{ opacity: 0.65, cursor: 'not-allowed', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
-              Chưa đến giờ mở ({startTime?.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })})
+              Chưa đến giờ mở ({formatCardDate(startTime)})
             </button>
           )}
 

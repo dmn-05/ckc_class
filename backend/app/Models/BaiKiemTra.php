@@ -44,6 +44,11 @@ class BaiKiemTra extends Model
         'hien_dap_an_sau_nop' => 'boolean',
     ];
 
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
+
     public function nguoiTao()
     {
         return $this->belongsTo(NguoiDung::class, 'nguoi_tao_id');

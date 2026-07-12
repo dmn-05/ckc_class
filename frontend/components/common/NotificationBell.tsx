@@ -118,7 +118,7 @@ export default function NotificationBell() {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diff = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 1000));
 
     if (diff < 60) return 'Vừa xong';
     if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;

@@ -50,7 +50,9 @@ class DatabaseSeeder extends Seeder
             // 4. Token & Khác
             $this->call(PersonalAccessTokensTableSeeder::class);
             $this->call(QuenMatKhauTableSeeder::class);
-        } finally {
+            $this->call(NhapExcelDongTableSeeder::class);
+        $this->call(NhapExcelDotTableSeeder::class);
+    } finally {
             \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         }
     }

@@ -39,15 +39,7 @@ export default function LecturerClassroomClient({
           href: `/lecturer/assignments/${post.bai_tap_id || post.id}/submissions`
         });
       } else if (post.loai_bai_viet === 'bai_kiem_tra') {
-        const qId = post.bai_kiem_tra_id || post.id;
-        seenIds.add(String(qId));
-        items.push({
-          id: `post-${post.id}`,
-          type: 'quiz',
-          title: post.tieu_de,
-          date: post.ngay_tao,
-          href: `/lecturer/quizzes/${qId}`
-        });
+        // Skip duplicate post record for quiz; quizzes array contains full quiz details
       } else {
         items.push({
           id: `post-${post.id}`,
@@ -227,21 +219,25 @@ export default function LecturerClassroomClient({
               {streamFeed && streamFeed.length > 0 ? (
                 streamFeed.map((item) => (
                   item.type === 'assignment' || item.type === 'quiz' ? (
-                    <Link key={item.id} href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: '16px', backgroundColor: '#ffffff' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', borderRadius: '50%' }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                              {item.type === 'quiz' ? 'quiz' : 'assignment'}
-                            </span>
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 500, fontSize: '16px', color: '#191c1e' }}>{item.title}</div>
-                            <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {item.date ? formatDate(item.date) : 'Vừa xong'}</div>
-                          </div>
+                  <div
+                    key={item.id}
+                    onClick={() => router.push(item.href)}
+                    style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                  >
+                    <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', backgroundColor: '#ffffff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', borderRadius: '50%' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                            {item.type === 'quiz' ? 'quiz' : 'assignment'}
+                          </span>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 500, fontSize: '16px', color: '#191c1e' }}>{item.title}</div>
+                          <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {item.date ? formatDate(item.date) : 'Vừa xong'}</div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
+                  </div>
                   ) : (() => {
                     const post = item.post;
                     return (

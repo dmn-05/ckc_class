@@ -30,6 +30,11 @@ class ThongBao extends Model
         'ngay_cap_nhat' => 'datetime',
     ];
 
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
+
     public function lopHocPhan()
     {
         return $this->belongsTo(LopHocPhan::class, 'lop_hoc_phan_id');

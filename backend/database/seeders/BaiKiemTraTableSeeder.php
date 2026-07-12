@@ -3065,6 +3065,27 @@ Nộp đúng giờ',
                 'ngay_tao' => '2026-06-30 19:30:21',
                 'ngay_cap_nhat' => '2026-06-30 19:30:21',
             ),
+            145 => 
+            array (
+                'id' => 146,
+                'tieu_de' => 'Kiểm tra định kỳ',
+                'mo_ta' => 'Nộp bài trc khi hết thời gian',
+                'lop_hoc_phan_id' => 2,
+                'nguoi_tao_id' => 22,
+                'thoi_gian_bat_dau' => '2026-07-13 02:45:00',
+                'thoi_gian_ket_thuc' => '2026-07-14 02:45:00',
+                'thoi_gian_lam_bai' => 45,
+                'diem_toi_da' => '10.0',
+                'diem_dat' => '5.0',
+                'so_lan_thi_toi_da' => 1,
+                'hinh_thuc' => 'trac_nghiem',
+                'xao_tron_cau_hoi' => 1,
+                'xao_tron_dap_an' => 1,
+                'hien_dap_an_sau_nop' => 1,
+                'trang_thai' => 'hien_thi',
+                'ngay_tao' => '2026-07-13 02:32:34',
+                'ngay_cap_nhat' => '2026-07-13 02:32:34',
+            ),
         ));
         
         

@@ -9905,6 +9905,20 @@ class KetQuaKiemTraTableSeeder extends Seeder
                 'ngay_tao' => '2026-07-07 03:47:34',
                 'ngay_cap_nhat' => '2026-07-07 03:47:34',
             ),
+            206 => 
+            array (
+                'id' => 707,
+                'sinh_vien_id' => 2,
+                'bai_kiem_tra_id' => 146,
+                'thoi_gian_bat_dau' => '2026-07-12 20:13:50',
+                'thoi_gian_nop_bai' => '2026-07-12 20:14:10',
+                'diem_trac_nghiem' => 5.0,
+                'diem_tu_luan' => 0.0,
+                'tong_diem' => 5.0,
+                'trang_thai' => 'da_cham',
+                'ngay_tao' => '2026-07-13 03:14:12',
+                'ngay_cap_nhat' => '2026-07-13 03:15:33',
+            ),
         ));
         
         

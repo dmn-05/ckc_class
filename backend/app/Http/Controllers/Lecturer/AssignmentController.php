@@ -273,16 +273,9 @@ class AssignmentController extends Controller
             ->join('nguoi_dung', 'sinh_vien.nguoi_dung_id', '=', 'nguoi_dung.id')
             ->where('bai_tap_id', $baiTap->id)
             ->select(
-                'bai_nop.id',
-                'bai_nop.sinh_vien_id',
+                'bai_nop.*',
                 'nguoi_dung.ho_ten as student_name',
-                'sinh_vien.ma_sinh_vien as student_code',
-                'bai_nop.ngay_nop',
-                'bai_nop.duong_dan_file',
-                'bai_nop.ten_file',
-                'bai_nop.trang_thai',
-                'bai_nop.diem',
-                'bai_nop.nhan_xet'
+                'sinh_vien.ma_sinh_vien as student_code'
             )
             ->get()
             ->map(function ($sub) {
@@ -299,7 +292,7 @@ class AssignmentController extends Controller
                     'studentCode' => $sub->student_code,
                     'submittedAt' => \Carbon\Carbon::parse($sub->ngay_nop)->format('d/m/Y H:i'),
                     'fileUrl' => $sub->duong_dan_file,
-                    'fileName' => $sub->ten_file ?: ($sub->duong_dan_file ? basename($sub->duong_dan_file) : 'submission.pdf'),
+                    'fileName' => $sub->duong_dan_file ? basename($sub->duong_dan_file) : 'submission.pdf',
                     'status' => $status,
                     'score' => $sub->diem !== null ? (float)$sub->diem : null,
                     'feedback' => $sub->nhan_xet

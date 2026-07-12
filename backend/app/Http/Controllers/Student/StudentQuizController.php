@@ -96,6 +96,19 @@ class StudentQuizController extends Controller
             $quiz->setRelation('cauHois', collect());
         } else {
             $quiz->load(['cauHois.dapAns']);
+
+            // Xáo trộn câu hỏi nếu được bật
+            if ($quiz->xao_tron_cau_hoi) {
+                $shuffled = $quiz->cauHois->shuffle();
+                $quiz->setRelation('cauHois', $shuffled);
+            }
+
+            // Xáo trộn đáp án nếu được bật
+            if ($quiz->xao_tron_dap_an) {
+                $quiz->cauHois->each(function ($cauHoi) {
+                    $cauHoi->setRelation('dapAns', $cauHoi->dapAns->shuffle());
+                });
+            }
         }
 
         return response()->json(['data' => $quiz]);

@@ -44,4 +44,9 @@ class KetQuaKiemTra extends Model
     {
         return $this->hasMany(ChiTietKetQua::class, 'ket_qua_kiem_tra_id');
     }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
 }

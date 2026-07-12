@@ -30,7 +30,7 @@ class StudentAssignmentController extends Controller
                     'id' => $sub->id,
                     'ngay_nop' => $sub->ngay_nop ? \Carbon\Carbon::parse($sub->ngay_nop)->format('H:i, d/m/Y') : null,
                     'duong_dan_file' => $sub->duong_dan_file,
-                    'ten_file' => $sub->ten_file ?? ($sub->duong_dan_file ? basename($sub->duong_dan_file) : null),
+                    'ten_file' => $sub->duong_dan_file ? basename($sub->duong_dan_file) : null,
                     'trang_thai' => $displayStatus,
                     'diem' => $isReturned ? $sub->diem : null,
                     'nhan_xet' => $isReturned ? $sub->nhan_xet : null,
@@ -151,6 +151,7 @@ class StudentAssignmentController extends Controller
                         'resource_type' => 'auto',
                         'filename_override' => $originalFileName,
                         'use_filename' => true,
+                        'unique_filename' => false,
                     ]
                 );
                 $fileUrl = $result['secure_url'];
@@ -163,6 +164,7 @@ class StudentAssignmentController extends Controller
                             'resource_type' => 'raw',
                             'filename_override' => $originalFileName,
                             'use_filename' => true,
+                            'unique_filename' => false,
                         ]
                     );
                     $fileUrl = $result['secure_url'];
@@ -191,7 +193,6 @@ class StudentAssignmentController extends Controller
             ],
             [
                 'duong_dan_file' => $fileUrl,
-                'ten_file' => $originalFileName,
                 'trang_thai' => $trangThai,
                 'ngay_nop' => $now,
                 'ngay_cap_nhat' => $now

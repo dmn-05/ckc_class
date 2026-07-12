@@ -30,15 +30,7 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
           href: `/student/assignments/${post.bai_tap_id || post.id}`
         });
       } else if (post.loai_bai_viet === 'bai_kiem_tra') {
-        const qId = post.bai_kiem_tra_id || post.id;
-        seenIds.add(String(qId));
-        items.push({
-          id: `post-${post.id}`,
-          type: 'quiz',
-          title: post.tieu_de,
-          date: post.ngay_tao,
-          href: `/student/quizzes/${qId}`
-        });
+        // Skip duplicate post record for quiz; quizzes array contains full quiz details
       } else {
         items.push({
           id: `post-${post.id}`,
@@ -185,8 +177,12 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
               {/* Feed Posts */}
               {streamFeed.map((item) => (
                 item.type === 'assignment' || item.type === 'quiz' ? (
-                  <Link key={item.id} href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: '16px' }}>
+                  <div
+                    key={item.id}
+                    onClick={() => router.push(item.href)}
+                    style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                  >
+                    <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
                           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
@@ -199,7 +195,7 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ) : (() => {
                   const post = item.post;
                   return (
@@ -263,8 +259,12 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                 {assignments && assignments.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {assignments.map(a => (
-                      <Link key={a.id} href={`/student/assignments/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                      <div
+                        key={a.id}
+                        onClick={() => router.push(`/student/assignments/${a.id}`)}
+                        style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                      >
+                        <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
                               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>assignment</span>
@@ -296,7 +296,7 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                             )}
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -387,8 +387,12 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                 {posts && posts.filter(p => p.loai_bai_viet === 'tai_lieu').length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {posts.filter(p => p.loai_bai_viet === 'tai_lieu').map(r => (
-                      <Link key={r.id} href={`/student/posts/${r.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                      <div
+                        key={r.id}
+                        onClick={() => router.push(`/student/posts/${r.id}`)}
+                        style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                      >
+                        <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
                               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>book</span>
@@ -409,7 +413,7 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                             </div>
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (

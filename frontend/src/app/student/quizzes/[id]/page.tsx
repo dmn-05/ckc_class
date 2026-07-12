@@ -43,13 +43,13 @@ export default function StudentQuizDetailPage() {
     if (!dateString) return 'Không giới hạn';
     try {
       const d = new Date(dateString);
-      return d.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      if (isNaN(d.getTime())) return dateString;
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${hours}:${minutes} ${day}/${month}/${year}`;
     } catch {
       return dateString;
     }
@@ -145,7 +145,9 @@ export default function StudentQuizDetailPage() {
                     {quizDetails.lop_hoc_phan.ten_lop}
                   </span>
                 )}
-                <span>Đóng bài: {formatDate(quizDetails.thoi_gian_ket_thuc)}</span>
+                <span>
+                  Mở bài: {formatDate(rawStartTime)} • Đóng bài: {formatDate(rawEndTime)}
+                </span>
               </p>
             </div>
           </div>

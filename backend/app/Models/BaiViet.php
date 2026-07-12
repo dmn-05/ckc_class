@@ -47,4 +47,9 @@ class BaiViet extends Model
     {
         return $this->hasMany(TepTinBaiViet::class, 'bai_viet_id');
     }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
 }

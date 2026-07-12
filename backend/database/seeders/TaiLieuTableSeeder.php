@@ -22,6 +22,7 @@ class TaiLieuTableSeeder extends Seeder
             0 => 
             array (
                 'id' => 1,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_549449.docx',
@@ -34,6 +35,7 @@ class TaiLieuTableSeeder extends Seeder
             1 => 
             array (
                 'id' => 2,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_769399.zip',
@@ -46,6 +48,7 @@ class TaiLieuTableSeeder extends Seeder
             2 => 
             array (
                 'id' => 3,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_981610.docx',
@@ -58,6 +61,7 @@ class TaiLieuTableSeeder extends Seeder
             3 => 
             array (
                 'id' => 4,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_438746.docx',
@@ -70,6 +74,7 @@ class TaiLieuTableSeeder extends Seeder
             4 => 
             array (
                 'id' => 5,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_863094.docx',
@@ -82,6 +87,7 @@ class TaiLieuTableSeeder extends Seeder
             5 => 
             array (
                 'id' => 6,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_374721.docx',
@@ -94,6 +100,7 @@ class TaiLieuTableSeeder extends Seeder
             6 => 
             array (
                 'id' => 7,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_930489.pptx',
@@ -106,6 +113,7 @@ class TaiLieuTableSeeder extends Seeder
             7 => 
             array (
                 'id' => 8,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_575745.pdf',
@@ -118,6 +126,7 @@ class TaiLieuTableSeeder extends Seeder
             8 => 
             array (
                 'id' => 9,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_198685.pdf',
@@ -130,6 +139,7 @@ class TaiLieuTableSeeder extends Seeder
             9 => 
             array (
                 'id' => 10,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_815339.pptx',
@@ -142,6 +152,7 @@ class TaiLieuTableSeeder extends Seeder
             10 => 
             array (
                 'id' => 11,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_487040.jpg',
@@ -154,6 +165,7 @@ class TaiLieuTableSeeder extends Seeder
             11 => 
             array (
                 'id' => 12,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_147652.docx',
@@ -166,6 +178,7 @@ class TaiLieuTableSeeder extends Seeder
             12 => 
             array (
                 'id' => 13,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_308252.pptx',
@@ -178,6 +191,7 @@ class TaiLieuTableSeeder extends Seeder
             13 => 
             array (
                 'id' => 14,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_244935.jpg',
@@ -190,6 +204,7 @@ class TaiLieuTableSeeder extends Seeder
             14 => 
             array (
                 'id' => 15,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_954222.jpg',
@@ -202,6 +217,7 @@ class TaiLieuTableSeeder extends Seeder
             15 => 
             array (
                 'id' => 16,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_955216.xlsx',
@@ -214,6 +230,7 @@ class TaiLieuTableSeeder extends Seeder
             16 => 
             array (
                 'id' => 17,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_829937.xlsx',
@@ -226,6 +243,7 @@ class TaiLieuTableSeeder extends Seeder
             17 => 
             array (
                 'id' => 18,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_378293.xlsx',
@@ -238,6 +256,7 @@ class TaiLieuTableSeeder extends Seeder
             18 => 
             array (
                 'id' => 19,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_955216.xlsx',
@@ -250,6 +269,7 @@ class TaiLieuTableSeeder extends Seeder
             19 => 
             array (
                 'id' => 20,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_168492.zip',
@@ -262,6 +282,7 @@ class TaiLieuTableSeeder extends Seeder
             20 => 
             array (
                 'id' => 21,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_167603.xlsx',
@@ -274,6 +295,7 @@ class TaiLieuTableSeeder extends Seeder
             21 => 
             array (
                 'id' => 22,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/giaotrinh_229054.pptx',
@@ -286,6 +308,7 @@ class TaiLieuTableSeeder extends Seeder
             22 => 
             array (
                 'id' => 23,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_486547.docx',
@@ -298,6 +321,7 @@ class TaiLieuTableSeeder extends Seeder
             23 => 
             array (
                 'id' => 24,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 2',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_963408.pdf',
@@ -310,6 +334,7 @@ class TaiLieuTableSeeder extends Seeder
             24 => 
             array (
                 'id' => 25,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_842658.docx',
@@ -322,6 +347,7 @@ class TaiLieuTableSeeder extends Seeder
             25 => 
             array (
                 'id' => 26,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_329242.pdf',
@@ -334,6 +360,7 @@ class TaiLieuTableSeeder extends Seeder
             26 => 
             array (
                 'id' => 27,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_527070.pdf',
@@ -346,6 +373,7 @@ class TaiLieuTableSeeder extends Seeder
             27 => 
             array (
                 'id' => 28,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_773662.docx',
@@ -358,6 +386,7 @@ class TaiLieuTableSeeder extends Seeder
             28 => 
             array (
                 'id' => 29,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_360406.pdf',
@@ -370,6 +399,7 @@ class TaiLieuTableSeeder extends Seeder
             29 => 
             array (
                 'id' => 30,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_406019.zip',
@@ -382,6 +412,7 @@ class TaiLieuTableSeeder extends Seeder
             30 => 
             array (
                 'id' => 31,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_671194.jpg',
@@ -394,6 +425,7 @@ class TaiLieuTableSeeder extends Seeder
             31 => 
             array (
                 'id' => 32,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_177353.jpg',
@@ -406,6 +438,7 @@ class TaiLieuTableSeeder extends Seeder
             32 => 
             array (
                 'id' => 33,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_626251.pptx',
@@ -418,6 +451,7 @@ class TaiLieuTableSeeder extends Seeder
             33 => 
             array (
                 'id' => 34,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/giaotrinh_921110.pdf',
@@ -430,6 +464,7 @@ class TaiLieuTableSeeder extends Seeder
             34 => 
             array (
                 'id' => 35,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_968797.zip',
@@ -442,6 +477,7 @@ class TaiLieuTableSeeder extends Seeder
             35 => 
             array (
                 'id' => 36,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_755106.docx',
@@ -454,6 +490,7 @@ class TaiLieuTableSeeder extends Seeder
             36 => 
             array (
                 'id' => 37,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_673028.zip',
@@ -466,6 +503,7 @@ class TaiLieuTableSeeder extends Seeder
             37 => 
             array (
                 'id' => 38,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_778058.pdf',
@@ -478,6 +516,7 @@ class TaiLieuTableSeeder extends Seeder
             38 => 
             array (
                 'id' => 39,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_780433.pdf',
@@ -490,6 +529,7 @@ class TaiLieuTableSeeder extends Seeder
             39 => 
             array (
                 'id' => 40,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_172827.zip',
@@ -502,6 +542,7 @@ class TaiLieuTableSeeder extends Seeder
             40 => 
             array (
                 'id' => 41,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_677637.jpg',
@@ -514,6 +555,7 @@ class TaiLieuTableSeeder extends Seeder
             41 => 
             array (
                 'id' => 42,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 2',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_791281.xlsx',
@@ -526,6 +568,7 @@ class TaiLieuTableSeeder extends Seeder
             42 => 
             array (
                 'id' => 43,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_960270.xlsx',
@@ -538,6 +581,7 @@ class TaiLieuTableSeeder extends Seeder
             43 => 
             array (
                 'id' => 44,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_973128.pdf',
@@ -550,6 +594,7 @@ class TaiLieuTableSeeder extends Seeder
             44 => 
             array (
                 'id' => 45,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_996332.jpg',
@@ -562,6 +607,7 @@ class TaiLieuTableSeeder extends Seeder
             45 => 
             array (
                 'id' => 46,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_122069.docx',
@@ -574,6 +620,7 @@ class TaiLieuTableSeeder extends Seeder
             46 => 
             array (
                 'id' => 47,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_378293.xlsx',
@@ -586,6 +633,7 @@ class TaiLieuTableSeeder extends Seeder
             47 => 
             array (
                 'id' => 48,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_673028.zip',
@@ -598,6 +646,7 @@ class TaiLieuTableSeeder extends Seeder
             48 => 
             array (
                 'id' => 49,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_374721.docx',
@@ -610,6 +659,7 @@ class TaiLieuTableSeeder extends Seeder
             49 => 
             array (
                 'id' => 50,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_628291.zip',
@@ -622,6 +672,7 @@ class TaiLieuTableSeeder extends Seeder
             50 => 
             array (
                 'id' => 51,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_509783.pptx',
@@ -634,6 +685,7 @@ class TaiLieuTableSeeder extends Seeder
             51 => 
             array (
                 'id' => 52,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_755106.docx',
@@ -646,6 +698,7 @@ class TaiLieuTableSeeder extends Seeder
             52 => 
             array (
                 'id' => 53,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_968797.zip',
@@ -658,6 +711,7 @@ class TaiLieuTableSeeder extends Seeder
             53 => 
             array (
                 'id' => 54,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_879677.docx',
@@ -670,6 +724,7 @@ class TaiLieuTableSeeder extends Seeder
             54 => 
             array (
                 'id' => 55,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_769399.zip',
@@ -682,6 +737,7 @@ class TaiLieuTableSeeder extends Seeder
             55 => 
             array (
                 'id' => 56,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_993077.pdf',
@@ -694,6 +750,7 @@ class TaiLieuTableSeeder extends Seeder
             56 => 
             array (
                 'id' => 57,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_888363.docx',
@@ -706,6 +763,7 @@ class TaiLieuTableSeeder extends Seeder
             57 => 
             array (
                 'id' => 58,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_968797.zip',
@@ -718,6 +776,7 @@ class TaiLieuTableSeeder extends Seeder
             58 => 
             array (
                 'id' => 59,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_108890.pdf',
@@ -730,6 +789,7 @@ class TaiLieuTableSeeder extends Seeder
             59 => 
             array (
                 'id' => 60,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_374721.docx',
@@ -742,6 +802,7 @@ class TaiLieuTableSeeder extends Seeder
             60 => 
             array (
                 'id' => 61,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_527070.pdf',
@@ -754,6 +815,7 @@ class TaiLieuTableSeeder extends Seeder
             61 => 
             array (
                 'id' => 62,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_863481.jpg',
@@ -766,6 +828,7 @@ class TaiLieuTableSeeder extends Seeder
             62 => 
             array (
                 'id' => 63,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_108890.pdf',
@@ -778,6 +841,7 @@ class TaiLieuTableSeeder extends Seeder
             63 => 
             array (
                 'id' => 64,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_970893.pptx',
@@ -790,6 +854,7 @@ class TaiLieuTableSeeder extends Seeder
             64 => 
             array (
                 'id' => 65,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_205102.jpg',
@@ -802,6 +867,7 @@ class TaiLieuTableSeeder extends Seeder
             65 => 
             array (
                 'id' => 66,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_877039.zip',
@@ -814,6 +880,7 @@ class TaiLieuTableSeeder extends Seeder
             66 => 
             array (
                 'id' => 67,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_438746.docx',
@@ -826,6 +893,7 @@ class TaiLieuTableSeeder extends Seeder
             67 => 
             array (
                 'id' => 68,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_615711.jpg',
@@ -838,6 +906,7 @@ class TaiLieuTableSeeder extends Seeder
             68 => 
             array (
                 'id' => 69,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_404969.docx',
@@ -850,6 +919,7 @@ class TaiLieuTableSeeder extends Seeder
             69 => 
             array (
                 'id' => 70,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_760393.docx',
@@ -862,6 +932,7 @@ class TaiLieuTableSeeder extends Seeder
             70 => 
             array (
                 'id' => 71,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/giaotrinh_502810.xlsx',
@@ -874,6 +945,7 @@ class TaiLieuTableSeeder extends Seeder
             71 => 
             array (
                 'id' => 72,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_973128.pdf',
@@ -886,6 +958,7 @@ class TaiLieuTableSeeder extends Seeder
             72 => 
             array (
                 'id' => 73,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_877039.zip',
@@ -898,6 +971,7 @@ class TaiLieuTableSeeder extends Seeder
             73 => 
             array (
                 'id' => 74,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_628291.zip',
@@ -910,6 +984,7 @@ class TaiLieuTableSeeder extends Seeder
             74 => 
             array (
                 'id' => 75,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_842658.docx',
@@ -922,6 +997,7 @@ class TaiLieuTableSeeder extends Seeder
             75 => 
             array (
                 'id' => 76,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_104359.xlsx',
@@ -934,6 +1010,7 @@ class TaiLieuTableSeeder extends Seeder
             76 => 
             array (
                 'id' => 77,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_780433.pdf',
@@ -946,6 +1023,7 @@ class TaiLieuTableSeeder extends Seeder
             77 => 
             array (
                 'id' => 78,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_637559.xlsx',
@@ -958,6 +1036,7 @@ class TaiLieuTableSeeder extends Seeder
             78 => 
             array (
                 'id' => 79,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_769399.zip',
@@ -970,6 +1049,7 @@ class TaiLieuTableSeeder extends Seeder
             79 => 
             array (
                 'id' => 80,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_888363.docx',
@@ -982,6 +1062,7 @@ class TaiLieuTableSeeder extends Seeder
             80 => 
             array (
                 'id' => 81,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_285488.xlsx',
@@ -994,6 +1075,7 @@ class TaiLieuTableSeeder extends Seeder
             81 => 
             array (
                 'id' => 82,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_527070.pdf',
@@ -1006,6 +1088,7 @@ class TaiLieuTableSeeder extends Seeder
             82 => 
             array (
                 'id' => 83,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_549449.docx',
@@ -1018,6 +1101,7 @@ class TaiLieuTableSeeder extends Seeder
             83 => 
             array (
                 'id' => 84,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_883281.docx',
@@ -1030,6 +1114,7 @@ class TaiLieuTableSeeder extends Seeder
             84 => 
             array (
                 'id' => 85,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_147652.docx',
@@ -1042,6 +1127,7 @@ class TaiLieuTableSeeder extends Seeder
             85 => 
             array (
                 'id' => 86,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_671194.jpg',
@@ -1054,6 +1140,7 @@ class TaiLieuTableSeeder extends Seeder
             86 => 
             array (
                 'id' => 87,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_801655.xlsx',
@@ -1066,6 +1153,7 @@ class TaiLieuTableSeeder extends Seeder
             87 => 
             array (
                 'id' => 88,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_815520.docx',
@@ -1078,6 +1166,7 @@ class TaiLieuTableSeeder extends Seeder
             88 => 
             array (
                 'id' => 89,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_544420.pptx',
@@ -1090,6 +1179,7 @@ class TaiLieuTableSeeder extends Seeder
             89 => 
             array (
                 'id' => 90,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_963408.pdf',
@@ -1102,6 +1192,7 @@ class TaiLieuTableSeeder extends Seeder
             90 => 
             array (
                 'id' => 91,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_487040.jpg',
@@ -1114,6 +1205,7 @@ class TaiLieuTableSeeder extends Seeder
             91 => 
             array (
                 'id' => 92,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_815520.docx',
@@ -1126,6 +1218,7 @@ class TaiLieuTableSeeder extends Seeder
             92 => 
             array (
                 'id' => 93,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_769399.zip',
@@ -1138,6 +1231,7 @@ class TaiLieuTableSeeder extends Seeder
             93 => 
             array (
                 'id' => 94,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_254535.xlsx',
@@ -1150,6 +1244,7 @@ class TaiLieuTableSeeder extends Seeder
             94 => 
             array (
                 'id' => 95,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_972950.pdf',
@@ -1162,6 +1257,7 @@ class TaiLieuTableSeeder extends Seeder
             95 => 
             array (
                 'id' => 96,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_198685.pdf',
@@ -1174,6 +1270,7 @@ class TaiLieuTableSeeder extends Seeder
             96 => 
             array (
                 'id' => 97,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_671194.jpg',
@@ -1186,6 +1283,7 @@ class TaiLieuTableSeeder extends Seeder
             97 => 
             array (
                 'id' => 98,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_842658.docx',
@@ -1198,6 +1296,7 @@ class TaiLieuTableSeeder extends Seeder
             98 => 
             array (
                 'id' => 99,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_628291.zip',
@@ -1210,6 +1309,7 @@ class TaiLieuTableSeeder extends Seeder
             99 => 
             array (
                 'id' => 100,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_863094.docx',
@@ -1222,6 +1322,7 @@ class TaiLieuTableSeeder extends Seeder
             100 => 
             array (
                 'id' => 101,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_329242.pdf',
@@ -1234,6 +1335,7 @@ class TaiLieuTableSeeder extends Seeder
             101 => 
             array (
                 'id' => 102,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_495896.docx',
@@ -1246,6 +1348,7 @@ class TaiLieuTableSeeder extends Seeder
             102 => 
             array (
                 'id' => 103,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_735553.pdf',
@@ -1258,6 +1361,7 @@ class TaiLieuTableSeeder extends Seeder
             103 => 
             array (
                 'id' => 104,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_955524.jpg',
@@ -1270,6 +1374,7 @@ class TaiLieuTableSeeder extends Seeder
             104 => 
             array (
                 'id' => 105,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_857135.docx',
@@ -1282,6 +1387,7 @@ class TaiLieuTableSeeder extends Seeder
             105 => 
             array (
                 'id' => 106,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_696360.docx',
@@ -1294,6 +1400,7 @@ class TaiLieuTableSeeder extends Seeder
             106 => 
             array (
                 'id' => 107,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_168492.zip',
@@ -1306,6 +1413,7 @@ class TaiLieuTableSeeder extends Seeder
             107 => 
             array (
                 'id' => 108,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_863481.jpg',
@@ -1318,6 +1426,7 @@ class TaiLieuTableSeeder extends Seeder
             108 => 
             array (
                 'id' => 109,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_482615.docx',
@@ -1330,6 +1439,7 @@ class TaiLieuTableSeeder extends Seeder
             109 => 
             array (
                 'id' => 110,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_204415.xlsx',
@@ -1342,6 +1452,7 @@ class TaiLieuTableSeeder extends Seeder
             110 => 
             array (
                 'id' => 111,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_636196.docx',
@@ -1354,6 +1465,7 @@ class TaiLieuTableSeeder extends Seeder
             111 => 
             array (
                 'id' => 112,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_480977.pptx',
@@ -1366,6 +1478,7 @@ class TaiLieuTableSeeder extends Seeder
             112 => 
             array (
                 'id' => 113,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_960270.xlsx',
@@ -1378,6 +1491,7 @@ class TaiLieuTableSeeder extends Seeder
             113 => 
             array (
                 'id' => 114,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baigiang_829937.xlsx',
@@ -1390,6 +1504,7 @@ class TaiLieuTableSeeder extends Seeder
             114 => 
             array (
                 'id' => 115,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 2',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_960270.xlsx',
@@ -1402,6 +1517,7 @@ class TaiLieuTableSeeder extends Seeder
             115 => 
             array (
                 'id' => 116,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_755106.docx',
@@ -1414,6 +1530,7 @@ class TaiLieuTableSeeder extends Seeder
             116 => 
             array (
                 'id' => 117,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_122069.docx',
@@ -1426,6 +1543,7 @@ class TaiLieuTableSeeder extends Seeder
             117 => 
             array (
                 'id' => 118,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_830532.jpg',
@@ -1438,6 +1556,7 @@ class TaiLieuTableSeeder extends Seeder
             118 => 
             array (
                 'id' => 119,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_696360.docx',
@@ -1450,6 +1569,7 @@ class TaiLieuTableSeeder extends Seeder
             119 => 
             array (
                 'id' => 120,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_528178.jpg',
@@ -1462,6 +1582,7 @@ class TaiLieuTableSeeder extends Seeder
             120 => 
             array (
                 'id' => 121,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_204415.xlsx',
@@ -1474,6 +1595,7 @@ class TaiLieuTableSeeder extends Seeder
             121 => 
             array (
                 'id' => 122,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/huongdanthuchanh_374721.docx',
@@ -1486,6 +1608,7 @@ class TaiLieuTableSeeder extends Seeder
             122 => 
             array (
                 'id' => 123,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_863094.docx',
@@ -1498,6 +1621,7 @@ class TaiLieuTableSeeder extends Seeder
             123 => 
             array (
                 'id' => 124,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_197784.pptx',
@@ -1510,6 +1634,7 @@ class TaiLieuTableSeeder extends Seeder
             124 => 
             array (
                 'id' => 125,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_312149.jpg',
@@ -1522,6 +1647,7 @@ class TaiLieuTableSeeder extends Seeder
             125 => 
             array (
                 'id' => 126,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_637559.xlsx',
@@ -1534,6 +1660,7 @@ class TaiLieuTableSeeder extends Seeder
             126 => 
             array (
                 'id' => 127,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_480977.pptx',
@@ -1546,6 +1673,7 @@ class TaiLieuTableSeeder extends Seeder
             127 => 
             array (
                 'id' => 128,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_487040.jpg',
@@ -1558,6 +1686,7 @@ class TaiLieuTableSeeder extends Seeder
             128 => 
             array (
                 'id' => 129,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Hướng dẫn làm đồ án',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_637559.xlsx',
@@ -1570,6 +1699,7 @@ class TaiLieuTableSeeder extends Seeder
             129 => 
             array (
                 'id' => 130,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_970893.pptx',
@@ -1582,6 +1712,7 @@ class TaiLieuTableSeeder extends Seeder
             130 => 
             array (
                 'id' => 131,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/bieumaunopbai_350725.jpg',
@@ -1594,6 +1725,7 @@ class TaiLieuTableSeeder extends Seeder
             131 => 
             array (
                 'id' => 132,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_815520.docx',
@@ -1606,6 +1738,7 @@ class TaiLieuTableSeeder extends Seeder
             132 => 
             array (
                 'id' => 133,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_438746.docx',
@@ -1618,6 +1751,7 @@ class TaiLieuTableSeeder extends Seeder
             133 => 
             array (
                 'id' => 134,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/kehoachhoc_487040.jpg',
@@ -1630,6 +1764,7 @@ class TaiLieuTableSeeder extends Seeder
             134 => 
             array (
                 'id' => 135,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Giáo trình môn học',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/decuongmonhoc_288540.xlsx',
@@ -1642,6 +1777,7 @@ class TaiLieuTableSeeder extends Seeder
             135 => 
             array (
                 'id' => 136,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_104359.xlsx',
@@ -1654,6 +1790,7 @@ class TaiLieuTableSeeder extends Seeder
             136 => 
             array (
                 'id' => 137,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_696360.docx',
@@ -1666,6 +1803,7 @@ class TaiLieuTableSeeder extends Seeder
             137 => 
             array (
                 'id' => 138,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/baocaodoan_981610.docx',
@@ -1678,6 +1816,7 @@ class TaiLieuTableSeeder extends Seeder
             138 => 
             array (
                 'id' => 139,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Bộ câu hỏi trắc nghiệm ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_615711.jpg',
@@ -1690,6 +1829,7 @@ class TaiLieuTableSeeder extends Seeder
             139 => 
             array (
                 'id' => 140,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Slide bài giảng chương 1',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_219879.jpg',
@@ -1702,6 +1842,7 @@ class TaiLieuTableSeeder extends Seeder
             140 => 
             array (
                 'id' => 141,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/tailieuthamkhao_465484.docx',
@@ -1714,6 +1855,7 @@ class TaiLieuTableSeeder extends Seeder
             141 => 
             array (
                 'id' => 142,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu tham khảo mở rộng',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_963408.pdf',
@@ -1726,6 +1868,7 @@ class TaiLieuTableSeeder extends Seeder
             142 => 
             array (
                 'id' => 143,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_963408.pdf',
@@ -1738,6 +1881,7 @@ class TaiLieuTableSeeder extends Seeder
             143 => 
             array (
                 'id' => 144,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_954222.jpg',
@@ -1750,6 +1894,7 @@ class TaiLieuTableSeeder extends Seeder
             144 => 
             array (
                 'id' => 145,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_946699.docx',
@@ -1762,6 +1907,7 @@ class TaiLieuTableSeeder extends Seeder
             145 => 
             array (
                 'id' => 146,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Biểu mẫu báo cáo thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_198685.pdf',
@@ -1774,6 +1920,7 @@ class TaiLieuTableSeeder extends Seeder
             146 => 
             array (
                 'id' => 147,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Đề cương ôn tập',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/dapanthamkhao_760460.pptx',
@@ -1786,6 +1933,7 @@ class TaiLieuTableSeeder extends Seeder
             147 => 
             array (
                 'id' => 148,
+                'bai_viet_id' => NULL,
                 'tieu_de' => 'Tài liệu thực hành',
                 'mo_ta' => 'Tài liệu phục vụ học tập, sinh viên vui lòng tải về và nghiên cứu trước khi lên lớp.',
                 'duong_dan_file' => 'https://res.cloudinary.com/ckc-classroom/files/slidebaihoc_963408.pdf',

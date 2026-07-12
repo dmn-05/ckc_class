@@ -35,6 +35,11 @@ class BaiTap extends Model
         'han_nop'          => 'datetime',
     ];
 
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
+
     public function nguoiTao()
     {
         return $this->belongsTo(NguoiDung::class, 'nguoi_tao_id');

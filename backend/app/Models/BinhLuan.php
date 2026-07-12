@@ -37,4 +37,9 @@ class BinhLuan extends Model
     {
         return $this->hasMany(BinhLuan::class, 'binh_luan_cha_id')->with('nguoiDung');
     }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d\TH:i:sP');
+    }
 }
