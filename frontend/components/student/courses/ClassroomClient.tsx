@@ -16,6 +16,55 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
 
+  const streamFeed = React.useMemo(() => {
+    const items: any[] = [];
+    const seenIds = new Set<string>();
+
+    (posts || []).forEach(post => {
+      if (post.loai_bai_viet === 'bai_tap') {
+        items.push({
+          id: `post-${post.id}`,
+          type: 'assignment',
+          title: post.tieu_de,
+          date: post.ngay_tao,
+          href: `/student/assignments/${post.bai_tap_id || post.id}`
+        });
+      } else if (post.loai_bai_viet === 'bai_kiem_tra') {
+        const qId = post.bai_kiem_tra_id || post.id;
+        seenIds.add(String(qId));
+        items.push({
+          id: `post-${post.id}`,
+          type: 'quiz',
+          title: post.tieu_de,
+          date: post.ngay_tao,
+          href: `/student/quizzes/${qId}`
+        });
+      } else {
+        items.push({
+          id: `post-${post.id}`,
+          type: 'post',
+          date: post.ngay_tao,
+          post: post
+        });
+      }
+    });
+
+    (quizzes || []).forEach(quiz => {
+      if (!seenIds.has(String(quiz.id))) {
+        seenIds.add(String(quiz.id));
+        items.push({
+          id: `quiz-${quiz.id}`,
+          type: 'quiz',
+          title: quiz.title || quiz.tieu_de || 'Bài kiểm tra',
+          date: quiz.ngay_tao || quiz.createdAt || quiz.startTime || new Date().toISOString(),
+          href: `/student/quizzes/${quiz.id}`
+        });
+      }
+    });
+
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [posts, quizzes]);
+
   const courseCode = section.ten_lop || section.ma_lop_hoc_phan || "Mã lớp";
   const courseName = section.mon_hoc?.ten_mon || "Tên môn học";
   const teacherName = section.giang_vien?.nguoi_dung?.ho_ten || 'Giảng viên chưa cập nhật';
@@ -134,62 +183,67 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
               </div>
 
               {/* Feed Posts */}
-              {posts.map((post) => (
-                post.loai_bai_viet === 'bai_tap' ? (
-                  <Link key={post.id} href={`/student/assignments/${post.bai_tap_id || post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              {streamFeed.map((item) => (
+                item.type === 'assignment' || item.type === 'quiz' ? (
+                  <Link key={item.id} href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>assignment</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                            {item.type === 'quiz' ? 'quiz' : 'assignment'}
+                          </span>
                         </div>
                         <div>
-                          <div style={{ fontWeight: 500, fontSize: '16px' }}>{post.tieu_de}</div>
-                          <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {formatDate(post.ngay_tao)}</div>
+                          <div style={{ fontWeight: 500, fontSize: '16px' }}>{item.title}</div>
+                          <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {item.date ? formatDate(item.date) : 'Vừa xong'}</div>
                         </div>
                       </div>
                     </div>
                   </Link>
-                ) : (
-                  <article 
-                    key={post.id} 
-                    className={styles.postCard} 
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => router.push(`/student/posts/${post.id}`)}
-                  >
-                    <div className={styles.postHeader}>
-                      <div className={styles.postAuthorInfo}>
-                        <div className={styles.avatar}>
-                          <span className="material-symbols-outlined">person</span>
+                ) : (() => {
+                  const post = item.post;
+                  return (
+                    <article 
+                      key={post.id} 
+                      className={styles.postCard} 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => router.push(`/student/posts/${post.id}`)}
+                    >
+                      <div className={styles.postHeader}>
+                        <div className={styles.postAuthorInfo}>
+                          <div className={styles.avatar}>
+                            <span className="material-symbols-outlined">person</span>
+                          </div>
+                          <div>
+                            <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Người dùng'}</h4>
+                            <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.nguoi_tao?.vai_tro === 'giang_vien' ? 'Giảng viên' : 'Sinh viên'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Người dùng'}</h4>
-                          <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.nguoi_tao?.vai_tro === 'giang_vien' ? 'Giảng viên' : 'Sinh viên'}</p>
-                        </div>
+                        <button className={styles.postMenuBtn} onClick={(e) => e.stopPropagation()}>
+                          <span className="material-symbols-outlined">more_vert</span>
+                        </button>
                       </div>
-                      <button className={styles.postMenuBtn} onClick={(e) => e.stopPropagation()}>
-                        <span className="material-symbols-outlined">more_vert</span>
-                      </button>
-                    </div>
-                    
-                    <div className={styles.postBody}>
-                      {post.tieu_de && <strong>{post.tieu_de}<br/></strong>}
-                      {post.noi_dung}
-                      {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
-                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          {post.tep_tin_bai_viet.map((tt: any) => (
-                            <span key={tt.id} style={{ display: 'inline-block', padding: '6px 12px', backgroundColor: 'var(--color-surface-container-high)', borderRadius: '6px', fontSize: '13px', color: 'var(--color-on-surface)', border: '1px solid var(--color-outline-variant)' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '6px' }}>attach_file</span>
-                              {tt.tep_tin?.ten_file}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                )
+                      
+                      <div className={styles.postBody}>
+                        {post.tieu_de && <strong>{post.tieu_de}<br/></strong>}
+                        {post.noi_dung}
+                        {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
+                          <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {post.tep_tin_bai_viet.map((tt: any) => (
+                              <span key={tt.id} style={{ display: 'inline-block', padding: '6px 12px', backgroundColor: 'var(--color-surface-container-high)', borderRadius: '6px', fontSize: '13px', color: 'var(--color-on-surface)', border: '1px solid var(--color-outline-variant)' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '6px' }}>attach_file</span>
+                                {tt.tep_tin?.ten_file}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })()
               ))}
 
-              {posts.length === 0 && (
+              {streamFeed.length === 0 && (
                 <div style={{ padding: '2rem', textAlign: 'center', color: '#5f6368', background: 'var(--color-surface-container-lowest)', borderRadius: '1rem', border: '1px solid color-mix(in srgb, var(--color-outline-variant) 10%, transparent)' }}>
                   Chưa có bài đăng nào trong lớp học này.
                 </div>
@@ -259,34 +313,61 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                 {quizzes && quizzes.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {quizzes.map(q => {
-                      const canTake = q.attemptsUsed < q.maxAttempts;
+                      const now = new Date();
+                      const rawStart = q.startTime || q.thoi_gian_bat_dau;
+                      const rawEnd = q.endTime || q.thoi_gian_ket_thuc;
+                      const startTime = rawStart ? new Date(rawStart) : null;
+                      const endTime = rawEnd ? new Date(rawEnd) : null;
+                      const isNotStarted = startTime && now < startTime;
+                      const isEnded = endTime && now > endTime;
+                      const canTake = q.attemptsUsed < q.maxAttempts && !isNotStarted && !isEnded;
                       const hasAttempt = q.attemptsUsed > 0;
                       return (
-                        <div key={q.id} className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div
+                          key={q.id}
+                          className={styles.memberItem}
+                          style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                          onClick={() => router.push(`/student/quizzes/${q.id}`)}
+                        >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className={styles.avatar} style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: '50%' }}>
                               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>quiz</span>
                             </div>
                             <div>
                               <div style={{ fontWeight: 500, fontSize: '16px' }}>{q.title}</div>
-                              <div style={{ fontSize: '12px', color: '#5f6368' }}>{q.questionCount} câu hỏi • {q.durationMinutes} phút</div>
+                              <div style={{ fontSize: '12px', color: '#5f6368' }}>
+                                {q.questionCount} câu hỏi • {q.durationMinutes} phút
+                                {startTime && ` • Mở: ${startTime.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
+                              </div>
                             </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                             {hasAttempt && (
-                              <Link href={`/student/quizzes/${q.id}/results`} style={{ textDecoration: 'none' }}>
-                                <button className={styles.buttonSecondary} style={{ padding: '0.5rem 1rem', fontSize: '14px' }}>
-                                  Xem kết quả {q.status === 'completed' ? `(${q.lastScore}đ)` : ''}
-                                </button>
-                              </Link>
+                              <button
+                                className={styles.buttonSecondary}
+                                style={{ padding: '0.5rem 1rem', fontSize: '14px' }}
+                                onClick={() => router.push(`/student/quizzes/${q.id}/results`)}
+                              >
+                                Xem kết quả {q.status === 'completed' ? `(${q.lastScore}đ)` : ''}
+                              </button>
                             )}
-                            {canTake && (
-                              <Link href={`/student/quizzes/${q.id}/take`} style={{ textDecoration: 'none' }}>
-                                <button className={styles.buttonPrimary} style={{ padding: '0.5rem 1rem', fontSize: '14px' }}>
-                                  Làm bài
-                                </button>
-                              </Link>
-                            )}
+                            {isNotStarted ? (
+                              <span style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+                                Chưa đến giờ mở
+                              </span>
+                            ) : isEnded && !canTake ? (
+                              <span style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, backgroundColor: '#f1f5f9', color: '#64748b' }}>
+                                Đã kết thúc
+                              </span>
+                            ) : canTake ? (
+                              <button
+                                className={styles.buttonPrimary}
+                                style={{ padding: '0.5rem 1rem', fontSize: '14px' }}
+                                onClick={() => router.push(`/student/quizzes/${q.id}/take`)}
+                              >
+                                Làm bài
+                              </button>
+                            ) : null}
                           </div>
                         </div>
                       );

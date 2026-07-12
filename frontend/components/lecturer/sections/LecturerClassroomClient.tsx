@@ -25,6 +25,55 @@ export default function LecturerClassroomClient({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
 
+  const streamFeed = React.useMemo(() => {
+    const items: any[] = [];
+    const seenIds = new Set<string>();
+
+    (posts || []).forEach(post => {
+      if (post.loai_bai_viet === 'bai_tap') {
+        items.push({
+          id: `post-${post.id}`,
+          type: 'assignment',
+          title: post.tieu_de,
+          date: post.ngay_tao,
+          href: `/lecturer/assignments/${post.bai_tap_id || post.id}/submissions`
+        });
+      } else if (post.loai_bai_viet === 'bai_kiem_tra') {
+        const qId = post.bai_kiem_tra_id || post.id;
+        seenIds.add(String(qId));
+        items.push({
+          id: `post-${post.id}`,
+          type: 'quiz',
+          title: post.tieu_de,
+          date: post.ngay_tao,
+          href: `/lecturer/quizzes/${qId}`
+        });
+      } else {
+        items.push({
+          id: `post-${post.id}`,
+          type: 'post',
+          date: post.ngay_tao,
+          post: post
+        });
+      }
+    });
+
+    (quizzes || []).forEach(quiz => {
+      if (!seenIds.has(String(quiz.id))) {
+        seenIds.add(String(quiz.id));
+        items.push({
+          id: `quiz-${quiz.id}`,
+          type: 'quiz',
+          title: quiz.title || quiz.tieu_de || 'Bài kiểm tra',
+          date: quiz.ngay_tao || quiz.createdAt || quiz.startTime || new Date().toISOString(),
+          href: `/lecturer/quizzes/${quiz.id}`
+        });
+      }
+    });
+
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [posts, quizzes]);
+
   const courseCode = section.ma_lop_hoc_phan || section.code || '';
   const courseName = section.ten_lop || section.name || section.mon_hoc?.ten_mon || 'Lớp học phần';
   const subjectName = section.mon_hoc?.ten_mon || section.subjectName || courseName;
@@ -175,51 +224,66 @@ export default function LecturerClassroomClient({
               </div>
 
               {/* Feed Posts */}
-              {posts && posts.length > 0 ? (
-                posts.map((post) => (
-                  <article 
-                    key={post.id} 
-                    className={styles.postCard} 
-                    style={{ cursor: 'pointer', marginBottom: '1rem' }}
-                    onClick={() => {
-                      if (post.loai_bai_viet === 'bai_tap' && (post.bai_tap_id || post.id)) {
-                        router.push(`/lecturer/assignments/${post.bai_tap_id || post.id}/submissions`);
-                      } else {
-                        router.push(`/lecturer/posts/${post.id}`);
-                      }
-                    }}
-                  >
-                    <div className={styles.postHeader}>
-                      <div className={styles.postAuthorInfo}>
-                        <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white' }}>
-                          <span>{post.nguoi_tao?.ho_ten ? post.nguoi_tao.ho_ten.charAt(0).toUpperCase() : 'GV'}</span>
-                        </div>
-                        <div>
-                          <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Giảng viên'}</h4>
-                          <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}</p>
+              {streamFeed && streamFeed.length > 0 ? (
+                streamFeed.map((item) => (
+                  item.type === 'assignment' || item.type === 'quiz' ? (
+                    <Link key={item.id} href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div className={styles.memberItem} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: '16px', backgroundColor: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white', borderRadius: '50%' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                              {item.type === 'quiz' ? 'quiz' : 'assignment'}
+                            </span>
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 500, fontSize: '16px', color: '#191c1e' }}>{item.title}</div>
+                            <div style={{ fontSize: '12px', color: '#5f6368' }}>Ngày đăng: {item.date ? formatDate(item.date) : 'Vừa xong'}</div>
+                          </div>
                         </div>
                       </div>
-                      <span style={{ padding: '4px 10px', backgroundColor: '#eef2ff', color: '#3525cd', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
-                        {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}
-                      </span>
-                    </div>
-
-                    <div className={styles.postBody}>
-                      {post.tieu_de && <strong style={{ display: 'block', marginBottom: '8px', fontSize: '16px', color: '#191c1e' }}>{post.tieu_de}</strong>}
-                      <p style={{ margin: 0, color: '#464555', whiteSpace: 'pre-wrap' }}>{post.noi_dung}</p>
-
-                      {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
-                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          {post.tep_tin_bai_viet.map((tt: any) => (
-                            <span key={tt.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0' }}>
-                              <span>📎</span>
-                              {tt.tep_tin?.ten_file || 'Tệp đính kèm'}
-                            </span>
-                          ))}
+                    </Link>
+                  ) : (() => {
+                    const post = item.post;
+                    return (
+                      <article 
+                        key={post.id} 
+                        className={styles.postCard} 
+                        style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                        onClick={() => router.push(`/lecturer/posts/${post.id}`)}
+                      >
+                        <div className={styles.postHeader}>
+                          <div className={styles.postAuthorInfo}>
+                            <div className={styles.avatar} style={{ backgroundColor: '#3525cd', color: 'white' }}>
+                              <span>{post.nguoi_tao?.ho_ten ? post.nguoi_tao.ho_ten.charAt(0).toUpperCase() : 'GV'}</span>
+                            </div>
+                            <div>
+                              <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Giảng viên'}</h4>
+                              <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}</p>
+                            </div>
+                          </div>
+                          <span style={{ padding: '4px 10px', backgroundColor: '#eef2ff', color: '#3525cd', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
+                            {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </article>
+
+                        <div className={styles.postBody}>
+                          {post.tieu_de && <strong style={{ display: 'block', marginBottom: '8px', fontSize: '16px', color: '#191c1e' }}>{post.tieu_de}</strong>}
+                          <p style={{ margin: 0, color: '#464555', whiteSpace: 'pre-wrap' }}>{post.noi_dung}</p>
+
+                          {post.tep_tin_bai_viet && post.tep_tin_bai_viet.length > 0 && (
+                            <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {post.tep_tin_bai_viet.map((tt: any) => (
+                                <span key={tt.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0' }}>
+                                  <span>📎</span>
+                                  {tt.tep_tin?.ten_file || 'Tệp đính kèm'}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })()
                 ))
               ) : (
                 <div style={{ padding: '3rem 2rem', textAlign: 'center', color: '#5f6368', background: '#ffffff', borderRadius: '1rem', border: '1px dashed #cbd5e1' }}>

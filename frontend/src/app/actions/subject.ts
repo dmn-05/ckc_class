@@ -6,55 +6,63 @@ export async function getSubjects() {
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+    if (!token) return [];
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        },
-        cache: 'no-store'
-    });
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            cache: 'no-store'
+        });
 
-    if (!response.ok) throw new Error(`Failed to fetch subjects: ${response.statusText}`);
+        if (!response.ok) return [];
 
-    const data = await response.json();
-    
-    return data.map((item: any) => ({
-        id: item.id.toString(),
-        name: item.ten_mon,
-        code: item.ma_mon,
-        credits: item.tin_chi,
-        facultyId: item.khoa_id,
-        departmentId: item.bo_mon_id,
-        facultyName: item.khoa ? item.khoa.ten_khoa : '',
-        departmentName: item.bo_mon ? item.bo_mon.ten_bo_mon : '',
-        studentCount: 0, // Placeholder
-        status: item.trang_thai === 'dang_mo' ? 'active' : 'inactive',
-        theme: item.trang_thai === 'dang_mo' ? 'primary' : 'secondary',
-        icon: 'library_books'
-    }));
+        const data = await response.json();
+        
+        return data.map((item: any) => ({
+            id: item.id.toString(),
+            name: item.ten_mon,
+            code: item.ma_mon,
+            credits: item.tin_chi,
+            facultyId: item.khoa_id,
+            departmentId: item.bo_mon_id,
+            facultyName: item.khoa ? item.khoa.ten_khoa : '',
+            departmentName: item.bo_mon ? item.bo_mon.ten_bo_mon : '',
+            studentCount: 0, // Placeholder
+            status: item.trang_thai === 'dang_mo' ? 'active' : 'inactive',
+            theme: item.trang_thai === 'dang_mo' ? 'primary' : 'secondary',
+            icon: 'library_books'
+        }));
+    } catch (e) {
+        return [];
+    }
 }
 
 export async function getSubjectStats() {
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+    if (!token) return { totalSubjects: 0, activeSubjects: 0, inactiveSubjects: 0 };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects/stats`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        },
-        cache: 'no-store'
-    });
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects/stats`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            cache: 'no-store'
+        });
 
-    if (!response.ok) throw new Error(`Failed to fetch subject stats: ${response.statusText}`);
+        if (!response.ok) return { totalSubjects: 0, activeSubjects: 0, inactiveSubjects: 0 };
 
-    return await response.json();
+        return await response.json();
+    } catch (e) {
+        return { totalSubjects: 0, activeSubjects: 0, inactiveSubjects: 0 };
+    }
 }
 
 export async function createSubject(data: { code: string; name: string; credits: number; facultyId: string; departmentId: string | null; status: string }) {
@@ -92,18 +100,19 @@ export async function getSubjectById(id: string) {
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+    if (!token) return null;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects/${id}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        },
-        cache: 'no-store'
-    });
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/subjects/${id}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            cache: 'no-store'
+        });
 
-    if (!response.ok) throw new Error(`Failed to fetch subject: ${response.statusText}`);
+        if (!response.ok) return null;
 
     const item = await response.json();
     return {
@@ -115,6 +124,9 @@ export async function getSubjectById(id: string) {
         departmentId: item.bo_mon_id ? item.bo_mon_id.toString() : '',
         status: item.trang_thai === 'dang_mo' ? 'active' : 'inactive'
     };
+    } catch (e) {
+        return null;
+    }
 }
 
 export async function updateSubject(id: string, data: { code: string; name: string; credits: number; facultyId: string; departmentId: string | null; status: string }) {

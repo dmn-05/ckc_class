@@ -49,18 +49,18 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
   useEffect(() => {
     if (initialData) {
       setFormData({
-        title: initialData.title,
-        sectionId: initialData.sectionId,
+        title: initialData.title || '',
+        sectionId: initialData.sectionId || defaultSectionId || '',
         description: initialData.description || '',
-        timeLimit: initialData.timeLimit,
-        maxScore: initialData.maxScore,
-        maxAttempts: initialData.maxAttempts,
-        startTime: initialData.startTime,
-        endTime: initialData.endTime,
-        shuffleQuestions: initialData.shuffleQuestions,
-        shuffleOptions: initialData.shuffleOptions,
-        showResultAfter: initialData.showResultAfter,
-        isPublished: initialData.isPublished
+        timeLimit: initialData.timeLimit ?? 45,
+        maxScore: initialData.maxScore ?? 10,
+        maxAttempts: initialData.maxAttempts ?? 1,
+        startTime: initialData.startTime || '',
+        endTime: initialData.endTime || '',
+        shuffleQuestions: initialData.shuffleQuestions ?? true,
+        shuffleOptions: initialData.shuffleOptions ?? true,
+        showResultAfter: initialData.showResultAfter ?? true,
+        isPublished: initialData.isPublished ?? true
       });
     }
   }, [initialData]);
@@ -86,9 +86,9 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
 
     const now = new Date();
 
-    if (formData.startTime) {
+    if (formData.startTime && !initialData?.id) {
       const start = new Date(formData.startTime);
-      if (start.getTime() < now.getTime()) {
+      if (start.getTime() < now.getTime() - 2 * 60 * 1000) {
         setError('Thời gian mở không được đặt ở thời điểm trong quá khứ. Vui lòng chọn thời điểm hiện tại hoặc tương lai.');
         return;
       }
@@ -126,7 +126,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
 
       <div className={styles.pageHeader}>
         <h2 className={styles.pageTitle}>
-          {initialData ? 'Chỉnh sửa Bài kiểm tra' : 'Tạo Bài kiểm tra mới'}
+          {initialData && initialData.id ? 'Chỉnh sửa Bài kiểm tra' : 'Tạo Bài kiểm tra mới'}
         </h2>
       </div>
 
@@ -193,7 +193,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
               <label className={styles.formLabel}>Tiêu đề *</label>
               <input 
                 type="text" name="title" className={styles.formInput} 
-                value={formData.title} onChange={handleChange} required
+                value={formData.title || ''} onChange={handleChange} required
                 placeholder="Ví dụ: Quiz 1 - Cấu trúc điều khiển"
               />
             </div>
@@ -202,7 +202,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
               <label className={styles.formLabel}>Mô tả / Hướng dẫn</label>
               <textarea 
                 name="description" className={styles.formTextarea} 
-                value={formData.description} onChange={handleChange}
+                value={formData.description || ''} onChange={handleChange}
                 placeholder="Hướng dẫn cho sinh viên trước khi làm bài..."
                 style={{ minHeight: '60px' }}
               />
@@ -213,7 +213,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <label className={styles.formLabel}>Thời gian mở (Start time)</label>
                 <input 
                   type="datetime-local" name="startTime" className={styles.formInput} 
-                  value={formData.startTime} onChange={handleChange}
+                  value={formData.startTime || ''} onChange={handleChange}
                   min={getMinDateTime()}
                 />
               </div>
@@ -221,7 +221,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <label className={styles.formLabel}>Thời gian đóng (End time)</label>
                 <input 
                   type="datetime-local" name="endTime" className={styles.formInput} 
-                  value={formData.endTime} onChange={handleChange}
+                  value={formData.endTime || ''} onChange={handleChange}
                   min={formData.startTime || getMinDateTime()}
                 />
               </div>
@@ -232,7 +232,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <label className={styles.formLabel}>Thời lượng (phút) *</label>
                 <input 
                   type="number" name="timeLimit" className={styles.formInput} 
-                  value={formData.timeLimit} onChange={handleChange} min={1} required
+                  value={formData.timeLimit ?? 45} onChange={handleChange} min={1} required
                 />
               </div>
               <div className={styles.formGroup}>

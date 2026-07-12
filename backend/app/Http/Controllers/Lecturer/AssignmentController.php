@@ -139,6 +139,15 @@ class AssignmentController extends Controller
             'han_nop'          => $baiTap->han_nop,
         ]);
 
+        \App\Helpers\NotificationHelper::createForClass(
+            $baiTap->lop_hoc_phan_id,
+            "Bài tập mới: " . $baiTap->tieu_de,
+            "Giảng viên vừa tạo bài tập mới. Hạn nộp: " . ($baiTap->han_nop ? \Carbon\Carbon::parse($baiTap->han_nop)->format('d/m/Y H:i') : 'Không hạn') ,
+            'bai_tap_moi',
+            '/student/assignments/' . $baiTap->id,
+            Auth::id()
+        );
+
         $baiTap->load(['lopHocPhan.monHoc', 'nguoiTao']);
         $totalStudents = $baiTap->lopHocPhan->sinhViens()->count();
 
@@ -328,6 +337,15 @@ class AssignmentController extends Controller
                 'nhan_xet' => $validated['nhan_xet'],
                 'trang_thai' => $newStatus
             ]);
+
+        \App\Helpers\NotificationHelper::createForStudent(
+            $baiNop->sinh_vien_id,
+            "Bài làm đã được chấm điểm",
+            "Bài tập '{$baiTap->tieu_de}' của bạn đã được giảng viên chấm: {$validated['diem']} điểm.",
+            'da_cham_diem',
+            '/student/assignments/' . $baiTap->id,
+            Auth::id()
+        );
 
         return response()->json(['message' => 'Graded successfully']);
     }

@@ -134,6 +134,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'update']);
     Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
 
+    // Shared Notification Routes
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+
     // Profile Routes
     Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
     Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);

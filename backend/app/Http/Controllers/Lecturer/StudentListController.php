@@ -80,11 +80,19 @@ class StudentListController extends Controller
             return response()->json(['message' => 'Sinh viên đã tồn tại trong lớp học phần này'], 422);
         }
 
-        // Add to class
         $section->sinhViens()->attach($student->id, [
             'ngay_tao' => now(),
             'ngay_cap_nhat' => now(),
         ]);
+
+        \App\Helpers\NotificationHelper::createForStudent(
+            $student->id,
+            "Được thêm vào lớp học phần",
+            "Bạn vừa được thêm vào lớp học phần: " . $section->ten_lop . " (" . $section->ma_lop_hoc_phan . ").",
+            'them_vao_lop',
+            '/student/courses/' . $section->id,
+            Auth::id()
+        );
 
         $student->load('nguoiDung', 'lop');
 

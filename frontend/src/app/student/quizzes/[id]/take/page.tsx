@@ -97,6 +97,42 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
         );
     }
 
+    const rawStart = (quizData as any).startTime || (quizData as any).thoi_gian_bat_dau;
+    if (rawStart && new Date() < new Date(rawStart)) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+                    <h3 style={{ color: '#b45309', marginBottom: '1rem' }}>Chưa đến thời gian làm bài kiểm tra</h3>
+                    <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
+                        Thời gian mở: <b>{new Date(rawStart).toLocaleString('vi-VN')}</b>
+                    </p>
+                    <button
+                        onClick={() => router.back()}
+                        style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', fontWeight: 600 }}
+                    >
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeQuestions.length === 0) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+                    <h3 style={{ color: '#b45309', marginBottom: '1rem' }}>Bài kiểm tra chưa được mở hoặc chưa có câu hỏi.</h3>
+                    <button
+                        onClick={() => router.back()}
+                        style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', fontWeight: 600 }}
+                    >
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.pageContainer}>
             <QuizInterface

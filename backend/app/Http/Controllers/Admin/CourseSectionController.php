@@ -94,6 +94,16 @@ class CourseSectionController extends Controller
                 $syncData[$id] = ['ngay_tao' => now(), 'ngay_cap_nhat' => now()];
             }
             $section->sinhViens()->attach($syncData);
+            foreach ($studentIds as $id) {
+                \App\Helpers\NotificationHelper::createForStudent(
+                    $id,
+                    "Được thêm vào lớp học phần",
+                    "Bạn vừa được thêm vào lớp học phần: " . $section->ten_lop . " (" . $section->ma_lop_hoc_phan . ").",
+                    'them_vao_lop',
+                    '/student/courses/' . $section->id,
+                    Auth::id()
+                );
+            }
         }
 
         $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);

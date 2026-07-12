@@ -84,6 +84,16 @@ class ClassController extends Controller
         $student->save();
         $student->load('nguoiDung', 'khoa', 'lop');
 
+        \App\Helpers\NotificationHelper::createForStudent(
+            $student->id,
+            "Được thêm vào lớp học",
+            "Bạn vừa được thêm vào danh sách lớp " . $lop->ten_lop . " (" . $lop->ma_lop . ").",
+            'them_vao_lop',
+            '/student/profile',
+            null,
+            Auth::id()
+        );
+
         return response()->json(['message' => 'Thêm sinh viên vào lớp thành công', 'data' => $student], 201);
     }
 

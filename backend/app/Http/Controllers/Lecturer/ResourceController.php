@@ -125,6 +125,15 @@ class ResourceController extends Controller
             }
         }
 
+        \App\Helpers\NotificationHelper::createForClass(
+            $post->lop_hoc_phan_id,
+            "Tài liệu mới: " . $post->tieu_de,
+            "Giảng viên vừa tải lên tài liệu mới cho lớp học phần.",
+            'tai_lieu_moi',
+            '/student/courses/' . $post->lop_hoc_phan_id,
+            Auth::id()
+        );
+
         $post->load(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao']);
 
         return response()->json(['message' => 'Resource created successfully', 'data' => $post], 201);

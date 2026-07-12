@@ -102,6 +102,15 @@ class PostController extends Controller
             ]);
         }
 
+        \App\Helpers\NotificationHelper::createForClass(
+            $post->lop_hoc_phan_id,
+            "Thông báo mới: " . $post->tieu_de,
+            "Giảng viên vừa đăng bài viết/thông báo mới trong lớp học phần.",
+            'bai_viet_moi',
+            '/student/courses/' . $post->lop_hoc_phan_id,
+            Auth::id()
+        );
+
         return response()->json(['message' => 'Post created successfully', 'data' => $post], 201);
     }
 
