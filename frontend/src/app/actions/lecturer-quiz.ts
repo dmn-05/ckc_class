@@ -104,10 +104,15 @@ function parseDateOrNull(value: string | null | undefined): string | null {
     if (!value || typeof value !== 'string') return null;
     const trimmed = value.trim();
     if (!trimmed) return null;
-    // Accept ISO format (datetime-local) or d/m/Y H:i
-    const isoRx = /^\d{4}-\d{2}-\d{2}(T|\s)\d{2}:\d{2}/;
-    const dmyRx = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}/;
-    if (isoRx.test(trimmed) || dmyRx.test(trimmed)) return trimmed;
+    const dmyMatch = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})/);
+    if (dmyMatch) {
+        return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}T${dmyMatch[4]}:${dmyMatch[5]}:00`;
+    }
+    const isoRx = /^(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2})(:\d{2})?/;
+    const isoMatch = trimmed.match(isoRx);
+    if (isoMatch) {
+        return isoMatch[2] ? trimmed : `${trimmed}:00`;
+    }
     return null;
 }
 

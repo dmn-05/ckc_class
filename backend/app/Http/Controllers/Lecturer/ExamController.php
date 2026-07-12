@@ -88,24 +88,28 @@ class ExamController extends Controller
             'trang_thai'          => $validated['trang_thai'] ?? 'nhap',
         ]);
 
-        \App\Models\BaiViet::create([
-            'tieu_de'         => $exam->tieu_de,
-            'noi_dung'        => $exam->mo_ta ?? '',
-            'lop_hoc_phan_id' => $exam->lop_hoc_phan_id,
-            'nguoi_tao_id'    => Auth::id(),
-            'loai_bai_viet'   => 'bai_kiem_tra',
-            'trang_thai'      => $exam->trang_thai,
-        ]);
+        try {
+            \App\Models\BaiViet::create([
+                'tieu_de'         => $exam->tieu_de,
+                'noi_dung'        => $exam->mo_ta ?? '',
+                'lop_hoc_phan_id' => $exam->lop_hoc_phan_id,
+                'nguoi_tao_id'    => Auth::id(),
+                'loai_bai_viet'   => 'bai_kiem_tra',
+                'trang_thai'      => $exam->trang_thai,
+            ]);
 
-        if ($exam->trang_thai === 'hien_thi') {
-            \App\Helpers\NotificationHelper::createForClass(
-                $exam->lop_hoc_phan_id,
-                "Bài kiểm tra mới: " . $exam->tieu_de,
-                "Giảng viên vừa mở bài kiểm tra mới. Thời gian làm bài: " . $exam->thoi_gian_lam_bai . " phút.",
-                'bai_kiem_tra_moi',
-                '/student/quizzes/' . $exam->id,
-                Auth::id()
-            );
+            if ($exam->trang_thai === 'hien_thi') {
+                \App\Helpers\NotificationHelper::createForClass(
+                    $exam->lop_hoc_phan_id,
+                    "Bài kiểm tra mới: " . $exam->tieu_de,
+                    "Giảng viên vừa mở bài kiểm tra mới. Thời gian làm bài: " . $exam->thoi_gian_lam_bai . " phút.",
+                    'bai_kiem_tra_moi',
+                    '/student/quizzes/' . $exam->id,
+                    Auth::id()
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error creating quiz feed/notification: ' . $e->getMessage());
         }
 
         $exam->load(['lopHocPhan.monHoc', 'nguoiTao']);
