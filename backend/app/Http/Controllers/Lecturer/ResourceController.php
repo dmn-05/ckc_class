@@ -19,15 +19,20 @@ class ResourceController extends Controller
         return $user->giangVien->id;
     }
 
-    public function index()
+    private function getSectionIds($giangVienId)
     {
-        $giangVienId = $this->getGiangVienId();
-        $sectionIds = LopHocPhan::where(function ($q) use ($giangVienId) {
+        return LopHocPhan::where(function ($q) use ($giangVienId) {
             $q->where('giang_vien_id', $giangVienId)
               ->orWhereHas('giangViens', function ($q2) use ($giangVienId) {
                   $q2->where('giang_vien.id', $giangVienId);
               });
         })->pluck('id');
+    }
+
+    public function index()
+    {
+        $giangVienId = $this->getGiangVienId();
+        $sectionIds = $this->getSectionIds($giangVienId);
 
         $resources = BaiViet::with(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao'])
             ->where('loai_bai_viet', 'tai_lieu')
@@ -143,7 +148,7 @@ class ResourceController extends Controller
     {
         $giangVienId = $this->getGiangVienId();
 
-        $sectionIds = LopHocPhan::where('giang_vien_id', $giangVienId)->pluck('id');
+        $sectionIds = $this->getSectionIds($giangVienId);
 
         $resource = BaiViet::with(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao'])
             ->where('loai_bai_viet', 'tai_lieu')
@@ -156,7 +161,7 @@ class ResourceController extends Controller
     public function update(Request $request, $id)
     {
         $giangVienId = $this->getGiangVienId();
-        $sectionIds = LopHocPhan::where('giang_vien_id', $giangVienId)->pluck('id');
+        $sectionIds = $this->getSectionIds($giangVienId);
 
         $post = BaiViet::where('loai_bai_viet', 'tai_lieu')
             ->whereIn('lop_hoc_phan_id', $sectionIds)
@@ -233,7 +238,7 @@ class ResourceController extends Controller
     public function destroy($id)
     {
         $giangVienId = $this->getGiangVienId();
-        $sectionIds = LopHocPhan::where('giang_vien_id', $giangVienId)->pluck('id');
+        $sectionIds = $this->getSectionIds($giangVienId);
 
         $post = BaiViet::where('loai_bai_viet', 'tai_lieu')
             ->whereIn('lop_hoc_phan_id', $sectionIds)
@@ -250,7 +255,7 @@ class ResourceController extends Controller
     public function toggleVisibility($id)
     {
         $giangVienId = $this->getGiangVienId();
-        $sectionIds = LopHocPhan::where('giang_vien_id', $giangVienId)->pluck('id');
+        $sectionIds = $this->getSectionIds($giangVienId);
 
         $post = BaiViet::where('loai_bai_viet', 'tai_lieu')
             ->whereIn('lop_hoc_phan_id', $sectionIds)
