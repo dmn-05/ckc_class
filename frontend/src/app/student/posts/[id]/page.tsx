@@ -11,7 +11,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { getProfileAction } from '@/app/student/profile/actions';
 import { authHeaders } from '@/lib/auth';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -62,7 +63,7 @@ export default function PostDetailPage() {
             if (file) {
               const fullUrl = file.duong_dan.startsWith('http') 
                 ? file.duong_dan 
-                : `http://localhost:8000${file.duong_dan.startsWith('/') ? '' : '/'}${file.duong_dan}`;
+                : `${BACKEND_ORIGIN}${file.duong_dan.startsWith('/') ? '' : '/'}${file.duong_dan}`;
               attachment = { name: file.ten_file, url: fullUrl };
             }
           }

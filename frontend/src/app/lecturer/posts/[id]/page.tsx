@@ -12,7 +12,7 @@ import { useParams } from 'next/navigation';
 import { authHeaders } from '@/lib/auth';
 import { getLecturerProfileAction } from '@/app/lecturer/profile/actions';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function LecturerPostDetailPage() {
   const params = useParams();
