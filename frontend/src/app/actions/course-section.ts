@@ -68,6 +68,18 @@ export async function updateCourseSection(id: string, data: any) {
     return await response.json();
 }
 
+export async function updateCourseSectionStatus(id: string, status: string) {
+    const response = await fetchWithAuth(`/course-sections/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ trang_thai: status })
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to update course section status');
+    }
+    return await response.json();
+}
+
 export async function deleteCourseSection(id: string) {
     const response = await fetchWithAuth(`/course-sections/${id}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Failed to delete course section');

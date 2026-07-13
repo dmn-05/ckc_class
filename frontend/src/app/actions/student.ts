@@ -104,14 +104,23 @@ export async function resetStudentPassword(id: string) {
         const response = await fetchWithAuth(`/students/${id}/reset-password`, {
             method: 'POST'
         });
+        const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Failed to reset password');
+            return {
+                success: false,
+                error: data.message || 'Lỗi đặt lại mật khẩu'
+            };
         }
-        return await response.json();
-    } catch (error) {
+        return {
+            success: true,
+            message: data.message || 'Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)'
+        };
+    } catch (error: any) {
         console.error('Error resetting student password:', error);
-        throw error;
+        return {
+            success: false,
+            error: error.message || 'Lỗi kết nối máy chủ'
+        };
     }
 }
 

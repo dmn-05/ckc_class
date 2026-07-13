@@ -278,7 +278,10 @@ class UserController extends Controller
         $user->mat_khau = \Hash::make('123456');
         $user->save();
 
-        return response()->json(['message' => 'Đặt lại mật khẩu thành công']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)'
+        ]);
     }
 
     public function destroyStudent($id)

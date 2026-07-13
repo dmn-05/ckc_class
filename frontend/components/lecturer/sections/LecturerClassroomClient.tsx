@@ -106,16 +106,6 @@ export default function LecturerClassroomClient({
   };
 
   const getLecturerRoleLabel = (gv: any, index: number) => {
-    const vaiTro = gv.pivot?.vai_tro;
-    if (vaiTro === 'chinh' || gv.id === section.giang_vien_id || (index === 0 && !vaiTro)) {
-      return 'Giảng viên chính';
-    }
-    if (vaiTro === 'tro_giang') {
-      return 'Trợ giảng';
-    }
-    if (vaiTro === 'dong_giang') {
-      return 'Giảng viên đồng giảng';
-    }
     return 'Giảng viên';
   };
 
@@ -140,20 +130,6 @@ export default function LecturerClassroomClient({
           </svg>
           Quay lại danh sách lớp học phần
         </Link>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
-            style={{ backgroundColor: '#ffffff', color: '#3525cd', border: '1px solid #3525cd', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            Quản lý sinh viên ({students.length})
-          </button>
-        </div>
       </div>
 
       {/* Hero Banner */}
@@ -525,12 +501,6 @@ export default function LecturerClassroomClient({
                 <h2 style={{ color: '#3525cd', fontSize: '20px', fontWeight: 700, margin: 0 }}>Sinh viên</h2>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <span style={{ fontSize: '14px', color: '#3525cd', fontWeight: 600 }}>{students.length} sinh viên</span>
-                  <button
-                    onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
-                    style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
-                  >
-                    Quản lý danh sách
-                  </button>
                 </div>
               </div>
 

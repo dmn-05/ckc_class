@@ -132,6 +132,10 @@ class StudentQuizController extends Controller
             return response()->json(['message' => 'Quiz not found or unauthorized'], 404);
         }
 
+        if ($quiz->lopHocPhan && $quiz->lopHocPhan->trang_thai === 'da_khoa') {
+            return response()->json(['message' => 'Lớp học phần đã được lưu trữ, không thể làm bài kiểm tra'], 403);
+        }
+
         if ($quiz->thoi_gian_bat_dau && now()->lt($quiz->thoi_gian_bat_dau)) {
             return response()->json(['message' => 'Chưa đến thời gian bắt đầu làm bài kiểm tra'], 403);
         }

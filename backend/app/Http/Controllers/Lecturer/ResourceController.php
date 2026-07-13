@@ -64,6 +64,10 @@ class ResourceController extends Controller
               });
         })->where('id', $validated['lop_hoc_phan_id'])->firstOrFail();
 
+        if ($section->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $chu_de_id = null;
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('chu_de')) {
@@ -167,6 +171,10 @@ class ResourceController extends Controller
             ->whereIn('lop_hoc_phan_id', $sectionIds)
             ->findOrFail($id);
 
+        if ($post->lopHocPhan && $post->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $validated = $request->validate([
             'tieu_de' => 'sometimes|string|max:255',
             'noi_dung' => 'nullable|string',
@@ -243,6 +251,10 @@ class ResourceController extends Controller
         $post = BaiViet::where('loai_bai_viet', 'tai_lieu')
             ->whereIn('lop_hoc_phan_id', $sectionIds)
             ->findOrFail($id);
+
+        if ($post->lopHocPhan && $post->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
 
         \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->delete();
         \App\Models\BinhLuan::where('bai_viet_id', $post->id)->delete();

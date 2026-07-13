@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/user/avatar', [AuthController::class, 'updateAvatar']);
+    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
     
     // Dashboard stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
@@ -57,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'store']);
         Route::get('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'show']);
         Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
+        Route::patch('/course-sections/{id}/status', [\App\Http\Controllers\Admin\CourseSectionController::class, 'updateStatus']);
         Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
         // Subject routes (Create/Update/Delete)
@@ -145,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
     Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
     Route::get('/lecturer/dashboard/stats', [\App\Http\Controllers\Lecturer\DashboardController::class, 'stats']);
+    Route::get('/student/dashboard/stats', [\App\Http\Controllers\Student\DashboardController::class, 'stats']);
     Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
     Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 

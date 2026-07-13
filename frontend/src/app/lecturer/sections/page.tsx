@@ -120,6 +120,7 @@ export default function LecturerSectionsPage() {
             onDelete={() => {}} // Disabled for lecturer, but passed to prevent error
             hideDelete={true}
             hideEdit={true}
+            hideManageStudents={true}
             onViewDetail={(sectionId) => router.push(`/lecturer/sections/${sectionId}`)}
             selectedSemester={selectedSemester}
             selectedYear={selectedYear}
