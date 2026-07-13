@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'store']);
         Route::get('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'show']);
         Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
+        Route::patch('/course-sections/{id}/status', [\App\Http\Controllers\Admin\CourseSectionController::class, 'updateStatus']);
         Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
         // Subject routes (Create/Update/Delete)

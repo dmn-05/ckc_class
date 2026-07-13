@@ -208,7 +208,7 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  Giảng viên chính <span style={{color:'red'}}>*</span>
+                  Giảng viên phụ trách <span style={{color:'red'}}>*</span>
                 </label>
                 {isLecturer ? (
                   <input
@@ -231,7 +231,7 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
                     onChange={handleChange}
                     required
                   >
-                    <option value="">-- Chọn Giảng viên chính --</option>
+                    <option value="">-- Chọn Giảng viên phụ trách --</option>
                     {lecturers.map(l => {
                       const gvId = getLecId(l);
                       if (!gvId) return null;
@@ -247,7 +247,7 @@ export default function CreateCourseSectionForm({ isLecturer = false }: CreateCo
 
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  Giảng viên phụ / hỗ trợ (Có thể chọn nhiều)
+                  Đồng Giảng viên phụ trách (Có thể chọn nhiều)
                   <span style={{ fontWeight: 400, fontSize: '0.8rem', color: '#64748b', marginLeft: '6px' }}>(Tùy chọn)</span>
                 </label>
                 

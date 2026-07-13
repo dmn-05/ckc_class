@@ -178,6 +178,17 @@ class CourseSectionController extends Controller
         return response()->json($section);
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $section = LopHocPhan::findOrFail($id);
+        $validated = $request->validate([
+            'trang_thai' => 'required|in:dang_mo,da_khoa,da_ket_thuc'
+        ]);
+        $section->update($validated);
+        $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
+        return response()->json($section);
+    }
+
     public function destroy($id)
     {
         $section = LopHocPhan::findOrFail($id);

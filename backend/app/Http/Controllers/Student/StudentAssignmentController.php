@@ -122,6 +122,10 @@ class StudentAssignmentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        if ($baiTap->lopHocPhan && $baiTap->lopHocPhan->trang_thai === 'da_khoa') {
+            return response()->json(['message' => 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa hoặc nộp bài'], 403);
+        }
+
         $existing = \Illuminate\Support\Facades\DB::table('bai_nop')
             ->where('bai_tap_id', $baiTap->id)
             ->where('sinh_vien_id', $student->id)

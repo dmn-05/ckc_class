@@ -70,6 +70,11 @@ class ExamController extends Controller
             abort(403, 'You do not own this course section');
         }
 
+        $secCheck = \App\Models\LopHocPhan::find($validated['lop_hoc_phan_id']);
+        if ($secCheck && $secCheck->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $exam = BaiKiemTra::create([
             'tieu_de'             => $validated['tieu_de'],
             'mo_ta'               => $validated['mo_ta'] ?? null,
@@ -141,6 +146,10 @@ class ExamController extends Controller
                    'thoi_gian_lam_bai','diem_toi_da','diem_dat','so_lan_thi_toi_da',
                    'hinh_thuc','xao_tron_cau_hoi','xao_tron_dap_an','hien_dap_an_sau_nop','trang_thai'];
 
+        if ($exam->lopHocPhan && $exam->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $updateData = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $validated)) {
@@ -173,6 +182,9 @@ class ExamController extends Controller
     public function destroy($id)
     {
         $exam = BaiKiemTra::whereIn('lop_hoc_phan_id', $this->getSectionIds())->findOrFail($id);
+        if ($exam->lopHocPhan && $exam->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
         $exam->delete();
 
         return response()->json(['message' => 'Exam deleted successfully']);

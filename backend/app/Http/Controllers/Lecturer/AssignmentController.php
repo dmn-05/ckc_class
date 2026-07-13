@@ -69,6 +69,11 @@ class AssignmentController extends Controller
             abort(403, 'You do not own this course section');
         }
 
+        $secCheck = \App\Models\LopHocPhan::find($validated['lop_hoc_phan_id']);
+        if ($secCheck && $secCheck->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $baiTap = BaiTap::create([
             'tieu_de'          => $validated['tieu_de'],
             'noi_dung'         => $validated['noi_dung'] ?? null,
@@ -172,6 +177,9 @@ class AssignmentController extends Controller
         $sectionIds = $this->getSectionIds();
 
         $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+        if ($baiTap->lopHocPhan && $baiTap->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
 
         $validated = $request->validate([
             'tieu_de'          => 'sometimes|string|max:255',
