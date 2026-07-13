@@ -111,6 +111,35 @@ class AuthController extends Controller
         }
     }
 
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'mat_khau_hien_tai' => 'required|string',
+            'mat_khau_moi' => 'required|string|min:6',
+            'xac_nhan_mat_khau_moi' => 'required|string|same:mat_khau_moi',
+        ], [
+            'mat_khau_moi.min' => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'xac_nhan_mat_khau_moi.same' => 'Xác nhận mật khẩu mới không khớp.'
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->mat_khau_hien_tai, $user->mat_khau)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mật khẩu hiện tại không chính xác.'
+            ], 422);
+        }
+
+        $user->mat_khau = Hash::make($request->mat_khau_moi);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đổi mật khẩu thành công!'
+        ]);
+    }
+
     public function verifyForgotEmail(Request $request)
     {
         $request->validate([

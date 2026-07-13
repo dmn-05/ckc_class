@@ -9,7 +9,8 @@ export interface ConfirmModalProps {
   message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'primary';
+  variant?: 'danger' | 'primary' | 'warning';
+  icon?: string;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -22,11 +23,30 @@ export default function ConfirmModal({
   confirmText = 'Xác nhận',
   cancelText = 'Huỷ bỏ',
   variant = 'danger',
+  icon,
   onConfirm,
   onCancel,
   isLoading = false,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
+
+  const getIconBoxClass = () => {
+    if (variant === 'danger') return styles.iconBoxDanger;
+    if (variant === 'warning') return styles.iconBoxWarning;
+    return styles.iconBoxPrimary;
+  };
+
+  const getBtnConfirmClass = () => {
+    if (variant === 'danger') return styles.btnConfirmDanger;
+    if (variant === 'warning') return styles.btnConfirmWarning;
+    return styles.btnConfirmPrimary;
+  };
+
+  const getIconName = () => {
+    if (icon) return icon;
+    if (variant === 'danger' || variant === 'warning') return 'warning';
+    return 'help';
+  };
 
   return (
     <div className={styles.backdrop} onClick={onCancel}>
@@ -34,12 +54,12 @@ export default function ConfirmModal({
         className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={variant === 'danger' ? styles.iconBoxDanger : styles.iconBoxPrimary}>
+        <div className={getIconBoxClass()}>
           <span
             className="material-symbols-outlined"
             style={{ fontSize: '32px' }}
           >
-            {variant === 'danger' ? 'warning' : 'help'}
+            {getIconName()}
           </span>
         </div>
 
@@ -57,7 +77,7 @@ export default function ConfirmModal({
           </button>
           <button
             type="button"
-            className={variant === 'danger' ? styles.btnConfirmDanger : styles.btnConfirmPrimary}
+            className={getBtnConfirmClass()}
             onClick={onConfirm}
             disabled={isLoading}
           >

@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/user/avatar', [AuthController::class, 'updateAvatar']);
+    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
     
     // Dashboard stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);

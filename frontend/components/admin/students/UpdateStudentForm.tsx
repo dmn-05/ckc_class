@@ -178,10 +178,10 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     setIsResetting(true);
     try {
       const result = await resetStudentPassword(studentId);
-      if (result.success) {
-        showAlert('Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)', 'success', 'Hoàn tất');
+      if (result.success || (!result.error && result.message)) {
+        showAlert(result.message || 'Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)', 'success', 'Hoàn tất');
       } else {
-        showAlert('Đặt lại mật khẩu thất bại: ' + result.error, 'error', 'Lỗi');
+        showAlert('Đặt lại mật khẩu thất bại: ' + (result.error || result.message || 'Không thể đặt lại mật khẩu'), 'error', 'Lỗi');
       }
     } catch (err: any) {
       showAlert('Có lỗi xảy ra: ' + err.message, 'error', 'Lỗi');
@@ -490,6 +490,8 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         title="Xác nhận đặt lại mật khẩu"
         message="Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên này về mặc định (123456) không?"
         confirmText="Đặt lại"
+        variant="primary"
+        icon="lock_reset"
         onCancel={() => setShowConfirmReset(false)}
         onConfirm={executeResetPassword}
       />
