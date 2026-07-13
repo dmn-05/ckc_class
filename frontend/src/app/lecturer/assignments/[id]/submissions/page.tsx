@@ -54,7 +54,11 @@ export default function AssignmentSubmissionsPage() {
   }, [id]);
 
   const handleBackToList = () => {
-    router.push('/lecturer/assignments');
+    if (assignment?.sectionId) {
+      router.push(`/lecturer/sections/${assignment.sectionId}`);
+    } else {
+      router.back();
+    }
   };
 
   const handleGrade = (submission: SubmissionData) => {

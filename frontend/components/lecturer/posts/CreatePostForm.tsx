@@ -75,8 +75,8 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
     setSubmitStatus('idle');
     setErrorMessage('');
 
-    // Khi tạo mới, ảnh bìa là bắt buộc
-    if (!isEdit && !formData.hinhAnh) {
+    // Khi tạo mới, ảnh bìa là bắt buộc (trừ khi là thông báo)
+    if (!isEdit && formData.category !== 'thong_bao' && !formData.hinhAnh) {
       setSubmitStatus('error');
       setErrorMessage('Vui lòng chọn ảnh bìa cho bài viết.');
       setIsSubmitting(false);
@@ -219,48 +219,50 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
               </div>
             </div>
 
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-              <div className={styles.formGroup}>
-                <h3 className={styles.uploadTitle}>
-                  Ảnh bìa {!isEdit && <span style={{color:'red'}}>*</span>}
-                </h3>
-                <label className={styles.uploadArea} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: hinhAnhPreview ? '200px' : undefined }}>
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleHinhAnhChange} 
-                    style={{ display: 'none' }}
-                    required={!isEdit}
-                  />
-                  {hinhAnhPreview ? (
-                    <div style={{ position: 'relative', width: '100%' }}>
-                      <img 
-                        src={hinhAnhPreview} 
-                        alt="Preview ảnh bìa" 
-                        style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', borderRadius: '0.5rem', display: 'block' }} 
-                      />
-                      <div style={{ 
-                        position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', 
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-                        borderRadius: '0.5rem', opacity: 0, transition: 'opacity 0.2s' 
-                      }}
-                        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                        onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>photo_camera</span>
-                        <span style={{ color: '#fff', fontSize: '14px', marginTop: '8px' }}>Nhấn để đổi ảnh</span>
+            {formData.category !== 'thong_bao' && (
+              <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
+                <div className={styles.formGroup}>
+                  <h3 className={styles.uploadTitle}>
+                    Ảnh bìa {!isEdit && <span style={{color:'red'}}>*</span>}
+                  </h3>
+                  <label className={styles.uploadArea} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: hinhAnhPreview ? '200px' : undefined }}>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleHinhAnhChange} 
+                      style={{ display: 'none' }}
+                      required={!isEdit && formData.category !== 'thong_bao'}
+                    />
+                    {hinhAnhPreview ? (
+                      <div style={{ position: 'relative', width: '100%' }}>
+                        <img 
+                          src={hinhAnhPreview} 
+                          alt="Preview ảnh bìa" 
+                          style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', borderRadius: '0.5rem', display: 'block' }} 
+                        />
+                        <div style={{ 
+                          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', 
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                          borderRadius: '0.5rem', opacity: 0, transition: 'opacity 0.2s' 
+                        }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>photo_camera</span>
+                          <span style={{ color: '#fff', fontSize: '14px', marginTop: '8px' }}>Nhấn để đổi ảnh</span>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className={styles.uploadContent}>
-                      <span className={`material-symbols-outlined ${styles.uploadIcon}`}>add_photo_alternate</span>
-                      <span className={styles.uploadText}>Nhấp để chọn ảnh bìa</span>
-                      <span className={styles.uploadHint}>JPG, PNG, WEBP (Tối đa 10MB) — Bắt buộc</span>
-                    </div>
-                  )}
-                </label>
+                    ) : (
+                      <div className={styles.uploadContent}>
+                        <span className={`material-symbols-outlined ${styles.uploadIcon}`}>add_photo_alternate</span>
+                        <span className={styles.uploadText}>Nhấp để chọn ảnh bìa</span>
+                        <span className={styles.uploadHint}>JPG, PNG, WEBP (Tối đa 10MB) — Bắt buộc</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
               <div className={styles.formGroup}>
@@ -310,9 +312,9 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                 {isSubmitting ? (
                   <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
                 ) : (
-                  <span className="material-symbols-outlined">{isEdit ? 'save' : 'add'}</span>
+                  <span className="material-symbols-outlined">{isEdit ? 'save' : 'send'}</span>
                 )}
-                {isEdit ? 'Cập nhật Bài Viết' : 'Thêm Bài Viết'}
+                {isEdit ? 'Cập nhật' : 'Đăng'}
               </button>
             </div>
           </form>

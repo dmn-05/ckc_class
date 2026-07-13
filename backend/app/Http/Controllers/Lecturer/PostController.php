@@ -35,7 +35,7 @@ class PostController extends Controller
             'loai_bai_viet' => 'required|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
-            'hinh_anh' => 'required|image|max:10240', // Ảnh bìa bắt buộc, tối đa 10MB
+            'hinh_anh' => 'required_unless:loai_bai_viet,thong_bao|nullable|image|max:10240', // Ảnh bìa không bắt buộc nếu là thông báo
             'file' => 'nullable|file|max:20480', // Tệp đính kèm, tối đa 20MB
         ]);
 

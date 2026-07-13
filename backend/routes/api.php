@@ -147,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
     Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
     Route::get('/lecturer/dashboard/stats', [\App\Http\Controllers\Lecturer\DashboardController::class, 'stats']);
+    Route::get('/student/dashboard/stats', [\App\Http\Controllers\Student\DashboardController::class, 'stats']);
     Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
     Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 

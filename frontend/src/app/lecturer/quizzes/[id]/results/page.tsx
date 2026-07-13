@@ -63,7 +63,13 @@ export default function QuizResultsPage({ params }: { params: Promise<{ id: stri
             <QuizResultsView
                 quiz={quizData}
                 attempts={attempts}
-                onBack={() => router.push('/lecturer/quizzes')}
+                onBack={() => {
+                    if (quizData.sectionId) {
+                        router.push(`/lecturer/sections/${quizData.sectionId}`);
+                    } else {
+                        router.back();
+                    }
+                }}
                 onGradeEssay={(attempt) => setGradingAttempt(attempt)}
             />
 
