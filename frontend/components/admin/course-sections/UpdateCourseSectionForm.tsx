@@ -389,7 +389,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
                 <label className={styles.formLabel}>Trạng thái</label>
                 <select name="trang_thai" className={`${styles.formInput} ${styles.formSelect}`} value={formData.trang_thai} onChange={handleChange}>
                   <option value="dang_mo">Đang mở</option>
-                  <option value="da_khoa">Đã khóa</option>
+                  <option value="da_khoa">Lưu trữ</option>
                   <option value="da_ket_thuc">Đã kết thúc</option>
                 </select>
               </div>

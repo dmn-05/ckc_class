@@ -67,7 +67,7 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
     cardClass = styles.classCardWarning;
     iconClass = styles.classIconWarning;
     statusClass = styles.statusWarning;
-    statusText = 'Đã khóa';
+    statusText = 'Lưu trữ';
     codeClass = styles.codeWarning;
     statusIcon = (
       <span className={styles.statusDot} style={{ backgroundColor: '#ed6c02' }} />
