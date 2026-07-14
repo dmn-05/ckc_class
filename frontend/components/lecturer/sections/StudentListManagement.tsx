@@ -114,7 +114,7 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
             fontSize: '14px',
             fontWeight: 500
           }}>
-            Lớp học phần này đã {sectionStatus === 'da_khoa' ? 'khóa' : 'kết thúc'}, không thể thêm sinh viên vào lớp.
+            Lớp học phần này đã {sectionStatus === 'da_khoa' ? 'lưu trữ' : 'kết thúc'}, không thể thêm sinh viên vào lớp.
           </div>
         )}
         <form onSubmit={handleAdd} className={styles.formGroup}>
@@ -125,7 +125,7 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
               value={searchQuery} 
               onChange={e => setSearchQuery(e.target.value)} 
               onFocus={() => { if (!isLockedOrEnded && searchResults.length > 0) setShowResults(true); }}
-              placeholder={isLockedOrEnded ? `Lớp học phần đã ${sectionStatus === 'da_khoa' ? 'khóa' : 'kết thúc'}, không thể thêm sinh viên` : 'Nhập tên hoặc mã sinh viên (VD: DH52...)'} 
+              placeholder={isLockedOrEnded ? `Lớp học phần đã ${sectionStatus === 'da_khoa' ? 'lưu trữ' : 'kết thúc'}, không thể thêm sinh viên` : 'Nhập tên hoặc mã sinh viên (VD: DH52...)'} 
               className={styles.input}
               disabled={isLockedOrEnded}
               autoComplete="off"

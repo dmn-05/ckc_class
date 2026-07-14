@@ -110,9 +110,9 @@ export default function CourseSectionDashboard({
           <div className={styles.statItem}>
             <div className={styles.statItemLeft}>
               <div className={styles.statIconBoxSecondary}>
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}>lock</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}>archive</span>
               </div>
-              <span className={styles.statLabel}>Đã khóa</span>
+              <span className={styles.statLabel}>Lưu trữ</span>
             </div>
             <span className={`${styles.statValue} ${styles.statValueSecondary}`}>{lockedCount.toString().padStart(2, '0')}</span>
           </div>
@@ -151,7 +151,7 @@ export default function CourseSectionDashboard({
               className={`${styles.filterTag} ${currentFilter === 'da_khoa' ? styles.filterTagActive : ''}`}
               onClick={() => onFilterChange('da_khoa')}
             >
-              Đã khóa
+              Lưu trữ
             </button>
             <button 
               className={`${styles.filterTag} ${currentFilter === 'da_ket_thuc' ? styles.filterTagActive : ''}`}
