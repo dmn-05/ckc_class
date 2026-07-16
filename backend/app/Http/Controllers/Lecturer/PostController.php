@@ -32,7 +32,7 @@ class PostController extends Controller
             'tieu_de' => 'required|string|max:255',
             'noi_dung' => 'required|string',
             'lop_hoc_phan_id' => 'required|integer',
-            'loai_bai_viet' => 'required|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'required|string|in:thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
             'hinh_anh' => 'required_unless:loai_bai_viet,thong_bao|nullable|image|max:10240', // Ảnh bìa không bắt buộc nếu là thông báo
@@ -43,7 +43,6 @@ class PostController extends Controller
             'thong_bao' => 'Thông báo',
             'tai_lieu' => 'Tài liệu',
             'bai_tap' => 'Bài tập',
-            'bai_viet' => 'Thảo luận',
         ];
         $ten_chu_de = $ten_chu_de_map[$validated['loai_bai_viet']] ?? null;
         $chu_de_id = null;
@@ -138,7 +137,7 @@ class PostController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'sometimes|string|max:255',
             'noi_dung' => 'sometimes|string',
-            'loai_bai_viet' => 'sometimes|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'sometimes|string|in:thong_bao,tai_lieu,bai_tap',
             'trang_thai' => 'sometimes|string',
             'hinh_anh' => 'nullable|image|max:10240',
         ]);

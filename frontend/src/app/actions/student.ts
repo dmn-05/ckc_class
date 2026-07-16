@@ -38,6 +38,7 @@ export async function getStudents() {
             code: item.sinh_vien ? item.sinh_vien.ma_sinh_vien : '',
             classCode: item.sinh_vien?.lop ? item.sinh_vien.lop.ma_lop : '',
             faculty: item.sinh_vien?.khoa ? item.sinh_vien.khoa.ten_khoa : '',
+            khoaHoc: item.sinh_vien?.khoa_hoc || '',
             email: item.email || '',
             avatar: item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
             statusClassName: item.sinh_vien?.trang_thai === 'dang_hoc' ? 'bg-green-500' : 'bg-red-500',

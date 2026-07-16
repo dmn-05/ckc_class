@@ -23,9 +23,9 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
 
   const [formData, setFormData] = useState({
     title: initialData?.tieu_de || initialData?.title || '',
-    category: initialData?.loai_bai_viet || initialData?.category || 'thong_bao',
+    category: (initialData?.loai_bai_viet === 'bai_viet' ? 'thong_bao' : initialData?.loai_bai_viet) || initialData?.category || 'thong_bao',
     status: initialData?.trang_thai || (initialData?.is_published ? 'hien_thi' : 'an') || 'hien_thi',
-    lopHocPhanId: initialData?.lop_hoc_phan_id || '',
+    lopHocPhanId: (initialData?.lop_hoc_phan_id || initialData?.sectionId || '').toString(),
     content: initialData?.noi_dung || '',
     hinhAnh: null as File | null,
     file: null as File | null
@@ -33,13 +33,27 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
   // Preview ảnh bìa: nếu đang edit thì dùng ảnh hiện tại, nếu chọn file mới thì dùng URL tạm
   const [hinhAnhPreview, setHinhAnhPreview] = useState<string | null>(
     initialData?.hinh_anh || null
-  );  useEffect(() => {
+  );
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId && sId !== '0') {
+      setInitialSectionId(sId);
+      if (!isEdit) {
+        setFormData(prev => ({ ...prev, lopHocPhanId: sId }));
+      }
+    }
+
     const fetchSections = async () => {
       try {
         const data = await getLecturerCourseSections();
         setCourseSections(data);
-        if (data.length > 0 && !formData.lopHocPhanId) {
+        if (data.length > 0 && !formData.lopHocPhanId && (!sId || sId === '0')) {
           setFormData(prev => ({ ...prev, lopHocPhanId: data[0].id.toString() }));
+        } else if (sId && sId !== '0' && !isEdit) {
+          setFormData(prev => ({ ...prev, lopHocPhanId: sId }));
         }
       } catch (err) {
         console.error(err);
@@ -121,7 +135,12 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
 
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/lecturer/posts');
+        const targetSectionId = initialSectionId || formData.lopHocPhanId || initialData?.lop_hoc_phan_id || initialData?.sectionId;
+        if (targetSectionId && targetSectionId !== '0') {
+          router.push(`/lecturer/sections/${targetSectionId}`);
+        } else {
+          router.push('/lecturer/posts');
+        }
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -166,7 +185,6 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                   required 
                   disabled={isEdit}
                 >
-                  <option value="bai_viet">Bài viết</option>
                   <option value="thong_bao">Thông báo</option>
                 </select>
                 {isEdit && <small style={{color: '#777587', marginTop: '4px'}}>Không thể đổi loại bài viết sau khi tạo.</small>}
@@ -195,12 +213,15 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                   value={formData.lopHocPhanId} 
                   onChange={handleChange} 
                   required
+                  disabled={isEdit || Boolean(initialSectionId && initialSectionId !== '0')}
                 >
                   <option value="">Chọn Lớp học phần</option>
                   {courseSections.map(s => (
                     <option key={s.id} value={s.id}>{s.code} - {s.name || (s.mon_hoc?.ten_mon)}</option>
                   ))}
                 </select>
+                {isEdit && <small style={{color: '#777587', marginTop: '4px'}}>Không thể đổi lớp học phần sau khi tạo.</small>}
+                {!isEdit && Boolean(initialSectionId && initialSectionId !== '0') && <small style={{color: '#777587', marginTop: '4px'}}>Đang thêm bài viết cho lớp học phần hiện tại (không thể thay đổi).</small>}
               </div>
             </div>
 
@@ -299,7 +320,14 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
               <button 
                 type="button" 
                 className={styles.btnSecondary}
-                onClick={() => router.back()}
+                onClick={() => {
+                  const targetSectionId = initialSectionId || formData.lopHocPhanId || initialData?.lop_hoc_phan_id || initialData?.sectionId;
+                  if (targetSectionId && targetSectionId !== '0') {
+                    router.push(`/lecturer/sections/${targetSectionId}`);
+                  } else {
+                    router.push('/lecturer/posts');
+                  }
+                }}
                 disabled={isSubmitting}
               >
                 Hủy bỏ

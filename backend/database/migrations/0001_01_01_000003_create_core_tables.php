@@ -187,7 +187,7 @@ return new class extends Migration
             $table->foreignId('lop_hoc_phan_id')->constrained('lop_hoc_phan')->onDelete('cascade');
             $table->unsignedBigInteger('chu_de_id')->nullable();
             $table->foreignId('nguoi_tao_id')->constrained('nguoi_dung')->onDelete('cascade');
-            $table->string('loai_bai_viet', 50)->default('bai_viet');
+            $table->string('loai_bai_viet', 50)->default('thong_bao');
             $table->string('trang_thai', 50)->default('dang_hoat_dong');
             $table->integer('luot_xem')->default(0);
             $table->timestamp('ngay_tao')->nullable();

@@ -171,6 +171,7 @@ class UserController extends Controller
             'ma_sinh_vien' => 'required|string|unique:sinh_vien,ma_sinh_vien',
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
+            'khoa_hoc' => 'nullable|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
         ]);
@@ -200,6 +201,7 @@ class UserController extends Controller
                 'ma_sinh_vien' => $validated['ma_sinh_vien'],
                 'khoa_id' => $validated['khoa_id'],
                 'lop_id' => $validated['lop_id'],
+                'khoa_hoc' => $validated['khoa_hoc'] ?? null,
                 'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
                 'cccd' => $validated['cccd'] ?? null,
                 'dia_chi' => $validated['dia_chi'] ?? null,
@@ -231,6 +233,7 @@ class UserController extends Controller
             'ma_sinh_vien' => 'required|string|unique:sinh_vien,ma_sinh_vien,' . $user->sinhVien->id,
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
+            'khoa_hoc' => 'nullable|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
         ]);
@@ -256,6 +259,7 @@ class UserController extends Controller
                 'ma_sinh_vien' => $validated['ma_sinh_vien'],
                 'khoa_id' => $validated['khoa_id'],
                 'lop_id' => $validated['lop_id'],
+                'khoa_hoc' => $validated['khoa_hoc'] ?? null,
                 'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
                 'cccd' => $validated['cccd'] ?? null,
                 'dia_chi' => $validated['dia_chi'] ?? null,

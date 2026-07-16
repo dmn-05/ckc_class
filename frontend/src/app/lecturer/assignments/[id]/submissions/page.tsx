@@ -53,11 +53,20 @@ export default function AssignmentSubmissionsPage() {
     if (id) loadData();
   }, [id]);
 
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId) setInitialSectionId(sId);
+  }, []);
+
   const handleBackToList = () => {
-    if (assignment?.sectionId) {
-      router.push(`/lecturer/sections/${assignment.sectionId}`);
+    const targetSectionId = initialSectionId || assignment?.sectionId;
+    if (targetSectionId) {
+      router.push(`/lecturer/sections/${targetSectionId}`);
     } else {
-      router.back();
+      router.push('/lecturer/assignments');
     }
   };
 

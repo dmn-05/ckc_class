@@ -64,7 +64,7 @@ export default function ConfirmModal({
         </div>
 
         <h3 className={styles.title}>{title}</h3>
-        <p className={styles.message}>{message}</p>
+        <div className={styles.message}>{message}</div>
 
         <div className={styles.actionRow}>
           <button

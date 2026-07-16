@@ -56,7 +56,7 @@ function mapResourceFromApi(item: any) {
         title: item.tieu_de,
         description: item.noi_dung || '',
         type: resourceType as ResourceType,
-        sectionId: item.lop_hoc_phan_id?.toString() || '',
+        sectionId: item.lop_hoc_phan_id?.toString() || item.sectionId?.toString() || '',
         sectionName: item.lop_hoc_phan?.ten_lop || item.lop_hoc_phan?.mon_hoc?.ten_mon || '',
         createdAt: formatDate(item.ngay_tao),
         fileSize,
