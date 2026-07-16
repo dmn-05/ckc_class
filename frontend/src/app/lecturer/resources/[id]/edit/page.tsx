@@ -16,8 +16,13 @@ export default function EditResourcePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [initialData, setInitialData] = useState<ResourceFormData | undefined>(undefined);
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId) setInitialSectionId(sId);
+
     async function loadData() {
       try {
         const [resourceData, sectionsData] = await Promise.all([
@@ -78,7 +83,12 @@ export default function EditResourcePage() {
       });
 
       await updateLecturerResource(id, formData);
-      router.push('/lecturer/resources');
+      const targetSectionId = initialSectionId || data.sectionId || initialData?.sectionId;
+      if (targetSectionId && targetSectionId !== '0') {
+        router.push(`/lecturer/sections/${targetSectionId}`);
+      } else {
+        router.push('/lecturer/resources');
+      }
     } catch (error) {
       alert('Có lỗi xảy ra khi cập nhật tài nguyên.');
       console.error(error);
@@ -92,10 +102,11 @@ export default function EditResourcePage() {
   }
 
   const handleBack = () => {
-    if (initialData?.sectionId) {
-      router.push(`/lecturer/sections/${initialData.sectionId}`);
+    const targetSectionId = initialSectionId || initialData?.sectionId;
+    if (targetSectionId && targetSectionId !== '0') {
+      router.push(`/lecturer/sections/${targetSectionId}`);
     } else {
-      router.back();
+      router.push('/lecturer/resources');
     }
   };
 

@@ -11,7 +11,7 @@ interface StudentPostFormModalProps {
 
 export default function StudentPostFormModal({ isOpen, onClose, onSubmit }: StudentPostFormModalProps) {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('bai_viet');
+  const [category, setCategory] = useState('thong_bao');
   const [isPublished, setIsPublished] = useState(true);
   const [lopHocPhanId, setLopHocPhanId] = useState<number>(1);
   const [content, setContent] = useState('');
@@ -25,7 +25,7 @@ export default function StudentPostFormModal({ isOpen, onClose, onSubmit }: Stud
       setIsRendered(true);
       setTimeout(() => setIsAnimating(true), 10);
       setTitle('');
-      setCategory('bai_viet');
+      setCategory('thong_bao');
       setIsPublished(true);
       setLopHocPhanId(1);
       setContent('');
@@ -91,7 +91,6 @@ export default function StudentPostFormModal({ isOpen, onClose, onSubmit }: Stud
                 onChange={e => setCategory(e.target.value)}
                 className={styles.modalInput}
               >
-                <option value="bai_viet">Thảo luận / Hỏi đáp</option>
                 <option value="thong_bao">Thông báo</option>
               </select>
             </div>

@@ -105,8 +105,9 @@ export default function EditAssignmentPage() {
       });
 
       await updateLecturerAssignment(id, formData);
-      if (initialSectionId) {
-        router.push(`/lecturer/sections/${initialSectionId}`);
+      const targetSectionId = initialSectionId || data.sectionId || initialData?.sectionId;
+      if (targetSectionId && targetSectionId !== '0') {
+        router.push(`/lecturer/sections/${targetSectionId}`);
       } else {
         router.push('/lecturer/assignments');
       }
@@ -123,10 +124,11 @@ export default function EditAssignmentPage() {
   }
 
   const handleBack = () => {
-    if (initialSectionId || initialData?.sectionId) {
-      router.push(`/lecturer/sections/${initialSectionId || initialData?.sectionId}`);
+    const targetSectionId = initialSectionId || initialData?.sectionId;
+    if (targetSectionId && targetSectionId !== '0') {
+      router.push(`/lecturer/sections/${targetSectionId}`);
     } else {
-      router.back();
+      router.push('/lecturer/assignments');
     }
   };
 

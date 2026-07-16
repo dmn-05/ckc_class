@@ -9,6 +9,7 @@ export interface StudentData {
   code: string;
   classCode: string;
   faculty: string;
+  khoaHoc?: string;
   email: string;
   avatar: string;
   statusClassName: string;
@@ -60,6 +61,9 @@ export default function StudentCard({ student, onDeleteSuccess }: { student: Stu
             <div className={styles.studentMetaRow}>
               <div className={styles.studentMetaItem}><span className="material-symbols-outlined" style={{ fontSize: '14px' }}>badge</span>{student.classCode}</div>
               <div className={styles.studentMetaItem}><span className="material-symbols-outlined" style={{ fontSize: '14px' }}>domain</span>{student.faculty}</div>
+              {student.khoaHoc && (
+                <div className={styles.studentMetaItem}><span className="material-symbols-outlined" style={{ fontSize: '14px' }}>school</span>Khóa {student.khoaHoc}</div>
+              )}
             </div>
             <div className={styles.studentEmailRow}>
               <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>mail</span>

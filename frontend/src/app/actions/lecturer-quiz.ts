@@ -73,7 +73,7 @@ function mapQuizFromApi(item: any): QuizData {
         shuffleOptions: item.shuffleAnswers ?? true,
         showResultAfter: item.showAnswerAfter ?? false,
         isPublished: item.isPublished ?? false,
-        sectionId: item.sectionId?.toString() || '',
+        sectionId: item.sectionId?.toString() || item.lop_hoc_phan_id?.toString() || '',
         sectionName: item.sectionName || '',
         status,
         stats: { 

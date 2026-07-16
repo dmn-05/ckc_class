@@ -54,9 +54,18 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     ma_sinh_vien: '',
     khoa_id: '',
     lop_id: '',
+    khoa_hoc: '',
     trang_thai: 'dang_hoat_dong',
     anh_dai_dien: ''
   });
+  const [khoaHocOptions] = useState<string[]>(() => 
+    Array.from({ length: 30 }, (_, i) => {
+      const startYear = 2000 + i + 1;
+      return `K${i + 1} (${startYear}-${startYear + 3})`;
+    })
+  );
+  const [showCustomKhoaHoc, setShowCustomKhoaHoc] = useState(false);
+  const [customKhoaHoc, setCustomKhoaHoc] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -80,9 +89,19 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           ma_sinh_vien: studentData.sinh_vien?.ma_sinh_vien || '',
           khoa_id: studentData.sinh_vien?.khoa_id?.toString() || '',
           lop_id: studentData.sinh_vien?.lop_id?.toString() || '',
+          khoa_hoc: studentData.sinh_vien?.khoa_hoc || '',
           trang_thai: studentData.sinh_vien?.trang_thai || 'dang_hoc',
           anh_dai_dien: studentData.anh_dai_dien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(studentData.ho_ten)
         });
+        // Set custom if not in list
+        const optionsList = Array.from({ length: 30 }, (_, i) => {
+          const s = 2000 + i + 1;
+          return `K${i + 1} (${s}-${s + 3})`;
+        });
+        if (studentData.sinh_vien?.khoa_hoc && !optionsList.includes(studentData.sinh_vien.khoa_hoc)) {
+          setShowCustomKhoaHoc(true);
+          setCustomKhoaHoc(studentData.sinh_vien.khoa_hoc);
+        }
       } catch (err) {
         console.error('Failed to load data', err);
         showAlert('Không thể tải thông tin sinh viên', 'error', 'Lỗi tải dữ liệu');
@@ -155,6 +174,11 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     submitData.append('ma_sinh_vien', formData.ma_sinh_vien);
     submitData.append('khoa_id', formData.khoa_id);
     submitData.append('lop_id', formData.lop_id);
+    if (showCustomKhoaHoc) {
+      submitData.append('khoa_hoc', customKhoaHoc);
+    } else if (formData.khoa_hoc) {
+      submitData.append('khoa_hoc', formData.khoa_hoc);
+    }
     submitData.append('trang_thai', formData.trang_thai);
     if (avatarFile) {
       submitData.append('avatar', avatarFile);
@@ -437,6 +461,53 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
                     <option key={c.id} value={c.id}>{c.ma_lop || c.ten_lop}</option>
                   ))}
                 </select>
+              </div>
+            </div>
+            <div className={styles.grid2Col} style={{ marginTop: '1rem' }}>
+              <div className={styles.colSpan2}>
+                <label className={styles.formLabel}>Khóa học</label>
+                {!showCustomKhoaHoc ? (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      className={`${styles.formInput} ${styles.formSelect}`}
+                      name="khoa_hoc"
+                      value={formData.khoa_hoc}
+                      onChange={handleChange}
+                      style={{ flex: 1 }}
+                    >
+                      <option value="">Chọn khóa học</option>
+                      {khoaHocOptions.map(k => (
+                        <option key={k} value={k}>{k}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomKhoaHoc(true)}
+                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#f0f0f8', border: '1px solid #c7c4d8', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#3525cd' }}
+                    >
+                      + Thêm mới
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      className={styles.formInput}
+                      type="text"
+                      value={customKhoaHoc}
+                      onChange={e => setCustomKhoaHoc(e.target.value)}
+                      placeholder="Nhập khóa học (VD: K23 (2023-2026))"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setShowCustomKhoaHoc(false); setCustomKhoaHoc(''); }}
+                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#fff0f0', border: '1px solid #fca5a5', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#dc2626' }}
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                )}
+                <small style={{ color: '#777587', marginTop: '4px', display: 'block' }}>Nếu chưa có khóa học mong muốn, nhấn “+ Thêm mới” để nhập trực tiếp.</small>
               </div>
             </div>
           </div>
