@@ -214,6 +214,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Thêm sinh viên thành công', 'data' => $user], 201);
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Error storing student: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['message' => 'Lỗi thêm sinh viên', 'error' => $e->getMessage()], 500);
         }
     }
@@ -272,6 +273,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Cập nhật sinh viên thành công', 'data' => $user]);
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Error updating student: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['message' => 'Lỗi cập nhật sinh viên', 'error' => $e->getMessage()], 500);
         }
     }

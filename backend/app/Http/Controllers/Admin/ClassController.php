@@ -21,7 +21,7 @@ class ClassController extends Controller
             'ma_lop' => 'required|string|max:20|unique:lop,ma_lop',
             'ten_lop' => 'required|string|max:100',
             'khoa_id' => 'required|exists:khoa,id',
-            'nam_nhap_hoc' => 'required|integer',
+            'khoa_hoc' => 'required|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,da_tot_nghiep',
         ]);
 
@@ -43,7 +43,7 @@ class ClassController extends Controller
             'ma_lop' => 'required|string|max:20|unique:lop,ma_lop,' . $id,
             'ten_lop' => 'required|string|max:100',
             'khoa_id' => 'required|exists:khoa,id',
-            'nam_nhap_hoc' => 'required|integer',
+            'khoa_hoc' => 'required|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,da_tot_nghiep',
         ]);
 

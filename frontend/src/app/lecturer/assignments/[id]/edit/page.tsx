@@ -144,7 +144,7 @@ export default function EditAssignmentPage() {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Quay lại lớp học phần
+            {(initialSectionId || initialData?.sectionId) ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
           </button>
           <h1 className={styles.pageTitle}>Chỉnh sửa Bài tập</h1>
           <p className={styles.pageSubtitle}>Cập nhật thông tin cho bài tập đã có</p>

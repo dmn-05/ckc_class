@@ -38,13 +38,15 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 function mapResourceFromApi(item: any) {
     const fileAttachments = item.tep_tin_bai_viet || [];
     const firstFile = fileAttachments[0]?.tep_tin;
-    const fileSize = firstFile
-        ? (firstFile.kich_thuoc / (1024 * 1024)).toFixed(1) + ' MB'
-        : (item.external_url ? 'Link' : '—');
-    const fileUrl = firstFile?.duong_dan || item.file_url || '';
-    const resourceType = mapLoaiTaiNguyen(item.loai_tai_nguyen || 'document');
+    const physicalFiles = fileAttachments.filter((attach: any) => (attach.tep_tin?.kich_thuoc ?? 0) > 0);
+    const firstPhysicalFile = physicalFiles[0]?.tep_tin;
+    const fileSize = firstPhysicalFile
+        ? (firstPhysicalFile.kich_thuoc / (1024 * 1024)).toFixed(1) + ' MB'
+        : (item.external_url || (firstFile?.kich_thuoc === 0 && firstFile?.duong_dan) ? 'Link' : '—');
+    const fileUrl = firstPhysicalFile?.duong_dan || firstFile?.duong_dan || item.file_url || '';
+    const resourceType = mapLoaiTaiNguyen(firstFile?.loai_file || item.loai_tai_nguyen || 'document');
 
-    const files = fileAttachments.map((attach: any) => ({
+    const files = physicalFiles.map((attach: any) => ({
         id: attach.tep_tin?.id,
         name: attach.tep_tin?.ten_file,
         url: attach.tep_tin?.duong_dan,
@@ -62,7 +64,7 @@ function mapResourceFromApi(item: any) {
         fileSize,
         fileUrl,
         files,
-        externalUrl: item.external_url || '',
+        externalUrl: item.external_url || (firstFile?.kich_thuoc === 0 ? firstFile?.duong_dan : '') || '',
         isVisible: item.trang_thai === 'hien_thi',
         orderNum: 0,
     };
@@ -134,7 +136,16 @@ export async function createLecturerResource(data: FormData | Record<string, any
     }
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to create resource');
+        let errMsg = err.message || 'Failed to create resource';
+        if (err.error) {
+            errMsg += `: ${err.error}`;
+        } else if (err.errors) {
+            const firstKey = Object.keys(err.errors)[0];
+            if (firstKey && Array.isArray(err.errors[firstKey])) {
+                errMsg = err.errors[firstKey][0];
+            }
+        }
+        throw new Error(errMsg);
     }
     const json = await response.json();
     return mapResourceFromApi(json.data || json);
@@ -156,7 +167,16 @@ export async function updateLecturerResource(id: string, data: FormData | Record
     }
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to update resource');
+        let errMsg = err.message || 'Failed to update resource';
+        if (err.error) {
+            errMsg += `: ${err.error}`;
+        } else if (err.errors) {
+            const firstKey = Object.keys(err.errors)[0];
+            if (firstKey && Array.isArray(err.errors[firstKey])) {
+                errMsg = err.errors[firstKey][0];
+            }
+        }
+        throw new Error(errMsg);
     }
     const json = await response.json();
     return mapResourceFromApi(json.data || json);

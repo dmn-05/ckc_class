@@ -56,16 +56,37 @@ export default function ResourceForm({
   // Sync initialData
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        title: initialData.title ?? '',
+        description: initialData.description ?? '',
+        type: initialData.type ?? 'document',
+        sectionId: initialData.sectionId ?? prev.sectionId ?? '',
+        externalUrl: initialData.externalUrl ?? '',
+      }));
     }
   }, [initialData]);
 
+  const [urlSectionId, setUrlSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId && sId !== '0') {
+      setUrlSectionId(sId);
+      if (!isEditMode) {
+        setFormData(prev => ({ ...prev, sectionId: sId }));
+      }
+    }
+  }, [isEditMode]);
+
   // Set default section if none selected and not editing
   useEffect(() => {
-    if (sections.length > 0 && !formData.sectionId && !isEditMode) {
+    if (sections.length > 0 && !formData.sectionId && !isEditMode && !urlSectionId) {
       setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
     }
-  }, [sections, formData.sectionId, isEditMode]);
+  }, [sections, formData.sectionId, isEditMode, urlSectionId]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -111,20 +132,26 @@ export default function ResourceForm({
           <select 
             name="sectionId"
             className={styles.formSelect}
-            value={formData.sectionId}
+            value={formData.sectionId || ''}
             onChange={handleChange}
             required
-            disabled={isEditMode}
+            disabled={isEditMode || Boolean(urlSectionId && urlSectionId !== '0') || Boolean(initialData?.sectionId && initialData.sectionId !== '0')}
           >
             {sections.map(sec => (
               <option key={sec.id} value={sec.id}>{sec.name} ({sec.code})</option>
             ))}
             {sections.length === 0 && (
-              <option value={formData.sectionId}>
+              <option value={formData.sectionId || ''}>
                 {isEditMode ? `Lớp ID: ${formData.sectionId}` : 'Không có lớp học phần nào'}
               </option>
             )}
           </select>
+          {!isEditMode && Boolean(urlSectionId && urlSectionId !== '0') && (
+            <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Đang thêm tài nguyên cho lớp học phần hiện tại (không thể thay đổi).</small>
+          )}
+          {isEditMode && (
+            <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Lớp học phần không thể thay đổi khi chỉnh sửa.</small>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -133,7 +160,7 @@ export default function ResourceForm({
             type="text" 
             name="title"
             className={styles.formInput} 
-            value={formData.title}
+            value={formData.title || ''}
             onChange={handleChange}
             placeholder="Nhập tiêu đề (VD: Slide Bài giảng Chương 1)"
             required
@@ -145,7 +172,7 @@ export default function ResourceForm({
           <select 
             name="type"
             className={styles.formSelect}
-            value={formData.type}
+            value={formData.type || 'document'}
             onChange={handleChange}
             required
           >
@@ -162,7 +189,7 @@ export default function ResourceForm({
           <textarea 
             name="description"
             className={styles.formTextarea} 
-            value={formData.description}
+            value={formData.description || ''}
             onChange={handleChange}
             placeholder="Nhập mô tả (không bắt buộc)"
             rows={4}
@@ -170,22 +197,24 @@ export default function ResourceForm({
         </div>
 
         {formData.type === 'link' ? (
-          <div className={styles.formGroup}>
+          <div key="external-url-group" className={styles.formGroup}>
             <label className={styles.formLabel}>Đường dẫn (URL) *</label>
             <input 
+              key="external-url-input"
               type="url" 
               name="externalUrl"
               className={styles.formInput} 
-              value={formData.externalUrl}
+              value={formData.externalUrl || ''}
               onChange={handleChange}
               placeholder="https://..."
               required
             />
           </div>
         ) : (
-          <div className={styles.formGroup}>
+          <div key="file-upload-group" className={styles.formGroup}>
             <label className={styles.formLabel}>Đính kèm File (Tải lên)</label>
             <input 
+              key="file-upload-input"
               type="file" 
               multiple
               className={styles.formInput} 

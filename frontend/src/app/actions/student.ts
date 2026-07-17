@@ -74,7 +74,16 @@ export async function createStudent(data: FormData) {
         });
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Failed to create student');
+            let errMsg = errData.message || 'Failed to create student';
+            if (errData.error) {
+                errMsg += `: ${errData.error}`;
+            } else if (errData.errors) {
+                const firstKey = Object.keys(errData.errors)[0];
+                if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                    errMsg = errData.errors[firstKey][0];
+                }
+            }
+            throw new Error(errMsg);
         }
         return await response.json();
     } catch (error) {
@@ -91,7 +100,16 @@ export async function updateStudent(id: string, data: FormData) {
         });
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Failed to update student');
+            let errMsg = errData.message || 'Failed to update student';
+            if (errData.error) {
+                errMsg += `: ${errData.error}`;
+            } else if (errData.errors) {
+                const firstKey = Object.keys(errData.errors)[0];
+                if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                    errMsg = errData.errors[firstKey][0];
+                }
+            }
+            throw new Error(errMsg);
         }
         return await response.json();
     } catch (error) {

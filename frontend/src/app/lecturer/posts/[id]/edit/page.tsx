@@ -65,10 +65,25 @@ export default function LecturerEditPostPage() {
               router.push('/lecturer/posts');
             }
           }}
-          style={{ color: '#3525cd', textDecoration: 'none', fontSize: '14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
+          style={{
+            backgroundColor: '#ffffff',
+            color: '#464555',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            border: '1px solid #c7c4d8',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
-          {targetSectionId && targetSectionId !== '0' ? 'Quay lại lớp học phần' : 'Quay lại Quản lý bài viết'}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {targetSectionId && targetSectionId !== '0' ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
         </button>
       </div>
       <div style={{ marginBottom: '32px', marginTop: '16px' }}>

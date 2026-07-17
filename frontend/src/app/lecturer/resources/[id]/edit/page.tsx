@@ -115,14 +115,14 @@ export default function EditResourcePage() {
       <div className={styles.pageHeader}>
         <div>
           <button 
-            className={styles.btnCancel} 
-            style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: 'none', background: 'none', cursor: 'pointer' }}
+            className={styles.btnSecondary} 
+            style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             onClick={handleBack}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Quay lại lớp học phần
+            {(initialSectionId || initialData?.sectionId) ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
           </button>
           <h1 className={styles.pageTitle}>Chỉnh sửa Tài nguyên</h1>
         </div>

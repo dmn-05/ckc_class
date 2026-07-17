@@ -37,6 +37,7 @@ class ResourceController extends Controller
         $resources = BaiViet::with(['lopHocPhan.monHoc', 'tepTinBaiViet.tepTin', 'nguoiTao'])
             ->where('loai_bai_viet', 'tai_lieu')
             ->whereIn('lop_hoc_phan_id', $sectionIds)
+            ->where('trang_thai', '!=', 'da_xoa')
             ->orderBy('ngay_tao', 'desc')
             ->get();
 
@@ -90,38 +91,53 @@ class ResourceController extends Controller
             'trang_thai' => $validated['trang_thai'] ?? 'hien_thi',
         ]);
 
-        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        if ($request->hasFile('files')) {
+            $cloudinary = env('CLOUDINARY_URL') ? new \Cloudinary\Cloudinary(env('CLOUDINARY_URL')) : null;
             foreach ($request->file('files') as $file) {
                 if ($file->getSize() === 0) continue;
                 $originalFileName = $file->getClientOriginalName();
-                try {
-                    $result = $cloudinary->uploadApi()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder' => 'files',
-                            'resource_type' => 'auto',
-                            'filename_override' => $originalFileName,
-                            'use_filename' => true,
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    $result = $cloudinary->uploadApi()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder' => 'files',
-                            'resource_type' => 'raw',
-                            'filename_override' => $originalFileName,
-                            'use_filename' => true,
-                        ]
-                    );
+                $secureUrl = null;
+                if ($cloudinary) {
+                    try {
+                        $result = $cloudinary->uploadApi()->upload(
+                            $file->getRealPath(),
+                            [
+                                'folder' => 'files',
+                                'resource_type' => 'auto',
+                                'filename_override' => $originalFileName,
+                                'use_filename' => true,
+                                'chunk_size' => 6000000,
+                            ]
+                        );
+                        $secureUrl = $result['secure_url'];
+                    } catch (\Exception $e) {
+                        try {
+                            $result = $cloudinary->uploadApi()->upload(
+                                $file->getRealPath(),
+                                [
+                                    'folder' => 'files',
+                                    'resource_type' => 'raw',
+                                    'filename_override' => $originalFileName,
+                                    'use_filename' => true,
+                                    'chunk_size' => 6000000,
+                                ]
+                            );
+                            $secureUrl = $result['secure_url'];
+                        } catch (\Exception $ex) {
+                            \Log::warning('Cloudinary upload failed for resource, falling back to local storage: ' . $ex->getMessage());
+                        }
+                    }
+                }
+                if (!$secureUrl) {
+                    $path = $file->store('resources', 'public');
+                    $secureUrl = '/storage/' . $path;
                 }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file' => $file->getClientOriginalName(),
-                    'ten_file_luu' => basename($result['secure_url']),
-                    'duong_dan' => $result['secure_url'],
-                    'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
+                    'ten_file_luu' => basename($secureUrl),
+                    'duong_dan' => $secureUrl,
+                    'loai_file' => $validated['loai_tai_nguyen'] ?? ($file->getClientOriginalExtension() ?: 'document'),
                     'kich_thuoc' => $file->getSize(),
                     'nguoi_tao_id' => Auth::id(),
                     'trang_thai' => 'dang_su_dung',
@@ -132,6 +148,22 @@ class ResourceController extends Controller
                     'bai_viet_id' => $post->id,
                 ]);
             }
+        }
+
+        if (!$request->hasFile('files') || count($request->file('files', [])) === 0) {
+            $tepTin = \App\Models\TepTin::create([
+                'ten_file' => $validated['tieu_de'],
+                'ten_file_luu' => 'resource_' . time(),
+                'duong_dan' => $validated['external_url'] ?? '',
+                'loai_file' => $validated['loai_tai_nguyen'] ?? 'document',
+                'kich_thuoc' => 0,
+                'nguoi_tao_id' => Auth::id(),
+                'trang_thai' => 'dang_su_dung',
+            ]);
+            \App\Models\TepTinBaiViet::create([
+                'tep_tin_id' => $tepTin->id,
+                'bai_viet_id' => $post->id,
+            ]);
         }
 
         \App\Helpers\NotificationHelper::createForClass(
@@ -183,7 +215,7 @@ class ResourceController extends Controller
             'external_url' => 'nullable|url',
             'trang_thai' => 'sometimes|string|in:hien_thi,an',
             'files' => 'nullable|array',
-            'files.*' => 'nullable|file',
+            'files.*' => 'nullable|file|max:51200',
             'remove_file_ids' => 'nullable|array',
             'remove_file_ids.*' => 'integer',
         ]);
@@ -194,6 +226,15 @@ class ResourceController extends Controller
         if (isset($validated['trang_thai'])) $updateData['trang_thai'] = $validated['trang_thai'];
         if (isset($validated['loai_tai_nguyen'])) $updateData['loai_tai_nguyen'] = $validated['loai_tai_nguyen'];
         if ($request->has('external_url')) $updateData['external_url'] = $validated['external_url'];
+
+        // Update existing file records if type or link changed
+        $tepTinIds = \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->pluck('tep_tin_id');
+        if (isset($validated['loai_tai_nguyen']) && $tepTinIds->isNotEmpty()) {
+            \App\Models\TepTin::whereIn('id', $tepTinIds)->update(['loai_file' => $validated['loai_tai_nguyen']]);
+        }
+        if ($request->has('external_url') && $tepTinIds->isNotEmpty()) {
+            \App\Models\TepTin::whereIn('id', $tepTinIds)->where('kich_thuoc', 0)->update(['duong_dan' => $validated['external_url'] ?? '']);
+        }
 
         // Handle file removals
         if (!empty($validated['remove_file_ids'])) {
@@ -206,22 +247,53 @@ class ResourceController extends Controller
         }
 
         // Handle new file uploads
-        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        if ($request->hasFile('files')) {
+            $cloudinary = env('CLOUDINARY_URL') ? new \Cloudinary\Cloudinary(env('CLOUDINARY_URL')) : null;
             foreach ($request->file('files') as $file) {
-                $result = $cloudinary->uploadApi()->upload(
-                    $file->getRealPath(),
-                    [
-                        'folder' => 'files',
-                        'resource_type' => 'auto'
-                    ]
-                );
+                if ($file->getSize() === 0) continue;
+                $originalFileName = $file->getClientOriginalName();
+                $secureUrl = null;
+                if ($cloudinary) {
+                    try {
+                        $result = $cloudinary->uploadApi()->upload(
+                            $file->getRealPath(),
+                            [
+                                'folder'            => 'files',
+                                'resource_type'     => 'auto',
+                                'filename_override' => $originalFileName,
+                                'use_filename'      => true,
+                                'chunk_size'        => 6000000,
+                            ]
+                        );
+                        $secureUrl = $result['secure_url'];
+                    } catch (\Exception $e) {
+                        try {
+                            $result = $cloudinary->uploadApi()->upload(
+                                $file->getRealPath(),
+                                [
+                                    'folder'            => 'files',
+                                    'resource_type'     => 'raw',
+                                    'filename_override' => $originalFileName,
+                                    'use_filename'      => true,
+                                    'chunk_size'        => 6000000,
+                                ]
+                            );
+                            $secureUrl = $result['secure_url'];
+                        } catch (\Exception $ex) {
+                            \Log::warning('Cloudinary upload failed for resource update, falling back to local storage: ' . $ex->getMessage());
+                        }
+                    }
+                }
+                if (!$secureUrl) {
+                    $path = $file->store('resources', 'public');
+                    $secureUrl = '/storage/' . $path;
+                }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file' => $file->getClientOriginalName(),
-                    'ten_file_luu' => basename($result['secure_url']),
-                    'duong_dan' => $result['secure_url'],
-                    'loai_file' => $file->getClientOriginalExtension() ?: 'unknown',
+                    'ten_file_luu' => basename($secureUrl),
+                    'duong_dan' => $secureUrl,
+                    'loai_file' => $validated['loai_tai_nguyen'] ?? ($file->getClientOriginalExtension() ?: 'document'),
                     'kich_thuoc' => $file->getSize(),
                     'nguoi_tao_id' => Auth::id(),
                     'trang_thai' => 'dang_su_dung',
@@ -232,6 +304,24 @@ class ResourceController extends Controller
                     'bai_viet_id' => $post->id,
                 ]);
             }
+        }
+
+        // Check if resource ended up with no file attached and create/ensure one if needed
+        $remainingTepTinIds = \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->pluck('tep_tin_id');
+        if ($remainingTepTinIds->isEmpty() && (isset($validated['loai_tai_nguyen']) || $request->has('external_url'))) {
+            $tepTin = \App\Models\TepTin::create([
+                'ten_file' => $post->tieu_de,
+                'ten_file_luu' => 'resource_' . time(),
+                'duong_dan' => $validated['external_url'] ?? '',
+                'loai_file' => $validated['loai_tai_nguyen'] ?? 'document',
+                'kich_thuoc' => 0,
+                'nguoi_tao_id' => Auth::id(),
+                'trang_thai' => 'dang_su_dung',
+            ]);
+            \App\Models\TepTinBaiViet::create([
+                'tep_tin_id' => $tepTin->id,
+                'bai_viet_id' => $post->id,
+            ]);
         }
 
         if (!empty($updateData)) {
@@ -256,10 +346,9 @@ class ResourceController extends Controller
             abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
         }
 
-        \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->delete();
-        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->delete();
-
-        $post->delete();
+        // Xóa mềm: đổi trạng thái sang 'da_xoa' thay vì xóa cứng
+        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->update(['trang_thai' => 'da_xoa']);
+        $post->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Resource deleted successfully']);
     }

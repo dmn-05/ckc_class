@@ -14,6 +14,7 @@ class PostController extends Controller
         // For testing purposes, we might just get all posts by this lecturer
         // In reality, it should be filtered by lop_hoc_phan_id to show all posts in a class
         $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+            ->where('trang_thai', '!=', 'da_xoa')
             ->whereHas('nguoiTao', function($q) {
                 $q->whereIn('vai_tro_id', [1, 2]); // Chỉ hiển thị bài của Admin(1) hoặc Giảng viên(2)
             });
@@ -163,11 +164,9 @@ class PostController extends Controller
     {
         $post = BaiViet::findOrFail($id);
         
-        // Delete related records to prevent foreign key constraint violations
-        \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->delete();
-        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->delete();
-
-        $post->delete();
+        // Xóa mềm: đổi trạng thái sang 'da_xoa'
+        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->update(['trang_thai' => 'da_xoa']);
+        $post->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Post deleted successfully']);
     }

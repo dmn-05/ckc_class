@@ -39,6 +39,7 @@ class DashboardController extends Controller
             ->pluck('bai_kiem_tra_id');
 
         $pendingQuizzes = BaiKiemTra::whereIn('lop_hoc_phan_id', $sectionIds)
+            ->where('trang_thai', '!=', 'da_xoa')
             ->whereNotIn('id', $attemptedQuizIds)
             ->count();
 

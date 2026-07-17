@@ -14,6 +14,41 @@ use App\Http\Controllers\Admin\ClassController;
 
 
 Route::get('/public/stats', [AuthController::class, 'publicStats']);
+Route::get('/public/download', function (Request $request) {
+    $url = $request->query('url');
+    $filename = $request->query('filename', 'download');
+    
+    if (!$url) {
+        return response()->json(['message' => 'URL missing'], 400);
+    }
+    
+    // Check if local storage file
+    $path = preg_replace('/^.*?\/storage\//', '', $url);
+    $fullStoragePath = storage_path('app/public/' . $path);
+    
+    if (file_exists($fullStoragePath) && is_file($fullStoragePath)) {
+        return response()->download($fullStoragePath, $filename, [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Expose-Headers' => 'Content-Disposition',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename)
+        ]);
+    }
+    
+    // If it's a remote Cloudinary URL, inject fl_attachment for forced download with original filename
+    if (str_contains($url, 'res.cloudinary.com') && str_contains($url, '/upload/')) {
+        $cleanUrl = preg_replace('/\/fl_attachment:[^\/]+\//', '/', $url);
+        $cleanUrl = str_replace('/fl_attachment/', '/', $cleanUrl);
+        $attachmentUrl = preg_replace('/\/upload\//', '/upload/fl_attachment:' . rawurlencode($filename) . '/', $cleanUrl, 1);
+        return redirect()->away($attachmentUrl);
+    }
+    
+    // For any other external URL, redirect
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+        return redirect()->away($url);
+    }
+    
+    return response()->json(['message' => 'File not found on server'], 404);
+});
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password/verify-email', [AuthController::class, 'verifyForgotEmail']);
 Route::post('/forgot-password/verify-cccd', [AuthController::class, 'verifyForgotCccd']);

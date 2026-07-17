@@ -87,6 +87,7 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
                 onSave={handleSave}
                 onClose={handleBack}
                 sections={sections}
+                isEditMode={true}
             />
         </div>
     );

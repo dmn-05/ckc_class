@@ -212,10 +212,25 @@ export default function LecturerClassroomClient({
     <div className={styles.pageContainer} style={{ padding: '24px', maxWidth: '1280px', margin: '0 auto' }}>
       {/* Back Button & Action Toolbar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <Link href="/lecturer/sections" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3525cd', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
+        <Link
+          href="/lecturer/sections"
+          style={{
+            backgroundColor: '#ffffff',
+            color: '#464555',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            border: '1px solid #c7c4d8',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Quay lại danh sách lớp học phần
         </Link>

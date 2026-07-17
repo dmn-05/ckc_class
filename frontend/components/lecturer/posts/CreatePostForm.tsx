@@ -285,25 +285,6 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
               </div>
             )}
 
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-              <div className={styles.formGroup}>
-                <h3 className={styles.uploadTitle}>Tệp đính kèm</h3>
-                <label className={styles.uploadArea}>
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange} 
-                    style={{ display: 'none' }}
-                  />
-                  <div className={styles.uploadContent}>
-                    <span className={`material-symbols-outlined ${styles.uploadIcon}`}>cloud_upload</span>
-                    <span className={styles.uploadText}>
-                      {formData.file ? formData.file.name : 'Nhấp để chọn tệp'}
-                    </span>
-                    <span className={styles.uploadHint}>Hỗ trợ PDF, DOCX, XLSX, hình ảnh (Tối đa 10MB)</span>
-                  </div>
-                </label>
-              </div>
-            </div>
 
             {submitStatus === 'error' && (
               <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fef2f2', color: '#dc2626', borderRadius: '0.5rem', fontSize: '0.875rem' }}>

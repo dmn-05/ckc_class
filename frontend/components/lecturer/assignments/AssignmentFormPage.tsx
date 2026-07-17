@@ -63,13 +63,25 @@ export default function AssignmentFormPage({
   const [removeFile, setRemoveFile] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [urlSectionId, setUrlSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId && sId !== '0') {
+      setUrlSectionId(sId);
+      if (!isEditMode) {
+        setFormData(prev => ({ ...prev, sectionId: sId }));
+      }
+    }
+  }, [isEditMode]);
 
   // Default section
   useEffect(() => {
-    if (sections.length > 0 && !formData.sectionId && !isEditMode) {
+    if (sections.length > 0 && !formData.sectionId && !isEditMode && !urlSectionId) {
       setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
     }
-  }, [sections, formData.sectionId, isEditMode]);
+  }, [sections, formData.sectionId, isEditMode, urlSectionId]);
 
   // Sync initialData
   useEffect(() => {
@@ -201,7 +213,7 @@ export default function AssignmentFormPage({
               value={formData.sectionId}
               onChange={handleChange}
               required
-              disabled={isEditMode}
+              disabled={isEditMode || Boolean(urlSectionId && urlSectionId !== '0') || Boolean(initialData?.sectionId && initialData.sectionId !== '0')}
             >
               {sections.map(sec => (
                 <option key={sec.id} value={sec.id}>
@@ -214,6 +226,12 @@ export default function AssignmentFormPage({
                 </option>
               )}
             </select>
+            {!isEditMode && Boolean(urlSectionId && urlSectionId !== '0') && (
+              <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Đang thêm bài tập cho lớp học phần hiện tại (không thể thay đổi).</small>
+            )}
+            {isEditMode && (
+              <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Lớp học phần không thể thay đổi khi chỉnh sửa.</small>
+            )}
           </div>
 
           <div className={styles.formGroup}>

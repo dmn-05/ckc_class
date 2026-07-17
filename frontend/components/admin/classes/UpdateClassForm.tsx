@@ -20,9 +20,18 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
     ma_lop: '',
     ten_lop: '',
     khoa_id: '',
-    nam_nhap_hoc: new Date().getFullYear(),
+    khoa_hoc: '',
     trang_thai: 'dang_hoc'
   });
+
+  const [khoaHocOptions] = useState<string[]>(() =>
+    Array.from({ length: 30 }, (_, i) => {
+      const startYear = 2000 + i + 1;
+      return `K${i + 1} (${startYear}-${startYear + 3})`;
+    })
+  );
+  const [showCustomKhoaHoc, setShowCustomKhoaHoc] = useState(false);
+  const [customKhoaHoc, setCustomKhoaHoc] = useState('');
 
   useEffect(() => {
     getFaculties().then(data => {
@@ -31,11 +40,20 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
 
     if (classId) {
       getClassById(classId).then(data => {
+        const khoaHoc = data.khoa_hoc ? String(data.khoa_hoc) : '';
+        const optionsList = Array.from({ length: 30 }, (_, i) => {
+          const s = 2000 + i + 1;
+          return `K${i + 1} (${s}-${s + 3})`;
+        });
+        if (khoaHoc && !optionsList.includes(khoaHoc)) {
+          setShowCustomKhoaHoc(true);
+          setCustomKhoaHoc(khoaHoc);
+        }
         setFormData({
           ma_lop: data.ma_lop || '',
           ten_lop: data.ten_lop || '',
           khoa_id: data.khoa_id ? data.khoa_id.toString() : '',
-          nam_nhap_hoc: data.nam_nhap_hoc || new Date().getFullYear(),
+          khoa_hoc: optionsList.includes(khoaHoc) ? khoaHoc : '',
           trang_thai: data.trang_thai || 'dang_hoc'
         });
       }).catch(console.error);
@@ -44,7 +62,7 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'nam_nhap_hoc' ? parseInt(value) || new Date().getFullYear() : value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,8 +73,11 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
     setSubmitStatus('idle');
     setErrorMessage('');
 
+    const finalKhoaHoc = showCustomKhoaHoc ? customKhoaHoc : formData.khoa_hoc;
+    const submitData = { ...formData, khoa_hoc: finalKhoaHoc };
+
     try {
-      await updateClass(classId, formData);
+      await updateClass(classId, submitData);
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/classes');
@@ -118,15 +139,49 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Khóa (Năm nhập học)</label>
-                <input 
-                  type="number" 
-                  name="nam_nhap_hoc"
-                  className={styles.formInput} 
-                  placeholder="Ví dụ: 2024" 
-                  value={formData.nam_nhap_hoc}
-                  onChange={handleChange}
-                  required
-                />
+                {!showCustomKhoaHoc ? (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      className={`${styles.formInput} ${styles.formSelect}`}
+                      name="khoa_hoc"
+                      value={formData.khoa_hoc}
+                      onChange={handleChange}
+                      style={{ flex: 1 }}
+                      required
+                    >
+                      <option value="">Chọn khóa học</option>
+                      {khoaHocOptions.map(k => (
+                        <option key={k} value={k}>{k}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomKhoaHoc(true)}
+                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#f0f0f8', border: '1px solid #c7c4d8', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#3525cd' }}
+                    >
+                      + Thêm mới
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      className={styles.formInput}
+                      type="text"
+                      value={customKhoaHoc}
+                      onChange={e => setCustomKhoaHoc(e.target.value)}
+                      placeholder="Nhập khóa học tùy chỉnh"
+                      style={{ flex: 1 }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setShowCustomKhoaHoc(false); setCustomKhoaHoc(''); }}
+                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#f0f0f8', border: '1px solid #c7c4d8', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#777587' }}
+                    >
+                      Chọn từ danh sách
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
