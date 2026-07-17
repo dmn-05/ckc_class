@@ -326,14 +326,23 @@ export default function AssignmentDetailPage() {
             const formData = new FormData();
             formData.append('file', file);
             if (note) formData.append('note', note);
-            
-            const res = await import('@/app/actions/student-assignment').then(m => m.submitStudentAssignment(id, formData));
-            if (res.success) {
+
+            // Gọi thẳng Laravel API từ browser để tránh giới hạn Next.js server action
+            const { authHeaders } = await import('@/lib/auth');
+            const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+            const res = await fetch(`${API_BASE_URL}/student/assignments/${id}/submit`, {
+              method: 'POST',
+              headers: authHeaders(),
+              body: formData,
+            });
+
+            const data = await res.json();
+            if (res.ok) {
               showToast('Nộp bài thành công!', 'success');
               setIsSubmitModalOpen(false);
-              loadData(); // Tải lại dữ liệu thay vì reload trang
+              loadData();
             } else {
-              showToast(res.message || 'Có lỗi xảy ra khi nộp bài.', 'error');
+              showToast(data.message || 'Có lỗi xảy ra khi nộp bài.', 'error');
             }
           } catch (err) {
             console.error(err);

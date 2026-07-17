@@ -5,7 +5,7 @@ import styles from '@/components/lecturer/posts/PostsManagement.module.css';
 import PostSummary from '@/components/lecturer/posts/PostSummary';
 import CommentInput from '@/components/lecturer/posts/CommentInput';
 import CommentThread, { CommentData } from '@/components/lecturer/posts/CommentThread';
-
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -27,6 +27,8 @@ export default function LecturerPostDetailPage() {
     role: 'teacher',
     avatar: null
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [initialSectionId, setInitialSectionId] = React.useState<string>('');
   const fetchedRef = React.useRef(false);
@@ -266,26 +268,7 @@ export default function LecturerPostDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                const itemLabel = postData.category === 'Tài liệu' ? 'tài nguyên' : postData.category === 'Bài tập' ? 'bài tập' : 'bài viết';
-                if (window.confirm(`Bạn có chắc chắn muốn xóa ${itemLabel} này không?`)) {
-                  const endpoint = postData.category === 'Tài liệu' ? 'resources' : 'posts';
-                  fetch(`${API_BASE_URL}/lecturer/${endpoint}/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Accept': 'application/json', ...authHeaders() }
-                  })
-                  .then(res => {
-                    if (!res.ok) throw new Error('Xóa thất bại');
-                    const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
-                    if (targetSectionId && targetSectionId !== '0') {
-                      router.push(`/lecturer/sections/${targetSectionId}`);
-                    } else {
-                      router.push('/lecturer/posts');
-                    }
-                  })
-                  .catch(err => alert(err.message || `Lỗi khi xóa ${itemLabel}`));
-                }
-              }}
+              onClick={() => setShowDeleteConfirm(true)}
               style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '0.5rem', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
@@ -337,6 +320,45 @@ export default function LecturerPostDetailPage() {
             ))}
 
         </section>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title={`Xác nhận xóa ${postData?.category === 'Tài liệu' ? 'tài nguyên' : postData?.category === 'Bài tập' ? 'bài tập' : 'bài viết'}`}
+        message={
+          <span>
+            Bạn có chắc chắn muốn xóa <strong>{postData?.title}</strong> không? Toàn bộ dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
+          </span>
+        }
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={isDeleting}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          const itemLabel = postData?.category === 'Tài liệu' ? 'tài nguyên' : postData?.category === 'Bài tập' ? 'bài tập' : 'bài viết';
+          const endpoint = postData?.category === 'Tài liệu' ? 'resources' : 'posts';
+          setIsDeleting(true);
+          fetch(`${API_BASE_URL}/lecturer/${endpoint}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json', ...authHeaders() }
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Xóa thất bại');
+            setShowDeleteConfirm(false);
+            const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
+            if (targetSectionId && targetSectionId !== '0') {
+              router.push(`/lecturer/sections/${targetSectionId}`);
+            } else {
+              router.push('/lecturer/posts');
+            }
+          })
+          .catch(err => {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+            alert(err.message || `Lỗi khi xóa ${itemLabel}`);
+          });
+        }}
+      />
     </div>
   );
 }

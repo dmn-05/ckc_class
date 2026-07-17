@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lop;
 use App\Models\SinhVien;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClassController extends Controller
 {

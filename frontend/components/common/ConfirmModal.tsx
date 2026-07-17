@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ConfirmModal.module.css';
 
 export interface ConfirmModalProps {
@@ -28,7 +29,13 @@ export default function ConfirmModal({
   onCancel,
   isLoading = false,
 }: ConfirmModalProps) {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted || typeof document === 'undefined') return null;
 
   const getIconBoxClass = () => {
     if (variant === 'danger') return styles.iconBoxDanger;
@@ -48,7 +55,7 @@ export default function ConfirmModal({
     return 'help';
   };
 
-  return (
+  return createPortal(
     <div className={styles.backdrop} onClick={onCancel}>
       <div
         className={styles.modalCard}
@@ -85,6 +92,7 @@ export default function ConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

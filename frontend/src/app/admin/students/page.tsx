@@ -142,7 +142,7 @@ export default function AdminStudentsPage() {
             <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
           ) : (
             <>
-              <StudentsList students={currentStudents} />
+              <StudentsList students={currentStudents} onDeleteSuccess={loadData} />
               <StudentsPagination 
                 currentPage={currentPage}
                 totalPages={totalPages}

@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './AlertModal.module.css';
 
 export interface AlertModalProps {
@@ -20,7 +21,13 @@ export default function AlertModal({
   buttonText = 'Đã hiểu',
   onClose,
 }: AlertModalProps) {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted || typeof document === 'undefined') return null;
 
   const getDefaultTitle = () => {
     if (title) return title;
@@ -62,7 +69,7 @@ export default function AlertModal({
     }
   };
 
-  return (
+  return createPortal(
     <div className={styles.backdrop} onClick={onClose}>
       <div
         className={styles.modalCard}
@@ -90,6 +97,7 @@ export default function AlertModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

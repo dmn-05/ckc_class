@@ -12,33 +12,22 @@ export function formatFileUrl(url?: string | null): string {
 
 export async function downloadFile(url: string, fileName: string) {
     if (!url) return;
-    const cleanUrl = formatFileUrl(url.replace('/fl_attachment/', '/'));
+    const formattedUrl = formatFileUrl(url);
     const targetFileName = fileName || 'download';
+
+    // Strip any existing fl_attachment transform so backend can re-inject correctly
+    const cleanUrl = formattedUrl
+        .replace(/\/fl_attachment:[^/]+\//, '/')
+        .replace(/\/fl_attachment\//, '/');
+
     const downloadEndpoint = `${API_BASE_URL}/public/download?url=${encodeURIComponent(cleanUrl)}&filename=${encodeURIComponent(targetFileName)}`;
 
-    try {
-        const response = await fetch(downloadEndpoint);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = targetFileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        console.warn('Direct fetch download failed, falling back to download endpoint redirection:', error);
-        const a = document.createElement('a');
-        a.href = downloadEndpoint;
-        a.download = targetFileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
+    const a = document.createElement('a');
+    a.href = downloadEndpoint;
+    a.download = targetFileName;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }

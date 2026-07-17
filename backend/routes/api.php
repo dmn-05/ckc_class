@@ -34,11 +34,11 @@ Route::get('/public/download', function (Request $request) {
         ]);
     }
     
-    // If it's a remote Cloudinary URL, inject fl_attachment for forced download with original filename
+    // If it's a remote Cloudinary URL, inject fl_attachment for forced download
     if (str_contains($url, 'res.cloudinary.com') && str_contains($url, '/upload/')) {
         $cleanUrl = preg_replace('/\/fl_attachment:[^\/]+\//', '/', $url);
         $cleanUrl = str_replace('/fl_attachment/', '/', $cleanUrl);
-        $attachmentUrl = preg_replace('/\/upload\//', '/upload/fl_attachment:' . rawurlencode($filename) . '/', $cleanUrl, 1);
+        $attachmentUrl = preg_replace('/\/upload\//', '/upload/fl_attachment/', $cleanUrl, 1);
         return redirect()->away($attachmentUrl);
     }
     

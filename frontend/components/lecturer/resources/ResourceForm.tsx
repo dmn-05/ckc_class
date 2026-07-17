@@ -178,7 +178,6 @@ export default function ResourceForm({
           >
             <option value="document">Tài liệu (PDF, Word...)</option>
             <option value="video">Video bài giảng</option>
-            <option value="link">Liên kết ngoài (Link)</option>
             <option value="image">Hình ảnh</option>
             <option value="other">Khác</option>
           </select>
