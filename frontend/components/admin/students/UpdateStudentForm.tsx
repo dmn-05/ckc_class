@@ -19,7 +19,6 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
   const [isResetting, setIsResetting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Modals state
   const [alertConfig, setAlertConfig] = useState<{
     isOpen: boolean;
     title?: string;
@@ -55,17 +54,9 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     khoa_id: '',
     lop_id: '',
     khoa_hoc: '',
-    trang_thai: 'dang_hoat_dong',
+    trang_thai: 'dang_hoc',
     anh_dai_dien: ''
   });
-  const [khoaHocOptions] = useState<string[]>(() => 
-    Array.from({ length: 30 }, (_, i) => {
-      const startYear = 2000 + i + 1;
-      return `K${i + 1} (${startYear}-${startYear + 3})`;
-    })
-  );
-  const [showCustomKhoaHoc, setShowCustomKhoaHoc] = useState(false);
-  const [customKhoaHoc, setCustomKhoaHoc] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,6 +69,13 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         setFaculties(facs);
         setClasses(cls);
 
+        const lopId = studentData.sinh_vien?.lop_id?.toString() || '';
+        // Lấy khóa học từ lớp tương ứng, ưu tiên dữ liệu từ lớp
+        const matchedLop = cls.find((c: any) => c.id.toString() === lopId);
+        const khoaHoc = matchedLop?.khoa_hoc
+          ? String(matchedLop.khoa_hoc)
+          : (studentData.sinh_vien?.khoa_hoc || '');
+
         setFormData({
           ho_ten: studentData.ho_ten || '',
           email: studentData.email || '',
@@ -88,20 +86,11 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           gioi_tinh: studentData.gioi_tinh || studentData.sinh_vien?.gioi_tinh || 'nam',
           ma_sinh_vien: studentData.sinh_vien?.ma_sinh_vien || '',
           khoa_id: studentData.sinh_vien?.khoa_id?.toString() || '',
-          lop_id: studentData.sinh_vien?.lop_id?.toString() || '',
-          khoa_hoc: studentData.sinh_vien?.khoa_hoc || '',
+          lop_id: lopId,
+          khoa_hoc: khoaHoc,
           trang_thai: studentData.sinh_vien?.trang_thai || 'dang_hoc',
           anh_dai_dien: studentData.anh_dai_dien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(studentData.ho_ten)
         });
-        // Set custom if not in list
-        const optionsList = Array.from({ length: 30 }, (_, i) => {
-          const s = 2000 + i + 1;
-          return `K${i + 1} (${s}-${s + 3})`;
-        });
-        if (studentData.sinh_vien?.khoa_hoc && !optionsList.includes(studentData.sinh_vien.khoa_hoc)) {
-          setShowCustomKhoaHoc(true);
-          setCustomKhoaHoc(studentData.sinh_vien.khoa_hoc);
-        }
       } catch (err) {
         console.error('Failed to load data', err);
         showAlert('Không thể tải thông tin sinh viên', 'error', 'Lỗi tải dữ liệu');
@@ -122,11 +111,20 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
       return;
     }
     if (name === 'khoa_id') {
-      const filteredClasses = classes.filter(c => c.khoa_id.toString() === value);
+      const filteredCls = classes.filter(c => c.khoa_id.toString() === value);
+      const defaultLop = filteredCls.length > 0 ? filteredCls[0] : null;
       setFormData(prev => ({
         ...prev,
         [name]: value,
-        lop_id: filteredClasses.length > 0 ? filteredClasses[0].id.toString() : ''
+        lop_id: defaultLop ? defaultLop.id.toString() : '',
+        khoa_hoc: defaultLop?.khoa_hoc ? String(defaultLop.khoa_hoc) : '',
+      }));
+    } else if (name === 'lop_id') {
+      const selectedLop = classes.find(c => c.id.toString() === value);
+      setFormData(prev => ({
+        ...prev,
+        lop_id: value,
+        khoa_hoc: selectedLop?.khoa_hoc ? String(selectedLop.khoa_hoc) : '',
       }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -148,13 +146,11 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate số điện thoại phải đủ 10 số nếu có nhập
     if (formData.so_dien_thoai && !/^\d{10}$/.test(formData.so_dien_thoai.trim())) {
       showAlert('Số điện thoại phải nhập đúng 10 chữ số.', 'warning', 'Kiểm tra Số điện thoại');
       return;
     }
 
-    // Validate CCCD nếu nhập phải 12 số
     if (formData.cccd && !/^\d{12}$/.test(formData.cccd.trim())) {
       showAlert('Số Căn cước công dân (CCCD) phải nhập đúng 12 chữ số.', 'warning', 'Kiểm tra Số CCCD');
       return;
@@ -174,15 +170,9 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     submitData.append('ma_sinh_vien', formData.ma_sinh_vien);
     submitData.append('khoa_id', formData.khoa_id);
     submitData.append('lop_id', formData.lop_id);
-    if (showCustomKhoaHoc) {
-      submitData.append('khoa_hoc', customKhoaHoc);
-    } else if (formData.khoa_hoc) {
-      submitData.append('khoa_hoc', formData.khoa_hoc);
-    }
+    if (formData.khoa_hoc) submitData.append('khoa_hoc', formData.khoa_hoc);
     submitData.append('trang_thai', formData.trang_thai);
-    if (avatarFile) {
-      submitData.append('avatar', avatarFile);
-    }
+    if (avatarFile) submitData.append('avatar', avatarFile);
 
     try {
       await updateStudent(studentId, submitData);
@@ -230,9 +220,9 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           <div className={styles.avatarUploadWrapper} onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
             <div className={styles.avatarBox}>
               {avatarPreview || formData.anh_dai_dien ? (
-                <img 
-                  src={avatarPreview || formData.anh_dai_dien} 
-                  alt="Avatar" 
+                <img
+                  src={avatarPreview || formData.anh_dai_dien}
+                  alt="Avatar"
                   className={styles.avatarImg}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                 />
@@ -244,12 +234,12 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
               <span className={`material-symbols-outlined ${styles.avatarIcon}`} style={{ color: '#fff', opacity: 0.8 }}>edit</span>
             </div>
           </div>
-          <input 
-            type="file" 
-            accept="image/*" 
-            ref={fileInputRef} 
-            onChange={handleAvatarChange} 
-            style={{ display: 'none' }} 
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleAvatarChange}
+            style={{ display: 'none' }}
           />
           <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
@@ -442,6 +432,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
                   onChange={handleChange}
                   required
                 >
+                  <option value="">-- Chọn khoa --</option>
                   {faculties.map(f => (
                     <option key={f.id} value={f.id}>{f.name}</option>
                   ))}
@@ -466,48 +457,15 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
             <div className={styles.grid2Col} style={{ marginTop: '1rem' }}>
               <div className={styles.colSpan2}>
                 <label className={styles.formLabel}>Khóa học</label>
-                {!showCustomKhoaHoc ? (
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <select
-                      className={`${styles.formInput} ${styles.formSelect}`}
-                      name="khoa_hoc"
-                      value={formData.khoa_hoc}
-                      onChange={handleChange}
-                      style={{ flex: 1 }}
-                    >
-                      <option value="">Chọn khóa học</option>
-                      {khoaHocOptions.map(k => (
-                        <option key={k} value={k}>{k}</option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowCustomKhoaHoc(true)}
-                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#f0f0f8', border: '1px solid #c7c4d8', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#3525cd' }}
-                    >
-                      + Thêm mới
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      className={styles.formInput}
-                      type="text"
-                      value={customKhoaHoc}
-                      onChange={e => setCustomKhoaHoc(e.target.value)}
-                      placeholder="Nhập khóa học (VD: K23 (2023-2026))"
-                      style={{ flex: 1 }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => { setShowCustomKhoaHoc(false); setCustomKhoaHoc(''); }}
-                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#fff0f0', border: '1px solid #fca5a5', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#dc2626' }}
-                    >
-                      Hủy
-                    </button>
-                  </div>
-                )}
-                <small style={{ color: '#777587', marginTop: '4px', display: 'block' }}>Nếu chưa có khóa học mong muốn, nhấn “+ Thêm mới” để nhập trực tiếp.</small>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={formData.khoa_hoc || ''}
+                  readOnly
+                  placeholder="Tự động lấy từ lớp đã chọn"
+                  style={{ backgroundColor: '#f5f5f9', color: '#555', cursor: 'not-allowed' }}
+                />
+                <small style={{ color: '#777587', marginTop: '4px', display: 'block' }}>Khóa học được tự động lấy từ lớp đã chọn.</small>
               </div>
             </div>
           </div>

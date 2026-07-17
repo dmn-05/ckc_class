@@ -44,7 +44,7 @@ export async function getClassById(id: string) {
     return await response.json();
 }
 
-export async function createClass(data: { ma_lop: string, ten_lop: string, khoa_id: string, nam_nhap_hoc: number, trang_thai: string }) {
+export async function createClass(data: { ma_lop: string, ten_lop: string, khoa_id: string, khoa_hoc: string, trang_thai: string }) {
     const response = await fetchWithAuth('/classes', {
         method: 'POST',
         body: JSON.stringify(data)
@@ -56,7 +56,7 @@ export async function createClass(data: { ma_lop: string, ten_lop: string, khoa_
     return await response.json();
 }
 
-export async function updateClass(id: string, data: { ma_lop: string, ten_lop: string, khoa_id: string, nam_nhap_hoc: number, trang_thai: string }) {
+export async function updateClass(id: string, data: { ma_lop: string, ten_lop: string, khoa_id: string, khoa_hoc: string, trang_thai: string }) {
     const response = await fetchWithAuth(`/classes/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)

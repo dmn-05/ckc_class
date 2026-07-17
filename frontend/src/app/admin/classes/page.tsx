@@ -33,7 +33,7 @@ export default function LecturerClassesPage() {
         code: item.ma_lop,
         name: item.ten_lop,
         faculty: item.khoa?.ten_khoa || 'Không rõ',
-        enrollmentYear: item.nam_nhap_hoc || 2024,
+        enrollmentYear: item.khoa_hoc ? String(item.khoa_hoc) : '',
         studentCount: item.sinh_viens_count || 0,
         status: item.trang_thai || 'dang_hoc'
       }));

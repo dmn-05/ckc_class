@@ -19,7 +19,7 @@ class Lop extends Model
         'ma_lop',
         'ten_lop',
         'khoa_id',
-        'nam_nhap_hoc',
+        'khoa_hoc',
         'trang_thai'
     ];
 

@@ -21,7 +21,7 @@ class StudentQuizController extends Controller
         // Get all section IDs the student is enrolled in
         $sectionIds = $student->lopHocPhans()->pluck('lop_hoc_phan.id');
 
-        $quizzesQuery = BaiKiemTra::query();
+        $quizzesQuery = BaiKiemTra::where('trang_thai', '!=', 'da_xoa');
         if ($request->has('lop_hoc_phan_id') && $request->lop_hoc_phan_id) {
             $quizzesQuery->where('lop_hoc_phan_id', (int) $request->lop_hoc_phan_id);
         } else {

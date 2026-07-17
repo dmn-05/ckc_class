@@ -206,29 +206,44 @@ export default function LecturerPostDetailPage() {
 
   return (
     <div className={styles.pageContainer}>
+      <div className={styles.breadcrumb} style={{ marginBottom: '1rem' }}>
+        <button
+          type="button"
+          onClick={() => {
+            const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
+            if (targetSectionId && targetSectionId !== '0') {
+              router.push(`/lecturer/sections/${targetSectionId}`);
+            } else {
+              router.push('/lecturer/posts');
+            }
+          }}
+          style={{
+            backgroundColor: '#ffffff',
+            color: '#464555',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            border: '1px solid #c7c4d8',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {(initialSectionId || postData?.lop_hoc_phan_id) ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
+        </button>
+      </div>
+
       <header className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <h2 className={styles.pageTitle}>Bài viết</h2>
-          <div className={styles.breadcrumb}>
-            <button
-              type="button"
-              onClick={() => {
-                const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
-                if (targetSectionId && targetSectionId !== '0') {
-                  router.push(`/lecturer/sections/${targetSectionId}`);
-                } else {
-                  router.push('/lecturer/posts');
-                }
-              }}
-              className={styles.btnCancel}
-              style={{ padding: '0 0.5rem 0 0', display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: '#3525cd', fontWeight: 600 }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              {(initialSectionId || postData?.lop_hoc_phan_id) ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
-            </button>
-          </div>
+          <h2 className={styles.pageTitle} style={{ margin: 0 }}>
+            {postData?.category === 'Tài liệu' ? 'Tài nguyên' : postData?.category === 'Bài tập' ? 'Bài tập' : 'Bài viết'}
+          </h2>
         </div>
         {postData && (
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -236,18 +251,26 @@ export default function LecturerPostDetailPage() {
               type="button"
               onClick={() => {
                 const sectionQuery = initialSectionId || postData?.lop_hoc_phan_id ? `?sectionId=${initialSectionId || postData.lop_hoc_phan_id}` : '';
-                router.push(`/lecturer/posts/${id}/edit${sectionQuery}`);
+                if (postData.category === 'Tài liệu') {
+                  router.push(`/lecturer/resources/${id}/edit${sectionQuery}`);
+                } else if (postData.category === 'Bài tập') {
+                  router.push(`/lecturer/assignments/${id}/edit${sectionQuery}`);
+                } else {
+                  router.push(`/lecturer/posts/${id}/edit${sectionQuery}`);
+                }
               }}
               style={{ padding: '0.5rem 1.25rem', backgroundColor: '#3525cd', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-              Sửa bài viết
+              {postData.category === 'Tài liệu' ? 'Sửa tài nguyên' : postData.category === 'Bài tập' ? 'Sửa bài tập' : 'Sửa bài viết'}
             </button>
             <button
               type="button"
               onClick={() => {
-                if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này không?')) {
-                  fetch(`${API_BASE_URL}/lecturer/posts/${id}`, {
+                const itemLabel = postData.category === 'Tài liệu' ? 'tài nguyên' : postData.category === 'Bài tập' ? 'bài tập' : 'bài viết';
+                if (window.confirm(`Bạn có chắc chắn muốn xóa ${itemLabel} này không?`)) {
+                  const endpoint = postData.category === 'Tài liệu' ? 'resources' : 'posts';
+                  fetch(`${API_BASE_URL}/lecturer/${endpoint}/${id}`, {
                     method: 'DELETE',
                     headers: { 'Accept': 'application/json', ...authHeaders() }
                   })
@@ -260,7 +283,7 @@ export default function LecturerPostDetailPage() {
                       router.push('/lecturer/posts');
                     }
                   })
-                  .catch(err => alert(err.message || 'Lỗi khi xóa bài viết'));
+                  .catch(err => alert(err.message || `Lỗi khi xóa ${itemLabel}`));
                 }
               }}
               style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '0.5rem', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}

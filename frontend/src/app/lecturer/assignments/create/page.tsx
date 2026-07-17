@@ -61,8 +61,8 @@ export default function CreateAssignmentPage() {
       } else {
         router.push('/lecturer/assignments');
       }
-    } catch (error) {
-      alert('Có lỗi xảy ra khi lưu bài tập.');
+    } catch (error: any) {
+      alert(error?.message || 'Có lỗi xảy ra khi lưu bài tập.');
       console.error(error);
     } finally {
       setSaving(false);
@@ -93,7 +93,7 @@ export default function CreateAssignmentPage() {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Quay lại
+            {initialSectionId ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
           </button>
           <h1 className={styles.pageTitle}>Tạo Bài tập mới</h1>
           <p className={styles.pageSubtitle}>Điền thông tin để tạo bài tập mới cho sinh viên</p>

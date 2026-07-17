@@ -3,7 +3,7 @@
 import React from 'react';
 import styles from './PostsManagement.module.css';
 
-import { downloadFile } from '@/utils/download';
+import { downloadFile, formatFileUrl } from '@/utils/download';
 
 /** Lấy 2 chữ cái đầu: chữ đầu họ + chữ đầu tên */
 function getInitials(fullName: string): string {
@@ -102,12 +102,12 @@ export default function PostSummary({ post }: PostSummaryProps) {
               </svg>
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <a href={post.attachment.url} target="_blank" rel="noopener noreferrer" style={{ color: '#191c1e', textDecoration: 'none', fontWeight: 600, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <a href={formatFileUrl(post.attachment.url)} target="_blank" rel="noopener noreferrer" style={{ color: '#191c1e', textDecoration: 'none', fontWeight: 600, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {post.attachment.name}
               </a>
             </div>
             <a 
-              href={post.attachment.url} 
+              href={formatFileUrl(post.attachment.url)} 
               onClick={handleDownload}
               style={{ padding: '0.5rem 1rem', border: '1px solid #e0e3e5', borderRadius: '0.25rem', backgroundColor: '#ffffff', color: '#191c1e', cursor: 'pointer', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}
             >

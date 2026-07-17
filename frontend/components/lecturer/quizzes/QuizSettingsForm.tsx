@@ -10,9 +10,11 @@ interface QuizSettingsModalProps {
   onSave: (data: Partial<QuizData>) => void;
   onClose: () => void;
   sections?: CourseSectionOption[];
+  isEditMode?: boolean;
 }
 
-export default function QuizSettingsForm({ initialData, onSave, onClose, sections = [] }: QuizSettingsModalProps) {
+export default function QuizSettingsForm({ initialData, onSave, onClose, sections = [], isEditMode = false }: QuizSettingsModalProps) {
+  const isEdit = isEditMode || Boolean(initialData?.id);
   const defaultSectionId = sections.length > 0 ? sections[0].id : '';
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -40,11 +42,24 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
+  const [urlSectionId, setUrlSectionId] = useState<string>('');
+
   useEffect(() => {
-    if (sections.length > 0 && !formData.sectionId) {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId && sId !== '0') {
+      setUrlSectionId(sId);
+      if (!isEdit) {
+        setFormData(prev => ({ ...prev, sectionId: sId }));
+      }
+    }
+  }, [isEdit]);
+
+  useEffect(() => {
+    if (sections.length > 0 && !formData.sectionId && !urlSectionId) {
       setFormData(prev => ({ ...prev, sectionId: sections[0].id }));
     }
-  }, [sections]);
+  }, [sections, urlSectionId]);
 
   useEffect(() => {
     if (initialData) {
@@ -160,11 +175,23 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <select 
                   name="sectionId" className={styles.formSelect}
                   value={formData.sectionId} onChange={handleChange} required
+                  disabled={isEdit || Boolean(urlSectionId && urlSectionId !== '0') || Boolean(initialData?.sectionId && initialData.sectionId !== '0')}
                 >
                   {sections.map(sec => (
                     <option key={sec.id} value={sec.id}>{sec.subjectName} - {sec.name}</option>
                   ))}
+                  {sections.length === 0 && (
+                    <option value={formData.sectionId}>
+                      {isEdit ? `Lớp ID: ${formData.sectionId}` : 'Không có lớp học phần nào'}
+                    </option>
+                  )}
                 </select>
+                {!isEdit && Boolean(urlSectionId && urlSectionId !== '0') && (
+                  <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Đang thêm bài kiểm tra cho lớp học phần hiện tại (không thể thay đổi).</small>
+                )}
+                {isEdit && (
+                  <small style={{color: '#777587', marginTop: '4px', display: 'block'}}>Lớp học phần không thể thay đổi khi chỉnh sửa.</small>
+                )}
               </div>
 
               <div className={styles.formGroup}>

@@ -38,6 +38,7 @@ class ExamController extends Controller
 
         $exams = BaiKiemTra::with(['lopHocPhan.monHoc', 'nguoiTao'])
             ->whereIn('lop_hoc_phan_id', $sectionIds)
+            ->where('trang_thai', '!=', 'da_xoa')
             ->orderBy('ngay_tao', 'desc')
             ->get()
             ->map(fn($item) => $this->format($item));
@@ -185,7 +186,9 @@ class ExamController extends Controller
         if ($exam->lopHocPhan && $exam->lopHocPhan->trang_thai === 'da_khoa') {
             abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
         }
-        $exam->delete();
+
+        // Xóa mềm: đổi trạng thái sang 'da_xoa' thay vì xóa cứng
+        $exam->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Exam deleted successfully']);
     }

@@ -10,7 +10,7 @@ export interface ClassData {
   code: string; // ma_lop
   name: string; // ten_lop
   faculty: string; // khoa.ten_khoa
-  enrollmentYear: number; // nam_nhap_hoc
+  enrollmentYear: string; // nam_nhap_hoc
   studentCount: number; // sinh_viens_count
   status: ClassStatus;
 }
