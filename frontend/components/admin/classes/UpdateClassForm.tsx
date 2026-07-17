@@ -24,7 +24,7 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
     trang_thai: 'dang_hoc'
   });
 
-  const [khoaHocOptions] = useState<string[]>(() =>
+  const [khoaHocOptions, setKhoaHocOptions] = useState<string[]>(() =>
     Array.from({ length: 30 }, (_, i) => {
       const startYear = 2000 + i + 1;
       return `K${i + 1} (${startYear}-${startYear + 3})`;
@@ -32,6 +32,17 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
   );
   const [showCustomKhoaHoc, setShowCustomKhoaHoc] = useState(false);
   const [customKhoaHoc, setCustomKhoaHoc] = useState('');
+
+  const handleAddCustomKhoaHoc = () => {
+    const trimmed = customKhoaHoc.trim();
+    if (!trimmed) return;
+    if (!khoaHocOptions.includes(trimmed)) {
+      setKhoaHocOptions(prev => [...prev, trimmed]);
+    }
+    setFormData(prev => ({ ...prev, khoa_hoc: trimmed }));
+    setCustomKhoaHoc('');
+    setShowCustomKhoaHoc(false);
+  };
 
   useEffect(() => {
     getFaculties().then(data => {
@@ -169,16 +180,24 @@ export default function UpdateClassForm({ classId }: UpdateClassFormProps) {
                       type="text"
                       value={customKhoaHoc}
                       onChange={e => setCustomKhoaHoc(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddCustomKhoaHoc())}
                       placeholder="Nhập khóa học tùy chỉnh"
                       style={{ flex: 1 }}
                       required
                     />
                     <button
                       type="button"
+                      onClick={handleAddCustomKhoaHoc}
+                      style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#3525cd', border: '1px solid #3525cd', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#fff' }}
+                    >
+                      Xác nhận
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => { setShowCustomKhoaHoc(false); setCustomKhoaHoc(''); }}
                       style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#f0f0f8', border: '1px solid #c7c4d8', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#777587' }}
                     >
-                      Chọn từ danh sách
+                      Hủy
                     </button>
                   </div>
                 )}

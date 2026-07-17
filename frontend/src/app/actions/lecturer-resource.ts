@@ -37,21 +37,29 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 
 function mapResourceFromApi(item: any) {
     const fileAttachments = item.tep_tin_bai_viet || [];
-    const firstFile = fileAttachments[0]?.tep_tin;
-    const physicalFiles = fileAttachments.filter((attach: any) => (attach.tep_tin?.kich_thuoc ?? 0) > 0);
-    const firstPhysicalFile = physicalFiles[0]?.tep_tin;
-    const fileSize = firstPhysicalFile
-        ? (firstPhysicalFile.kich_thuoc / (1024 * 1024)).toFixed(1) + ' MB'
-        : (item.external_url || (firstFile?.kich_thuoc === 0 && firstFile?.duong_dan) ? 'Link' : '—');
-    const fileUrl = firstPhysicalFile?.duong_dan || firstFile?.duong_dan || item.file_url || '';
-    const resourceType = mapLoaiTaiNguyen(firstFile?.loai_file || item.loai_tai_nguyen || 'document');
+    const allFiles = fileAttachments
+        .filter((attach: any) => attach.tep_tin?.id)
+        .map((attach: any) => ({
+            id: attach.tep_tin?.id,
+            name: attach.tep_tin?.ten_file,
+            url: attach.tep_tin?.duong_dan,
+            size: attach.tep_tin?.kich_thuoc ?? 0,
+            loai_file: attach.tep_tin?.loai_file,
+        }));
 
-    const files = physicalFiles.map((attach: any) => ({
-        id: attach.tep_tin?.id,
-        name: attach.tep_tin?.ten_file,
-        url: attach.tep_tin?.duong_dan,
-        size: attach.tep_tin?.kich_thuoc ?? 0,
-    })).filter((f: any) => f.id);
+    // Ưu tiên file có kích thước > 0, fallback về file đầu tiên
+    const primaryFile = allFiles.find((f: any) => f.size > 0) || allFiles[0] || null;
+    const firstFile = fileAttachments[0]?.tep_tin; // dùng cho loai_file fallback
+
+    const fileUrl = primaryFile?.url || item.file_url || '';
+    const fileSize = primaryFile && primaryFile.size > 0
+        ? primaryFile.size >= 1024 * 1024
+            ? (primaryFile.size / (1024 * 1024)).toFixed(1) + ' MB'
+            : (primaryFile.size / 1024).toFixed(0) + ' KB'
+        : '';
+    const resourceType = mapLoaiTaiNguyen(primaryFile?.loai_file || firstFile?.loai_file || item.loai_tai_nguyen || 'document');
+
+    const files = allFiles;
 
     return {
         id: item.id.toString(),

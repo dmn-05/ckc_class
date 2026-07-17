@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { downloadFile } from '@/utils/download';
 import styles from '@/components/student/courses/ClassroomView.module.css';
 import { deleteLecturerAssignment } from '@/app/actions/lecturer-assignment';
 import { deleteLecturerQuiz } from '@/app/actions/lecturer-quiz';
@@ -574,15 +575,17 @@ export default function LecturerClassroomClient({
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           {r.fileUrl || (r.files && r.files.length > 0) ? (
-                            <a
-                              href={r.fileUrl || r.files[0]?.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ backgroundColor: '#fef3c7', color: '#b45309', textDecoration: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px' }}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = r.fileUrl || r.files[0]?.url;
+                                const name = r.files?.[0]?.name || r.title || 'download';
+                                downloadFile(url, name);
+                              }}
+                              style={{ backgroundColor: '#fef3c7', color: '#b45309', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
                             >
                               Tải về / Xem
-                            </a>
+                            </button>
                           ) : r.externalUrl ? (
                             <a
                               href={r.externalUrl}

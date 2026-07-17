@@ -241,7 +241,6 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <input 
                   type="datetime-local" name="startTime" className={styles.formInput} 
                   value={formData.startTime || ''} onChange={handleChange}
-                  min={getMinDateTime()}
                 />
               </div>
               <div className={styles.formGroup}>
@@ -249,7 +248,7 @@ export default function QuizSettingsForm({ initialData, onSave, onClose, section
                 <input 
                   type="datetime-local" name="endTime" className={styles.formInput} 
                   value={formData.endTime || ''} onChange={handleChange}
-                  min={formData.startTime || getMinDateTime()}
+                  min={formData.startTime || ''}
                 />
               </div>
             </div>

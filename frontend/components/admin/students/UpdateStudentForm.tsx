@@ -89,7 +89,7 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
           lop_id: lopId,
           khoa_hoc: khoaHoc,
           trang_thai: studentData.sinh_vien?.trang_thai || 'dang_hoc',
-          anh_dai_dien: studentData.anh_dai_dien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(studentData.ho_ten)
+          anh_dai_dien: studentData.avatar || ''
         });
       } catch (err) {
         console.error('Failed to load data', err);
@@ -219,9 +219,16 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
         <section className={`${styles.card} ${styles.cardCenter}`}>
           <div className={styles.avatarUploadWrapper} onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
             <div className={styles.avatarBox}>
-              {avatarPreview || formData.anh_dai_dien ? (
+              {avatarPreview ? (
                 <img
-                  src={avatarPreview || formData.anh_dai_dien}
+                  src={avatarPreview}
+                  alt="Avatar"
+                  className={styles.avatarImg}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                />
+              ) : formData.anh_dai_dien ? (
+                <img
+                  src={formData.anh_dai_dien}
                   alt="Avatar"
                   className={styles.avatarImg}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
