@@ -7,8 +7,10 @@ import LecturerList from '@/components/admin/lecturers/LecturerList';
 import { LecturerData } from '@/components/admin/lecturers/LecturerCard';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getLecturers } from '@/app/actions/lecturer';
+import { getLecturers, deleteLecturer } from '@/app/actions/lecturer';
 import { getFaculties } from '@/app/actions/faculty';
+import ConfirmModal from '@/components/common/ConfirmModal';
+import AlertModal from '@/components/common/AlertModal';
 
 export default function LecturersManagementPage() {
   const router = useRouter();
@@ -22,6 +24,29 @@ export default function LecturersManagementPage() {
   const [showStopped, setShowStopped] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'success' | 'error' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'success'
+  });
+
+  const showAlert = (message: string, variant: 'success' | 'error' | 'warning' = 'error', title?: string) => {
+    setAlertConfig({
+      isOpen: true,
+      title: title || (variant === 'success' ? 'Thành công' : variant === 'error' ? 'Lỗi' : 'Cảnh báo'),
+      message,
+      variant
+    });
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -92,8 +117,23 @@ export default function LecturersManagementPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa Giảng viên này?')) {
-      setLecturers(prev => prev.filter(l => l.id !== id));
+    setDeleteId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await deleteLecturer(deleteId);
+      setLecturers(prev => prev.filter(l => l.id !== deleteId));
+      setDeleteId(null);
+      showAlert('Xóa giảng viên thành công!', 'success');
+      loadData();
+    } catch (error: any) {
+      setDeleteId(null);
+      showAlert(error.message || 'Có lỗi xảy ra khi xóa giảng viên.', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -144,6 +184,25 @@ export default function LecturersManagementPage() {
           />
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Xác nhận xóa Giảng viên"
+        message="Bạn có chắc chắn muốn xóa Giảng viên này? Hành động này sẽ chuyển trạng thái tài khoản thành bị khóa và không thể hoàn tác."
+        confirmText="Xóa ngay"
+        cancelText="Hủy"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteId(null)}
+        isLoading={deleting}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

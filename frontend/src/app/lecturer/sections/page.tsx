@@ -48,6 +48,9 @@ export default function LecturerSectionsPage() {
           faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
           maxStudents: item.si_so_toi_da || 0,
           enrolledStudents: item.sinh_viens_count ?? 0,
+          assignmentsCount: item.bai_taps_count ?? 0,
+          quizzesCount: item.bai_kiem_tras_count ?? 0,
+          pendingGradingCount: item.pending_grading_count ?? 0,
           status: item.trang_thai || 'dang_mo'
         };
       });
@@ -72,14 +75,14 @@ export default function LecturerSectionsPage() {
     return s.status === filter;
   });
 
-  // Stats mock data generator
+  // Real stats data
   const activeStatsSection = sections.find(s => s.id === statsSectionId);
   const mockStats = activeStatsSection ? {
     enrolled: activeStatsSection.enrolledStudents ?? 0,
     max: activeStatsSection.maxStudents || 40,
-    assignments: Math.floor(Math.random() * 5),
-    quizzes: Math.floor(Math.random() * 3),
-    pendingGrading: Math.floor(Math.random() * 10)
+    assignments: activeStatsSection.assignmentsCount ?? 0,
+    quizzes: activeStatsSection.quizzesCount ?? 0,
+    pendingGrading: activeStatsSection.pendingGradingCount ?? 0
   } : null;
 
   const handleOpenManageStudents = (sectionId: string) => {

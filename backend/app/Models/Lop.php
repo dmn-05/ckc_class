@@ -15,6 +15,14 @@ class Lop extends Model
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
 
+    protected $dates = ['deleted_at'];
+
+    protected $casts = [
+        'deleted_at' => 'datetime',
+        'ngay_tao' => 'datetime',
+        'ngay_cap_nhat' => 'datetime',
+    ];
+
     protected $fillable = [
         'ma_lop',
         'ten_lop',
