@@ -120,3 +120,25 @@ export async function updateLecturer(id: string, data: FormData) {
 
     return await response.json();
 }
+
+export async function deleteLecturer(id: string) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) throw new Error("Unauthorized");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+        }
+    });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.message || `Failed to delete lecturer: ${response.statusText}`);
+    }
+
+    return await response.json();
+}

@@ -19,6 +19,9 @@ export interface CourseSectionData {
   faculty: string;
   maxStudents: number;
   enrolledStudents?: number;
+  assignmentsCount?: number;
+  quizzesCount?: number;
+  pendingGradingCount?: number;
   status: CourseSectionStatus;
 }
 

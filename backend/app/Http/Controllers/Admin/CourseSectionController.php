@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LopHocPhan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourseSectionController extends Controller
 {
     public function index()
     {
         $sections = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
-            ->withCount('sinhViens')
+            ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
             ->get();
         return response()->json($sections);
     }
@@ -82,37 +83,46 @@ class CourseSectionController extends Controller
 
         $validated['giang_vien_id'] = $mainLecturerId;
 
-        $section = LopHocPhan::create($validated);
-        $this->syncLecturersWithRoles($section, $mainLecturerId, $subLecturerIds, $flatIds);
+        \DB::beginTransaction();
+        try {
+            $section = LopHocPhan::create($validated);
+            $this->syncLecturersWithRoles($section, $mainLecturerId, $subLecturerIds, $flatIds);
 
-        if ($baseClassId) {
-            $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
-                ->where('trang_thai', 'dang_hoc')
-                ->pluck('id');
-            $syncData = [];
-            foreach ($studentIds as $id) {
-                $syncData[$id] = ['ngay_tao' => now(), 'ngay_cap_nhat' => now()];
+            if ($baseClassId) {
+                $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
+                    ->where('trang_thai', 'dang_hoc')
+                    ->pluck('id');
+                $syncData = [];
+                foreach ($studentIds as $id) {
+                    $syncData[$id] = ['ngay_tao' => now(), 'ngay_cap_nhat' => now()];
+                }
+                $section->sinhViens()->attach($syncData);
+                foreach ($studentIds as $id) {
+                    \App\Helpers\NotificationHelper::createForStudent(
+                        $id,
+                        "Được thêm vào lớp học phần",
+                        "Bạn vừa được thêm vào lớp học phần: " . $section->ten_lop . " (" . $section->ma_lop_hoc_phan . ").",
+                        'them_vao_lop',
+                        '/student/courses/' . $section->id,
+                        Auth::id()
+                    );
+                }
             }
-            $section->sinhViens()->attach($syncData);
-            foreach ($studentIds as $id) {
-                \App\Helpers\NotificationHelper::createForStudent(
-                    $id,
-                    "Được thêm vào lớp học phần",
-                    "Bạn vừa được thêm vào lớp học phần: " . $section->ten_lop . " (" . $section->ma_lop_hoc_phan . ").",
-                    'them_vao_lop',
-                    '/student/courses/' . $section->id,
-                    Auth::id()
-                );
-            }
+
+            \DB::commit();
+            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
+            return response()->json($section, 201);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['message' => $e->getMessage() ?: 'Lỗi khi tạo lớp học phần'], 500);
         }
-
-        $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
-        return response()->json($section, 201);
     }
 
     public function show($id)
     {
-        $section = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])->findOrFail($id);
+        $section = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+            ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
+            ->findOrFail($id);
         return response()->json($section);
     }
 
@@ -164,18 +174,26 @@ class CourseSectionController extends Controller
         }
 
         $validated['giang_vien_id'] = $mainLecturerId;
-        $section->update($validated);
-        $this->syncLecturersWithRoles($section, $mainLecturerId, $subLecturerIds, $flatIds);
+        
+        \DB::beginTransaction();
+        try {
+            $section->update($validated);
+            $this->syncLecturersWithRoles($section, $mainLecturerId, $subLecturerIds, $flatIds);
 
-        if ($baseClassId) {
-            $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
-                ->where('trang_thai', 'dang_hoc')
-                ->pluck('id');
-            $section->sinhViens()->syncWithoutDetaching($studentIds);
+            if ($baseClassId) {
+                $studentIds = \App\Models\SinhVien::where('lop_id', $baseClassId)
+                    ->where('trang_thai', 'dang_hoc')
+                    ->pluck('id');
+                $section->sinhViens()->syncWithoutDetaching($studentIds);
+            }
+
+            \DB::commit();
+            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
+            return response()->json($section);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['message' => $e->getMessage() ?: 'Lỗi khi cập nhật lớp học phần'], 500);
         }
-
-        $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
-        return response()->json($section);
     }
 
     public function updateStatus(Request $request, $id)

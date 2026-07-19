@@ -56,7 +56,14 @@ class ClassController extends Controller
     {
         $lop = Lop::findOrFail($id);
         $lop->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+        return response()->json([
+            'message' => 'Xóa lớp học thành công',
+            'data' => [
+                'id' => $lop->id,
+                'ma_lop' => $lop->ma_lop,
+                'deleted_at' => $lop->deleted_at
+            ]
+        ]);
     }
 
     public function getStudents($id)

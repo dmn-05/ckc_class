@@ -138,6 +138,35 @@ class UserController extends Controller
         }
     }
 
+    public function destroyLecturer($id)
+    {
+        try {
+            \DB::beginTransaction();
+
+            $user = NguoiDung::where('vai_tro_id', 2)->findOrFail($id);
+            
+            // Soft delete the GiangVien record
+            if ($user->giangVien) {
+                $user->giangVien()->delete();
+            }
+
+            // Also lock the user account
+            $user->update(['trang_thai' => 'bi_khoa']);
+
+            \DB::commit();
+            return response()->json([
+                'message' => 'Xóa giảng viên thành công',
+                'data' => [
+                    'id' => $user->id,
+                    'deleted_at' => $user->giangVien ? $user->giangVien->deleted_at : now()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['message' => 'Lỗi xóa giảng viên', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getStudents()
     {
         // vai_tro_id = 3 is sinh_vien
