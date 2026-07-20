@@ -125,7 +125,7 @@ export async function getClassStudents(classId: string) {
     }
 
     const data = await res.json();
-    return { success: true, data: data.data };
+    return { success: true, data: data.data, class: data.class };
   } catch (error) {
     return { success: false, error: 'Lỗi kết nối' };
   }

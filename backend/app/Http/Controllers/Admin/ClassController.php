@@ -70,16 +70,33 @@ class ClassController extends Controller
     {
         $lop = Lop::findOrFail($id);
         $students = $lop->sinhViens()->with('nguoiDung', 'khoa', 'lop')->get();
-        return response()->json(['data' => $students]);
+        return response()->json([
+            'data' => $students,
+            'class' => [
+                'id' => $lop->id,
+                'ma_lop' => $lop->ma_lop,
+                'ten_lop' => $lop->ten_lop,
+                'trang_thai' => $lop->trang_thai,
+            ]
+        ]);
     }
 
     public function addStudent(Request $request, $id)
     {
         $lop = Lop::findOrFail($id);
+
+        if (in_array($lop->trang_thai, ['da_tot_nghiep', 'da_ket_thuc', 'ket_thuc', 'ngung_hoat_dong']) || $lop->trang_thai !== 'dang_hoc') {
+            return response()->json(['message' => 'Không thể thêm sinh viên vào lớp học đã kết thúc hoặc tốt nghiệp'], 422);
+        }
+
         $validated = $request->validate([
             'ma_sinh_vien' => 'required|string|exists:sinh_vien,ma_sinh_vien',
         ]);
         $student = SinhVien::where('ma_sinh_vien', $validated['ma_sinh_vien'])->firstOrFail();
+
+        if ($student->trang_thai !== 'dang_hoc') {
+            return response()->json(['message' => 'Chỉ có thể thêm sinh viên đang học vào lớp'], 422);
+        }
 
         if ($student->lop_id == $lop->id) {
             return response()->json(['message' => 'Sinh viên này đã thuộc lớp ' . $lop->ma_lop], 422);
