@@ -36,6 +36,10 @@ export default function QuizResult({
   const currentAttempt = attempts[selectedAttemptIndex];
 
   const isPending = hasTextQuestions && currentAttempt?.attemptStatus !== 'da_cham';
+  
+  // Đếm chỉ câu trắc nghiệm (loại bỏ câu tự luận)
+  const multipleChoiceQuestions = questions.filter(q => q.type !== 'text');
+  const totalMultipleChoiceQuestions = multipleChoiceQuestions.length;
 
   if (!currentAttempt) return null;
 
@@ -90,8 +94,8 @@ export default function QuizResult({
 
         <div className={styles.scoreStatsGrid}>
           <div className={styles.scoreStatItem}>
-            <p className={styles.statItemLabel}>Trả lời đúng</p>
-            <p className={`${styles.statItemValue} ${isPending ? styles.statItemValueNeutral : ''}`}>{currentAttempt.correctCount}/{totalQuestions}</p>
+            <p className={styles.statItemLabel}>Câu trắc nghiệm đúng</p>
+            <p className={`${styles.statItemValue} ${isPending ? styles.statItemValueNeutral : ''}`}>{currentAttempt.correctCount}/{totalMultipleChoiceQuestions}</p>
           </div>
           <div className={styles.statDivider}></div>
           <div className={styles.scoreStatItem}>

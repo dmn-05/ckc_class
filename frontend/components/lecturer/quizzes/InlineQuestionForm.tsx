@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './QuizzesManagement.module.css';
 import { QuestionData, QuestionType, QuestionOption } from './QuestionsManager';
+import AlertModal from '@/components/common/AlertModal';
 
 interface QuestionFormProps {
   initialData?: QuestionData;
@@ -28,6 +29,13 @@ export default function InlineQuestionForm({ initialData, onClose, onChangeScore
       { id: `opt_${Date.now()}_2`, content: '', isCorrect: false },
     ]
   });
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+    title?: string;
+    variant: 'warning' | 'error';
+  }>({ isOpen: false, message: '', variant: 'warning' });
 
   const formId = React.useId();
 
@@ -226,6 +234,14 @@ export default function InlineQuestionForm({ initialData, onClose, onChangeScore
             </div>
           </div>
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './QuizzesManagement.module.css';
 import { QuestionData, QuestionType, QuestionOption } from './QuestionsManager';
+import AlertModal from '@/components/common/AlertModal';
 
 interface QuestionFormModalProps {
   initialData?: QuestionData;
@@ -27,6 +28,13 @@ export default function QuestionFormModal({ initialData, onSave, onClose }: Ques
       { id: `opt_${Date.now()}_2`, content: '', isCorrect: false },
     ]
   });
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+    title?: string;
+    variant: 'warning' | 'error';
+  }>({ isOpen: false, message: '', variant: 'warning' });
 
   const formId = React.useId();
 
@@ -103,10 +111,43 @@ export default function QuestionFormModal({ initialData, onSave, onClose }: Ques
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate đáp án trắc nghiệm
+    if (formData.type !== 'essay' && formData.type !== 'true_false') {
+      const emptyOptions = formData.options.filter(o => !o.content.trim());
+      if (emptyOptions.length > 0) {
+        setAlertConfig({
+          isOpen: true,
+          title: 'Cảnh báo nhập liệu',
+          message: `Vui lòng nhập nội dung cho tất cả các đáp án. Còn ${emptyOptions.length} đáp án chưa được nhập.`,
+          variant: 'warning',
+        });
+        return;
+      }
+      const hasCorrect = formData.options.some(o => o.isCorrect);
+      if (!hasCorrect) {
+        setAlertConfig({
+          isOpen: true,
+          title: 'Cảnh báo nhập liệu',
+          message: 'Vui lòng chọn ít nhất một đáp án đúng.',
+          variant: 'warning',
+        });
+        return;
+      }
+    }
+
     onSave({ ...formData });
   };
 
   return (
+    <>
+    <AlertModal
+      isOpen={alertConfig.isOpen}
+      title={alertConfig.title}
+      message={alertConfig.message}
+      variant={alertConfig.variant}
+      onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+    />
     <div className={styles.modalOverlay}>
       <div className={`${styles.modalContent} ${styles.modalContentLarge}`}>
         <div className={styles.modalHeader}>
@@ -230,5 +271,6 @@ export default function QuestionFormModal({ initialData, onSave, onClose }: Ques
         </form>
       </div>
     </div>
+    </>
   );
 }
