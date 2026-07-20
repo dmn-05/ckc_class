@@ -26,8 +26,8 @@ class CourseSectionController extends Controller
                   $q2->where('giang_vien.id', $giangVienId);
               });
         })
-        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
-        ->withCount('sinhViens')
+        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop'])
+        ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
         ->get();
         return response()->json($sections);
     }
@@ -75,6 +75,7 @@ class CourseSectionController extends Controller
         $validated['giang_vien_id'] = $giangVienId;
         $baseClassId = $validated['base_class_id'] ?? null;
         unset($validated['base_class_id']);
+        $validated['lop_id'] = $baseClassId;
 
         $section = LopHocPhan::create($validated);
         $this->syncLecturersWithRoles($section, $giangVienId, $subLecturerIds);
@@ -102,7 +103,8 @@ class CourseSectionController extends Controller
                   $q2->where('giang_vien.id', $giangVienId);
               });
         })
-        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop'])
+        ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
         ->findOrFail($id);
         return response()->json($section);
     }
@@ -149,6 +151,10 @@ class CourseSectionController extends Controller
             }
         }
 
+        if (array_key_exists('base_class_id', $request->all()) || $baseClassId !== null) {
+            $validated['lop_id'] = $baseClassId;
+        }
+
         $section->update($validated);
         $this->syncLecturersWithRoles($section, $giangVienId, $subLecturerIds);
 
@@ -160,6 +166,7 @@ class CourseSectionController extends Controller
             $section->sinhViens()->syncWithoutDetaching($studentIds);
         }
 
+        $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop']);
         return response()->json($section);
     }
 }

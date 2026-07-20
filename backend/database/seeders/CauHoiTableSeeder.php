@@ -6873,6 +6873,54 @@ class CauHoiTableSeeder extends Seeder
                 'ngay_tao' => '2026-06-30 19:32:04',
                 'ngay_cap_nhat' => '2026-06-30 19:32:04',
             ),
+            71 => 
+            array (
+                'id' => 572,
+                'bai_kiem_tra_id' => 146,
+                'loai' => 'single_choice',
+                'noi_dung' => 'Chọn câu đúng',
+                'diem' => '2.0',
+                'giai_thich' => NULL,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:10:43',
+                'ngay_cap_nhat' => '2026-07-13 03:10:43',
+            ),
+            72 => 
+            array (
+                'id' => 573,
+                'bai_kiem_tra_id' => 146,
+                'loai' => 'multiple_choice',
+                'noi_dung' => '1+1=',
+                'diem' => '2.0',
+                'giai_thich' => NULL,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:10:44',
+                'ngay_cap_nhat' => '2026-07-13 03:10:44',
+            ),
+            73 => 
+            array (
+                'id' => 574,
+                'bai_kiem_tra_id' => 146,
+                'loai' => 'true_false',
+                'noi_dung' => 'Hãy chọn câu sai',
+                'diem' => '1.0',
+                'giai_thich' => NULL,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:10:45',
+                'ngay_cap_nhat' => '2026-07-13 03:10:45',
+            ),
+            74 => 
+            array (
+                'id' => 575,
+                'bai_kiem_tra_id' => 146,
+                'loai' => 'essay',
+                'noi_dung' => '1+11=',
+                'diem' => '5.0',
+                'giai_thich' => NULL,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:10:45',
+                'ngay_cap_nhat' => '2026-07-13 03:10:45',
+            ),
         ));
         
         

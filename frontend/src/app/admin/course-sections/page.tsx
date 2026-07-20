@@ -7,8 +7,8 @@ import styles from '@/components/admin/course-sections/AdminCourseSections.modul
 import CourseSectionList from '@/components/admin/course-sections/CourseSectionList';
 import CourseSectionDashboard from '@/components/admin/course-sections/CourseSectionDashboard';
 import CourseSectionStatsModal from '@/components/admin/course-sections/CourseSectionStatsModal';
-import { CourseSectionData } from '@/components/admin/course-sections/CourseSectionCard';
-import { getCourseSections, deleteCourseSection } from '@/app/actions/course-section';
+import { CourseSectionData, CourseSectionStatus } from '@/components/admin/course-sections/CourseSectionCard';
+import { getCourseSections, deleteCourseSection, updateCourseSectionStatus } from '@/app/actions/course-section';
 import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function CourseSectionsPage() {
@@ -19,6 +19,9 @@ export default function CourseSectionsPage() {
   const [loading, setLoading] = useState(true);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [archiveTargetId, setArchiveTargetId] = useState<string | null>(null);
+  const [archiveTargetStatus, setArchiveTargetStatus] = useState<CourseSectionStatus>('dang_mo');
+  const [archiving, setArchiving] = useState(false);
   const router = useRouter();
 
   // Modals state
@@ -52,6 +55,9 @@ export default function CourseSectionsPage() {
           faculty: item.mon_hoc?.khoa?.ten_khoa || 'Chưa phân khoa',
           maxStudents: item.si_so_toi_da || 0,
           enrolledStudents: item.sinh_viens_count ?? 0,
+          assignmentsCount: item.bai_taps_count ?? 0,
+          quizzesCount: item.bai_kiem_tras_count ?? 0,
+          pendingGradingCount: item.pending_grading_count ?? 0,
           status: item.trang_thai || 'dang_mo'
         };
       });
@@ -85,6 +91,26 @@ export default function CourseSectionsPage() {
     }
   };
 
+  const handleArchiveSection = (id: string, currentStatus: CourseSectionStatus) => {
+    setArchiveTargetId(id);
+    setArchiveTargetStatus(currentStatus);
+  };
+
+  const executeArchive = async () => {
+    if (!archiveTargetId) return;
+    setArchiving(true);
+    try {
+      const newStatus = archiveTargetStatus === 'da_khoa' ? 'dang_mo' : 'da_khoa';
+      await updateCourseSectionStatus(archiveTargetId, newStatus);
+      setSections(prev => prev.map(s => s.id === archiveTargetId ? { ...s, status: newStatus } : s));
+      setArchiveTargetId(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setArchiving(false);
+    }
+  };
+
   const handleOpenEdit = (section: CourseSectionData) => {
     router.push(`/admin/course-sections/${section.id}/edit`);
   };
@@ -98,14 +124,14 @@ export default function CourseSectionsPage() {
     return s.status === filter;
   });
 
-  // Stats mock data generator
+  // Real stats data
   const activeStatsSection = sections.find(s => s.id === statsSectionId);
   const mockStats = activeStatsSection ? {
-    enrolled: Math.floor(Math.random() * activeStatsSection.maxStudents),
+    enrolled: activeStatsSection.enrolledStudents ?? 0,
     max: activeStatsSection.maxStudents || 40,
-    assignments: Math.floor(Math.random() * 5),
-    quizzes: Math.floor(Math.random() * 3),
-    pendingGrading: Math.floor(Math.random() * 10)
+    assignments: activeStatsSection.assignmentsCount ?? 0,
+    quizzes: activeStatsSection.quizzesCount ?? 0,
+    pendingGrading: activeStatsSection.pendingGradingCount ?? 0
   } : null;
 
   return (
@@ -147,6 +173,7 @@ export default function CourseSectionsPage() {
             onViewStats={setStatsSectionId}
             onManageStudents={handleManageStudents}
             onDelete={handleDeleteSection}
+            onArchive={handleArchiveSection}
             selectedSemester={selectedSemester}
             selectedYear={selectedYear}
           />
@@ -170,6 +197,21 @@ export default function CourseSectionsPage() {
         onConfirm={executeDelete}
         onCancel={() => setDeleteTargetId(null)}
         isLoading={deleting}
+      />
+
+      <ConfirmModal
+        isOpen={!!archiveTargetId}
+        title={archiveTargetStatus === 'da_khoa' ? 'Khôi phục lớp học' : 'Lưu trữ lớp học'}
+        message={
+          archiveTargetStatus === 'da_khoa'
+            ? 'Bạn có chắc chắn muốn khôi phục lớp học này về trạng thái đang mở?'
+            : 'Các lớp học đã chọn sẽ được lưu trữ. Giáo viên hoặc học viên không thể chỉnh sửa các lớp học đã lưu trữ trừ phi các lớp học đó được khôi phục.'
+        }
+        confirmText={archiveTargetStatus === 'da_khoa' ? 'Khôi phục' : 'Lưu trữ'}
+        cancelText="Hủy"
+        onConfirm={executeArchive}
+        onCancel={() => setArchiveTargetId(null)}
+        isLoading={archiving}
       />
     </div>
   );

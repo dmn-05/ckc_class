@@ -17,9 +17,15 @@ export default async function StudentCoursesPage() {
     code: sec.ma_lop_hoc_phan,
     semester: sec.hoc_ky ? `Học kỳ ${sec.hoc_ky} ${sec.nam_hoc}` : 'Không rõ',
     title: sec.ten_lop || sec.mon_hoc?.ten_mon || 'Không có môn học',
-    instructor: sec.giang_vien && sec.giang_vien.nguoi_dung 
-        ? sec.giang_vien.nguoi_dung.ho_ten 
-        : 'Chưa cập nhật',
+    instructor: (() => {
+      const names = Array.isArray(sec.giang_viens) && sec.giang_viens.length > 0
+        ? sec.giang_viens.map((gv: any) => gv.nguoi_dung?.ho_ten).filter(Boolean)
+        : (sec.giang_vien?.nguoi_dung?.ho_ten ? [sec.giang_vien.nguoi_dung.ho_ten] : []);
+      if (names.length > 1) {
+        return `${names[0]} (+${names.length - 1} GV)`;
+      }
+      return names[0] || 'Chưa cập nhật';
+    })(),
     schedule: `Thứ ${sec.thu} (Tiết ${sec.tiet_bat_dau}-${sec.tiet_bat_dau + sec.so_tiet - 1}) • Phòng ${sec.phong_hoc}`,
     enrolledStudents: sec.sinh_viens_count || 0,
     isActive: true,

@@ -6,7 +6,7 @@ export async function getDepartments() {
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+    if (!token) return [];
 
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/departments`, {

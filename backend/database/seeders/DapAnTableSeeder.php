@@ -20005,6 +20005,98 @@ class DapAnTableSeeder extends Seeder
                 'ngay_tao' => '2026-06-30 19:31:35',
                 'ngay_cap_nhat' => '2026-06-30 19:31:35',
             ),
+            498 => 
+            array (
+                'id' => 2005,
+                'cau_hoi_id' => 574,
+                'noi_dung' => 'Đúng',
+                'la_dap_an_dung' => 0,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:10:45',
+                'ngay_cap_nhat' => '2026-07-13 03:10:45',
+            ),
+            499 => 
+            array (
+                'id' => 2006,
+                'cau_hoi_id' => 574,
+                'noi_dung' => 'Sai',
+                'la_dap_an_dung' => 1,
+                'thu_tu' => 1,
+                'ngay_tao' => '2026-07-13 03:10:45',
+                'ngay_cap_nhat' => '2026-07-13 03:10:45',
+            ),
+        ));
+        \DB::table('dap_an')->insert(array (
+            0 => 
+            array (
+                'id' => 2007,
+                'cau_hoi_id' => 572,
+                'noi_dung' => 'Đúng',
+                'la_dap_an_dung' => 1,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:11:30',
+                'ngay_cap_nhat' => '2026-07-13 03:11:30',
+            ),
+            1 => 
+            array (
+                'id' => 2008,
+                'cau_hoi_id' => 572,
+                'noi_dung' => 'Sai',
+                'la_dap_an_dung' => 0,
+                'thu_tu' => 1,
+                'ngay_tao' => '2026-07-13 03:11:30',
+                'ngay_cap_nhat' => '2026-07-13 03:11:30',
+            ),
+            2 => 
+            array (
+                'id' => 2009,
+                'cau_hoi_id' => 572,
+                'noi_dung' => 'Chưa đúng',
+                'la_dap_an_dung' => 0,
+                'thu_tu' => 2,
+                'ngay_tao' => '2026-07-13 03:11:30',
+                'ngay_cap_nhat' => '2026-07-13 03:11:30',
+            ),
+            3 => 
+            array (
+                'id' => 2010,
+                'cau_hoi_id' => 572,
+                'noi_dung' => 'Quá sai',
+                'la_dap_an_dung' => 0,
+                'thu_tu' => 3,
+                'ngay_tao' => '2026-07-13 03:11:30',
+                'ngay_cap_nhat' => '2026-07-13 03:11:30',
+            ),
+            4 => 
+            array (
+                'id' => 2011,
+                'cau_hoi_id' => 573,
+                'noi_dung' => '2',
+                'la_dap_an_dung' => 1,
+                'thu_tu' => 0,
+                'ngay_tao' => '2026-07-13 03:11:47',
+                'ngay_cap_nhat' => '2026-07-13 03:11:47',
+            ),
+            5 => 
+            array (
+                'id' => 2012,
+                'cau_hoi_id' => 573,
+                'noi_dung' => '3-1',
+                'la_dap_an_dung' => 1,
+                'thu_tu' => 1,
+                'ngay_tao' => '2026-07-13 03:11:47',
+                'ngay_cap_nhat' => '2026-07-13 03:11:47',
+            ),
+            6 => 
+            array (
+                'id' => 2013,
+                'cau_hoi_id' => 573,
+                'noi_dung' => '4',
+                'la_dap_an_dung' => 0,
+                'thu_tu' => 2,
+                'ngay_tao' => '2026-07-13 03:11:47',
+                'ngay_cap_nhat' => '2026-07-13 03:11:47',
+            ),
         ));
         
         

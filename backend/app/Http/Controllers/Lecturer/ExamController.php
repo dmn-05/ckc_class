@@ -38,6 +38,7 @@ class ExamController extends Controller
 
         $exams = BaiKiemTra::with(['lopHocPhan.monHoc', 'nguoiTao'])
             ->whereIn('lop_hoc_phan_id', $sectionIds)
+            ->where('trang_thai', '!=', 'da_xoa')
             ->orderBy('ngay_tao', 'desc')
             ->get()
             ->map(fn($item) => $this->format($item));
@@ -70,6 +71,11 @@ class ExamController extends Controller
             abort(403, 'You do not own this course section');
         }
 
+        $secCheck = \App\Models\LopHocPhan::find($validated['lop_hoc_phan_id']);
+        if ($secCheck && $secCheck->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $exam = BaiKiemTra::create([
             'tieu_de'             => $validated['tieu_de'],
             'mo_ta'               => $validated['mo_ta'] ?? null,
@@ -87,6 +93,21 @@ class ExamController extends Controller
             'hien_dap_an_sau_nop' => $validated['hien_dap_an_sau_nop'] ?? false,
             'trang_thai'          => $validated['trang_thai'] ?? 'nhap',
         ]);
+
+        try {
+            if ($exam->trang_thai === 'hien_thi') {
+                \App\Helpers\NotificationHelper::createForClass(
+                    $exam->lop_hoc_phan_id,
+                    "Bài kiểm tra mới: " . $exam->tieu_de,
+                    "Giảng viên vừa mở bài kiểm tra mới. Thời gian làm bài: " . $exam->thoi_gian_lam_bai . " phút.",
+                    'bai_kiem_tra_moi',
+                    '/student/quizzes/' . $exam->id,
+                    Auth::id()
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error creating quiz notification: ' . $e->getMessage());
+        }
 
         $exam->load(['lopHocPhan.monHoc', 'nguoiTao']);
 
@@ -126,6 +147,10 @@ class ExamController extends Controller
                    'thoi_gian_lam_bai','diem_toi_da','diem_dat','so_lan_thi_toi_da',
                    'hinh_thuc','xao_tron_cau_hoi','xao_tron_dap_an','hien_dap_an_sau_nop','trang_thai'];
 
+        if ($exam->lopHocPhan && $exam->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $updateData = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $validated)) {
@@ -133,8 +158,21 @@ class ExamController extends Controller
             }
         }
 
+        $oldStatus = $exam->trang_thai;
+
         if (!empty($updateData)) {
             $exam->update($updateData);
+        }
+
+        if ($oldStatus !== 'hien_thi' && $exam->trang_thai === 'hien_thi') {
+            \App\Helpers\NotificationHelper::createForClass(
+                $exam->lop_hoc_phan_id,
+                "Bài kiểm tra mới: " . $exam->tieu_de,
+                "Giảng viên vừa công bố bài kiểm tra. Thời gian làm bài: " . $exam->thoi_gian_lam_bai . " phút.",
+                'bai_kiem_tra_moi',
+                '/student/quizzes/' . $exam->id,
+                Auth::id()
+            );
         }
 
         $exam->load(['lopHocPhan.monHoc', 'nguoiTao']);
@@ -145,7 +183,12 @@ class ExamController extends Controller
     public function destroy($id)
     {
         $exam = BaiKiemTra::whereIn('lop_hoc_phan_id', $this->getSectionIds())->findOrFail($id);
-        $exam->delete();
+        if ($exam->lopHocPhan && $exam->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
+        // Xóa mềm: đổi trạng thái sang 'da_xoa' thay vì xóa cứng
+        $exam->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Exam deleted successfully']);
     }

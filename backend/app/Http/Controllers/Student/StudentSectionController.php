@@ -19,7 +19,7 @@ class StudentSectionController extends Controller
 
         $sections = $student->lopHocPhans()
             ->with(['giangVien.nguoiDung', 'monHoc', 'giangViens.nguoiDung'])
-            ->withCount('sinhViens')
+            ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
             ->get();
 
         return response()->json(['data' => $sections]);

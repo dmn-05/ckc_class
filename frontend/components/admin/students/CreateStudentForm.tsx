@@ -45,6 +45,7 @@ export default function CreateStudentForm() {
     ma_sinh_vien: '',
     khoa_id: '',
     lop_id: '',
+    khoa_hoc: '',
     trang_thai: 'dang_hoc',
   });
 
@@ -60,10 +61,12 @@ export default function CreateStudentForm() {
         if (facs.length > 0) {
           const defaultFacId = facs[0].id.toString();
           const filteredCls = cls.filter((c: any) => c.khoa_id.toString() === defaultFacId);
+          const defaultLop = filteredCls.length > 0 ? filteredCls[0] : null;
           setFormData(prev => ({
             ...prev,
             khoa_id: defaultFacId,
-            lop_id: filteredCls.length > 0 ? filteredCls[0].id.toString() : ''
+            lop_id: defaultLop ? defaultLop.id.toString() : '',
+            khoa_hoc: defaultLop?.khoa_hoc ? String(defaultLop.khoa_hoc) : '',
           }));
         }
       } catch (err) {
@@ -81,11 +84,20 @@ export default function CreateStudentForm() {
       return;
     }
     if (name === 'khoa_id') {
-      const filteredClasses = classes.filter(c => c.khoa_id.toString() === value);
+      const filteredCls = classes.filter(c => c.khoa_id.toString() === value);
+      const defaultLop = filteredCls.length > 0 ? filteredCls[0] : null;
       setFormData(prev => ({
         ...prev,
         [name]: value,
-        lop_id: filteredClasses.length > 0 ? filteredClasses[0].id.toString() : ''
+        lop_id: defaultLop ? defaultLop.id.toString() : '',
+        khoa_hoc: defaultLop?.khoa_hoc ? String(defaultLop.khoa_hoc) : '',
+      }));
+    } else if (name === 'lop_id') {
+      const selectedLop = classes.find(c => c.id.toString() === value);
+      setFormData(prev => ({
+        ...prev,
+        lop_id: value,
+        khoa_hoc: selectedLop?.khoa_hoc ? String(selectedLop.khoa_hoc) : '',
       }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -107,13 +119,11 @@ export default function CreateStudentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate số điện thoại phải đủ 10 số
     if (!formData.so_dien_thoai || !/^\d{10}$/.test(formData.so_dien_thoai.trim())) {
       showAlert('Số điện thoại phải nhập đúng 10 chữ số.', 'warning', 'Kiểm tra Số điện thoại');
       return;
     }
 
-    // Validate CCCD nếu có nhập thì phải 12 số
     if (formData.cccd && !/^\d{12}$/.test(formData.cccd.trim())) {
       showAlert('Số Căn cước công dân (CCCD) phải bao gồm đúng 12 chữ số.', 'warning', 'Kiểm tra Số CCCD');
       return;
@@ -132,13 +142,18 @@ export default function CreateStudentForm() {
     submitData.append('ma_sinh_vien', formData.ma_sinh_vien);
     submitData.append('khoa_id', formData.khoa_id);
     submitData.append('lop_id', formData.lop_id);
+    if (formData.khoa_hoc) submitData.append('khoa_hoc', formData.khoa_hoc);
     submitData.append('trang_thai', formData.trang_thai);
-    if (avatarFile) {
-      submitData.append('avatar', avatarFile);
-    }
+    if (avatarFile) submitData.append('avatar', avatarFile);
 
     try {
-      await createStudent(submitData);
+      const res: any = await createStudent(submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Thêm sinh viên thất bại', 'error', 'Lỗi thêm sinh viên');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/students');
@@ -167,12 +182,12 @@ export default function CreateStudentForm() {
               <span className={`material-symbols-outlined ${styles.avatarIcon}`} style={{ color: '#fff', opacity: 0.8 }}>edit</span>
             </div>
           </div>
-          <input 
-            type="file" 
-            accept="image/*" 
-            ref={fileInputRef} 
-            onChange={handleAvatarChange} 
-            style={{ display: 'none' }} 
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleAvatarChange}
+            style={{ display: 'none' }}
           />
           <h3 className={styles.cardTitle}>Ảnh đại diện</h3>
           <p className={styles.avatarHelpText}>
@@ -350,6 +365,7 @@ export default function CreateStudentForm() {
                   onChange={handleChange}
                   required
                 >
+                  <option value="">-- Chọn khoa --</option>
                   {faculties.map(f => (
                     <option key={f.id} value={f.id}>{f.name}</option>
                   ))}
@@ -369,6 +385,20 @@ export default function CreateStudentForm() {
                     <option key={c.id} value={c.id}>{c.ma_lop || c.ten_lop}</option>
                   ))}
                 </select>
+              </div>
+            </div>
+            <div className={styles.grid2Col} style={{ marginTop: '1rem' }}>
+              <div className={styles.colSpan2}>
+                <label className={styles.formLabel}>Khóa học</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={formData.khoa_hoc || ''}
+                  readOnly
+                  placeholder="Tự động lấy từ lớp đã chọn"
+                  style={{ backgroundColor: '#f5f5f9', color: '#555', cursor: 'not-allowed' }}
+                />
+                <small style={{ color: '#777587', marginTop: '4px', display: 'block' }}>Khóa học được tự động lấy từ lớp đã chọn.</small>
               </div>
             </div>
           </div>

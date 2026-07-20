@@ -19,6 +19,9 @@ export interface CourseSectionData {
   faculty: string;
   maxStudents: number;
   enrolledStudents?: number;
+  assignmentsCount?: number;
+  quizzesCount?: number;
+  pendingGradingCount?: number;
   status: CourseSectionStatus;
 }
 
@@ -30,10 +33,12 @@ interface CourseSectionCardProps {
   onDelete: (sectionId: string) => void;
   hideDelete?: boolean;
   hideEdit?: boolean;
+  hideManageStudents?: boolean;
   onViewDetail?: (sectionId: string) => void;
+  onArchive?: (sectionId: string, currentStatus: CourseSectionStatus) => void;
 }
 
-export default function CourseSectionCard({ section, onEdit, onViewStats, onManageStudents, onDelete, hideDelete, hideEdit, onViewDetail }: CourseSectionCardProps) {
+export default function CourseSectionCard({ section, onEdit, onViewStats, onManageStudents, onDelete, hideDelete, hideEdit, hideManageStudents, onViewDetail, onArchive }: CourseSectionCardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -65,7 +70,7 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
     cardClass = styles.classCardWarning;
     iconClass = styles.classIconWarning;
     statusClass = styles.statusWarning;
-    statusText = 'Đã khóa';
+    statusText = 'Lưu trữ';
     codeClass = styles.codeWarning;
     statusIcon = (
       <span className={styles.statusDot} style={{ backgroundColor: '#ed6c02' }} />
@@ -97,18 +102,18 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
           </div>
           
           <div className={styles.classDetailsRow}>
-            <div className={styles.detailItem} title={section.lecturerNames ? `GV chính: ${section.lecturerNames[0]}${section.lecturerNames.length > 1 ? ` | GV phụ: ${section.lecturerNames.slice(1).join(', ')}` : ''}` : section.lecturerName}>
+            <div className={styles.detailItem} title={section.lecturerNames && section.lecturerNames.length > 0 ? `Danh sách giảng viên: ${section.lecturerNames.join(', ')}` : section.lecturerName}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               {section.lecturerNames && section.lecturerNames.length > 1
-                ? `GV: ${section.lecturerNames[0]} (+${section.lecturerNames.length - 1} GV phụ)`
-                : `GV: ${section.lecturerName || 'Chưa phân công'}`}
+                ? `GV: ${section.lecturerNames[0]} (+${section.lecturerNames.length - 1} GV)`
+                : `GV: ${(section.lecturerNames && section.lecturerNames.length === 1 ? section.lecturerNames[0] : section.lecturerName) || 'Chưa phân công'}`}
             </div>
 
             <div className={styles.detailItem}>
               <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
               {section.enrolledStudents !== undefined
                 ? `${section.enrolledStudents}/${section.maxStudents} SV`
@@ -134,13 +139,6 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
               {section.academicYear ? ` (${section.academicYear})` : ''}
             </div>
 
-            <div className={styles.detailItem}>
-              <svg className={styles.detailIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Khóa {section.academicYear ? section.academicYear.substring(0, 4) : '2024'}
-            </div>
-
             <div className={`${styles.statusLabel} ${statusClass}`}>
               {statusIcon}
               {statusText}
@@ -150,20 +148,6 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
       </div>
 
       <div className={styles.classCardRight}>
-        {onManageStudents && (
-          <button 
-            className={`${styles.btnActionSmall} ${styles.btnActionSecondary}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onManageStudents(section.id);
-            }}
-            title="Quản lý sinh viên"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </button>
-        )}
         <button 
           className={`${styles.btnActionSmall} ${styles.btnActionStats}`}
           onClick={(e) => {
@@ -176,6 +160,26 @@ export default function CourseSectionCard({ section, onEdit, onViewStats, onMana
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </button>
+        {onArchive && (
+          <button 
+            className={`${styles.btnActionSmall} ${styles.btnActionSecondary}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onArchive(section.id, section.status);
+            }}
+            title={section.status === 'da_khoa' ? 'Khôi phục lớp học phần' : 'Lưu trữ lớp học phần'}
+          >
+            {section.status === 'da_khoa' ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+            )}
+          </button>
+        )}
         {!hideEdit && (
           <button 
             className={styles.btnActionSmall}

@@ -11,6 +11,7 @@ import {
   toggleResourceVisibility,
 } from '@/app/actions/lecturer-resource';
 import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 interface SectionOption {
   id: string;
@@ -76,15 +77,26 @@ export default function LecturerResourcesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa tài nguyên này?")) {
-      try {
-        await deleteLecturerResource(id);
-        setResources(prev => prev.filter(r => r.id !== id));
-      } catch (error) {
-        alert('Có lỗi xảy ra khi xóa tài nguyên.');
-        console.error(error);
-      }
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title?: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = (id: string) => {
+    const target = resources.find(r => r.id === id);
+    setDeleteTarget({ id, title: target?.title });
+  };
+
+  const executeDeleteResource = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteLecturerResource(deleteTarget.id);
+      setResources(prev => prev.filter(r => r.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (error) {
+      alert('Có lỗi xảy ra khi xóa tài nguyên.');
+      console.error(error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -202,6 +214,22 @@ export default function LecturerResourcesPage() {
         />
       )}
 
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Xác nhận xóa tài nguyên"
+        message={
+          <div>
+            Bạn có chắc chắn muốn xóa tài nguyên{' '}
+            <strong style={{ color: '#1e293b' }}>{deleteTarget?.title || ''}</strong> không? Hành động này không thể khôi phục.
+          </div>
+        }
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={deleting}
+        onConfirm={executeDeleteResource}
+        onCancel={() => !deleting && setDeleteTarget(null)}
+      />
     </div>
   );
 }

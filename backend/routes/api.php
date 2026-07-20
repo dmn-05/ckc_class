@@ -14,6 +14,41 @@ use App\Http\Controllers\Admin\ClassController;
 
 
 Route::get('/public/stats', [AuthController::class, 'publicStats']);
+Route::get('/public/download', function (Request $request) {
+    $url = $request->query('url');
+    $filename = $request->query('filename', 'download');
+    
+    if (!$url) {
+        return response()->json(['message' => 'URL missing'], 400);
+    }
+    
+    // Check if local storage file
+    $path = preg_replace('/^.*?\/storage\//', '', $url);
+    $fullStoragePath = storage_path('app/public/' . $path);
+    
+    if (file_exists($fullStoragePath) && is_file($fullStoragePath)) {
+        return response()->download($fullStoragePath, $filename, [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Expose-Headers' => 'Content-Disposition',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename)
+        ]);
+    }
+    
+    // If it's a remote Cloudinary URL, inject fl_attachment for forced download
+    if (str_contains($url, 'res.cloudinary.com') && str_contains($url, '/upload/')) {
+        $cleanUrl = preg_replace('/\/fl_attachment:[^\/]+\//', '/', $url);
+        $cleanUrl = str_replace('/fl_attachment/', '/', $cleanUrl);
+        $attachmentUrl = preg_replace('/\/upload\//', '/upload/fl_attachment/', $cleanUrl, 1);
+        return redirect()->away($attachmentUrl);
+    }
+    
+    // For any other external URL, redirect
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+        return redirect()->away($url);
+    }
+    
+    return response()->json(['message' => 'File not found on server'], 404);
+});
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password/verify-email', [AuthController::class, 'verifyForgotEmail']);
 Route::post('/forgot-password/verify-cccd', [AuthController::class, 'verifyForgotCccd']);
@@ -23,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/user/avatar', [AuthController::class, 'updateAvatar']);
+    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
     
     // Dashboard stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
@@ -32,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // User routes (Create/Update/Delete)
         Route::post('/lecturers', [UserController::class, 'storeLecturer']);
         Route::put('/lecturers/{id}', [UserController::class, 'updateLecturer']);
+        Route::delete('/lecturers/{id}', [UserController::class, 'destroyLecturer']);
 
         Route::get('/students', [UserController::class, 'getStudents']);
         Route::get('/students/{id}', [UserController::class, 'getStudentById']);
@@ -57,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/course-sections', [\App\Http\Controllers\Admin\CourseSectionController::class, 'store']);
         Route::get('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'show']);
         Route::put('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update']);
+        Route::patch('/course-sections/{id}/status', [\App\Http\Controllers\Admin\CourseSectionController::class, 'updateStatus']);
         Route::delete('/course-sections/{id}', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy']);
         
         // Subject routes (Create/Update/Delete)
@@ -134,12 +172,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'update']);
     Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy']);
 
+    // Shared Notification Routes
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+
     // Profile Routes
     Route::get('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'show']);
     Route::put('/student/profile', [App\Http\Controllers\Student\StudentProfileController::class, 'update']);
     Route::get('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'show']);
     Route::put('/lecturer/profile', [App\Http\Controllers\Lecturer\LecturerProfileController::class, 'update']);
     Route::get('/lecturer/dashboard/stats', [\App\Http\Controllers\Lecturer\DashboardController::class, 'stats']);
+    Route::get('/student/dashboard/stats', [\App\Http\Controllers\Student\DashboardController::class, 'stats']);
     Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show']);
     Route::put('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 

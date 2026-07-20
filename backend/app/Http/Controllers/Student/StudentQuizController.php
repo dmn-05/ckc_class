@@ -21,7 +21,7 @@ class StudentQuizController extends Controller
         // Get all section IDs the student is enrolled in
         $sectionIds = $student->lopHocPhans()->pluck('lop_hoc_phan.id');
 
-        $quizzesQuery = BaiKiemTra::query();
+        $quizzesQuery = BaiKiemTra::where('trang_thai', '!=', 'da_xoa');
         if ($request->has('lop_hoc_phan_id') && $request->lop_hoc_phan_id) {
             $quizzesQuery->where('lop_hoc_phan_id', (int) $request->lop_hoc_phan_id);
         } else {
@@ -60,6 +60,10 @@ class StudentQuizController extends Controller
                     'attemptsUsed' => $attemptsUsed,
                     'maxAttempts' => $quiz->so_lan_thi_toi_da,
                     'isPublished' => $quiz->trang_thai === 'dang_mo' || $quiz->trang_thai === 'da_cong_bo',
+                    'startTime' => $quiz->thoi_gian_bat_dau ? $quiz->thoi_gian_bat_dau->toIso8601String() : null,
+                    'endTime' => $quiz->thoi_gian_ket_thuc ? $quiz->thoi_gian_ket_thuc->toIso8601String() : null,
+                    'thoi_gian_bat_dau' => $quiz->thoi_gian_bat_dau ? $quiz->thoi_gian_bat_dau->toIso8601String() : null,
+                    'thoi_gian_ket_thuc' => $quiz->thoi_gian_ket_thuc ? $quiz->thoi_gian_ket_thuc->toIso8601String() : null,
                     'status' => $status,
                     'lastScore' => $lastAttempt ? $lastAttempt->tong_diem : null,
                     'lastDate' => $lastAttempt && $lastAttempt->thoi_gian_nop_bai ? $lastAttempt->thoi_gian_nop_bai->format('d/m/Y H:i') : null,
@@ -81,11 +85,30 @@ class StudentQuizController extends Controller
         $sectionIds = $student->lopHocPhans()->pluck('lop_hoc_phan.id');
 
         $quiz = BaiKiemTra::whereIn('lop_hoc_phan_id', $sectionIds)
-            ->with(['lopHocPhan.monHoc', 'cauHois.dapAns'])
+            ->with(['lopHocPhan.monHoc'])
             ->find($id);
 
         if (!$quiz) {
             return response()->json(['message' => 'Quiz not found or unauthorized'], 404);
+        }
+
+        if ($quiz->thoi_gian_bat_dau && now()->lt($quiz->thoi_gian_bat_dau)) {
+            $quiz->setRelation('cauHois', collect());
+        } else {
+            $quiz->load(['cauHois.dapAns']);
+
+            // Xáo trộn câu hỏi nếu được bật
+            if ($quiz->xao_tron_cau_hoi) {
+                $shuffled = $quiz->cauHois->shuffle();
+                $quiz->setRelation('cauHois', $shuffled);
+            }
+
+            // Xáo trộn đáp án nếu được bật
+            if ($quiz->xao_tron_dap_an) {
+                $quiz->cauHois->each(function ($cauHoi) {
+                    $cauHoi->setRelation('dapAns', $cauHoi->dapAns->shuffle());
+                });
+            }
         }
 
         return response()->json(['data' => $quiz]);
@@ -107,6 +130,14 @@ class StudentQuizController extends Controller
 
         if (!$quiz) {
             return response()->json(['message' => 'Quiz not found or unauthorized'], 404);
+        }
+
+        if ($quiz->lopHocPhan && $quiz->lopHocPhan->trang_thai === 'da_khoa') {
+            return response()->json(['message' => 'Lớp học phần đã được lưu trữ, không thể làm bài kiểm tra'], 403);
+        }
+
+        if ($quiz->thoi_gian_bat_dau && now()->lt($quiz->thoi_gian_bat_dau)) {
+            return response()->json(['message' => 'Chưa đến thời gian bắt đầu làm bài kiểm tra'], 403);
         }
 
         $validated = $request->validate([

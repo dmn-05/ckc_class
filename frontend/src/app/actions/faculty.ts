@@ -7,7 +7,7 @@ export async function getFaculties() {
     const token = cookieStore.get("auth_token")?.value;
 
     if (!token) {
-        throw new Error("Unauthorized");
+        return [];
     }
 
     try {

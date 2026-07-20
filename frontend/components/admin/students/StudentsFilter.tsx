@@ -4,17 +4,23 @@ import styles from './AdminStudents.module.css';
 interface StudentsFilterProps {
   facultyFilter: string;
   onFacultyChange: (value: string) => void;
+  classFilter: string;
+  onClassChange: (value: string) => void;
   statusFilter: string[];
   onStatusChange: (value: string[]) => void;
   faculties: any[];
+  classes: any[];
 }
 
 export default function StudentsFilter({
   facultyFilter,
   onFacultyChange,
+  classFilter,
+  onClassChange,
   statusFilter,
   onStatusChange,
-  faculties
+  faculties,
+  classes
 }: StudentsFilterProps) {
   const handleStatusToggle = (status: string) => {
     if (statusFilter.includes(status)) {
@@ -23,6 +29,12 @@ export default function StudentsFilter({
       onStatusChange([...statusFilter, status]);
     }
   };
+
+  // Lọc danh sách lớp theo khoa đang chọn
+  const selectedFaculty = faculties.find(f => f.name === facultyFilter);
+  const filteredClasses = facultyFilter === 'all'
+    ? classes
+    : classes.filter(c => selectedFaculty && c.khoa_id?.toString() === selectedFaculty.id?.toString());
 
   return (
     <div className={styles.card}>
@@ -42,6 +54,20 @@ export default function StudentsFilter({
             <option value="all">Tất cả các khoa</option>
             {faculties.map(f => (
               <option key={f.id} value={f.name}>{f.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>LỚP</label>
+          <select 
+            className={styles.filterSelect}
+            value={classFilter}
+            onChange={(e) => onClassChange(e.target.value)}
+          >
+            <option value="all">Tất cả các lớp</option>
+            {filteredClasses.map((c: any) => (
+              <option key={c.id} value={c.ma_lop}>{c.ma_lop} - {c.ten_lop}</option>
             ))}
           </select>
         </div>

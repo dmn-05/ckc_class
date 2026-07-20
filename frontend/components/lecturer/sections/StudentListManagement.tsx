@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { getSectionStudents, addStudentToSection, removeStudentFromSection, searchStudents } from '@/app/actions/student-list';
+import ConfirmModal from '@/components/common/ConfirmModal';
+import AlertModal from '@/components/common/AlertModal';
 import styles from './StudentManagement.module.css';
 
 export default function StudentListManagement({ sectionId }: { sectionId: string }) {
@@ -17,6 +19,20 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [targetStudentId, setTargetStudentId] = useState<string | null>(null);
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'success' | 'error' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info'
+  });
 
   const isLockedOrEnded = sectionStatus === 'da_khoa' || sectionStatus === 'da_ket_thuc';
 
@@ -86,14 +102,32 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
     setSubmitting(false);
   };
 
-  const handleRemove = async (studentId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa sinh viên này khỏi lớp?')) return;
-    
-    const res = await removeStudentFromSection(sectionId, studentId);
+  const handleRemoveClick = (studentId: string) => {
+    setTargetStudentId(studentId);
+    setConfirmOpen(true);
+  };
+
+  const executeRemove = async () => {
+    if (!targetStudentId) return;
+    setSubmitting(true);
+    const res = await removeStudentFromSection(sectionId, targetStudentId);
+    setSubmitting(false);
+    setConfirmOpen(false);
     if (res.success) {
+      setAlertConfig({
+        isOpen: true,
+        title: 'Thành công',
+        message: 'Đã xóa sinh viên khỏi lớp học phần thành công!',
+        variant: 'success'
+      });
       fetchStudents();
     } else {
-      alert(res.error || 'Có lỗi xảy ra');
+      setAlertConfig({
+        isOpen: true,
+        title: 'Lỗi',
+        message: res.error || 'Có lỗi xảy ra khi xóa sinh viên.',
+        variant: 'error'
+      });
     }
   };
 
@@ -114,7 +148,7 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
             fontSize: '14px',
             fontWeight: 500
           }}>
-            Lớp học phần này đã {sectionStatus === 'da_khoa' ? 'khóa' : 'kết thúc'}, không thể thêm sinh viên vào lớp.
+            Lớp học phần này đã {sectionStatus === 'da_khoa' ? 'lưu trữ' : 'kết thúc'}, không thể thêm sinh viên vào lớp.
           </div>
         )}
         <form onSubmit={handleAdd} className={styles.formGroup}>
@@ -125,7 +159,7 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
               value={searchQuery} 
               onChange={e => setSearchQuery(e.target.value)} 
               onFocus={() => { if (!isLockedOrEnded && searchResults.length > 0) setShowResults(true); }}
-              placeholder={isLockedOrEnded ? `Lớp học phần đã ${sectionStatus === 'da_khoa' ? 'khóa' : 'kết thúc'}, không thể thêm sinh viên` : 'Nhập tên hoặc mã sinh viên (VD: DH52...)'} 
+              placeholder={isLockedOrEnded ? `Lớp học phần đã ${sectionStatus === 'da_khoa' ? 'lưu trữ' : 'kết thúc'}, không thể thêm sinh viên` : 'Nhập tên hoặc mã sinh viên (VD: DH52...)'} 
               className={styles.input}
               disabled={isLockedOrEnded}
               autoComplete="off"
@@ -192,7 +226,7 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
                     <td className={styles.td}>{student.lop?.ma_lop}</td>
                     <td className={styles.td}>
                       <button 
-                        onClick={() => handleRemove(student.id)}
+                        onClick={() => handleRemoveClick(student.id)}
                         className={styles.btnDelete}
                       >
                         Xóa
@@ -205,6 +239,26 @@ export default function StudentListManagement({ sectionId }: { sectionId: string
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Xác nhận xóa khỏi lớp"
+        message="Bạn có chắc chắn muốn xóa sinh viên này khỏi lớp học phần không?"
+        confirmText="Xóa khỏi lớp"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={submitting}
+        onConfirm={executeRemove}
+        onCancel={() => !submitting && setConfirmOpen(false)}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

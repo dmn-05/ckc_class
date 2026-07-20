@@ -72,8 +72,9 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
     }
 
     const handleBack = () => {
-        if (initialSectionId) {
-            router.push(`/lecturer/sections/${initialSectionId}`);
+        const targetSectionId = initialSectionId || quizData?.sectionId;
+        if (targetSectionId) {
+            router.push(`/lecturer/sections/${targetSectionId}`);
         } else {
             router.push('/lecturer/quizzes');
         }
@@ -81,12 +82,12 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--color-on-surface)' }}>Cài đặt bài kiểm tra</h1>
             <QuizSettingsForm
                 initialData={quizData}
                 onSave={handleSave}
                 onClose={handleBack}
                 sections={sections}
+                isEditMode={true}
             />
         </div>
     );

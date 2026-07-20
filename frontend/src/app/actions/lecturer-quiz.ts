@@ -73,7 +73,7 @@ function mapQuizFromApi(item: any): QuizData {
         shuffleOptions: item.shuffleAnswers ?? true,
         showResultAfter: item.showAnswerAfter ?? false,
         isPublished: item.isPublished ?? false,
-        sectionId: item.sectionId?.toString() || '',
+        sectionId: item.sectionId?.toString() || item.lop_hoc_phan_id?.toString() || '',
         sectionName: item.sectionName || '',
         status,
         stats: { 
@@ -95,7 +95,10 @@ export async function getLecturerQuizzes(): Promise<QuizData[]> {
 
 export async function getLecturerQuizById(id: string) {
     const response = await fetchWithAuth(`/lecturer/exams/${id}`, { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch quiz');
+    if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch quiz');
+    }
     const json = await response.json();
     return mapQuizFromApi(json.data || json);
 }
@@ -104,10 +107,15 @@ function parseDateOrNull(value: string | null | undefined): string | null {
     if (!value || typeof value !== 'string') return null;
     const trimmed = value.trim();
     if (!trimmed) return null;
-    // Accept ISO format (datetime-local) or d/m/Y H:i
-    const isoRx = /^\d{4}-\d{2}-\d{2}(T|\s)\d{2}:\d{2}/;
-    const dmyRx = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}/;
-    if (isoRx.test(trimmed) || dmyRx.test(trimmed)) return trimmed;
+    const dmyMatch = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})/);
+    if (dmyMatch) {
+        return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}T${dmyMatch[4]}:${dmyMatch[5]}:00`;
+    }
+    const isoRx = /^(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2})(:\d{2})?/;
+    const isoMatch = trimmed.match(isoRx);
+    if (isoMatch) {
+        return isoMatch[2] ? trimmed : `${trimmed}:00`;
+    }
     return null;
 }
 
@@ -201,6 +209,7 @@ function mapQuestionFromApi(item: any): QuestionData {
 export async function getLecturerQuestions(examId: string): Promise<QuestionData[]> {
     const response = await fetchWithAuth(`/lecturer/exams/${examId}/questions`, { method: 'GET', cache: 'no-store' });
     if (!response.ok) {
+        if (response.status === 404) return [];
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || 'Failed to fetch questions');
     }
@@ -288,6 +297,7 @@ export async function reorderLecturerQuestions(examId: string, orders: { id: str
 export async function getQuizAttempts(examId: string) {
     const response = await fetchWithAuth(`/lecturer/exams/${examId}/results`, { method: 'GET', cache: 'no-store' });
     if (!response.ok) {
+        if (response.status === 404) return [];
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || 'Failed to fetch quiz attempts');
     }

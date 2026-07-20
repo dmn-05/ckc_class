@@ -39,14 +39,16 @@ export default function UpdateSubjectForm({ subjectId }: UpdateSubjectFormProps)
 
         if (subjectId) {
           const subjectData = await getSubjectById(subjectId);
-          setFormData({
-            code: subjectData.code,
-            name: subjectData.name,
-            credits: subjectData.credits.toString(),
-            facultyId: subjectData.facultyId,
-            departmentId: subjectData.departmentId || '',
-            status: subjectData.status
-          });
+          if (subjectData) {
+            setFormData({
+              code: subjectData.code,
+              name: subjectData.name,
+              credits: subjectData.credits.toString(),
+              facultyId: subjectData.facultyId,
+              departmentId: subjectData.departmentId || '',
+              status: subjectData.status
+            });
+          }
         }
       } catch (error) {
         console.error('Error loading form data', error);

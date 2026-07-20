@@ -16,6 +16,8 @@ export interface QuizData {
   lastScore?: number;
   lastDate?: string;
   attemptHistory?: { score: number; date: string; status: string }[];
+  startTime?: string;
+  endTime?: string;
 }
 
 interface QuizCardProps {
@@ -26,8 +28,25 @@ interface QuizCardProps {
 
 export default function QuizCard({ quiz, onStart, onViewResult }: QuizCardProps) {
   const isCompleted = quiz.status === 'completed';
-  const canTake = quiz.attemptsUsed < quiz.maxAttempts;
+  const now = new Date();
+  const rawStart = quiz.startTime || (quiz as any).thoi_gian_bat_dau;
+  const rawEnd = quiz.endTime || (quiz as any).thoi_gian_ket_thuc;
+  const startTime = rawStart ? new Date(rawStart) : null;
+  const endTime = rawEnd ? new Date(rawEnd) : null;
+  const isNotStarted = startTime && now < startTime;
+  const isEnded = endTime && now > endTime;
+  const canTake = quiz.attemptsUsed < quiz.maxAttempts && !isNotStarted && !isEnded;
   const hasAttempt = quiz.attemptsUsed > 0;
+
+  const formatCardDate = (d: Date | null) => {
+    if (!d || isNaN(d.getTime())) return '';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
 
   return (
     <div className={styles.quizCard}>
@@ -72,6 +91,12 @@ export default function QuizCard({ quiz, onStart, onViewResult }: QuizCardProps)
         )}
 
         <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+          {isNotStarted && (
+            <button className={styles.btnStart} disabled style={{ opacity: 0.65, cursor: 'not-allowed', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+              Chưa đến giờ mở ({formatCardDate(startTime)})
+            </button>
+          )}
+
           {canTake && (
             <button className={styles.btnStart} onClick={() => onStart(quiz.id)}>
               Bắt đầu làm bài

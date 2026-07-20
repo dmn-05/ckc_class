@@ -17,7 +17,7 @@ function getInitials(fullName: string): string {
 export interface PostData {
   id: string;
   title: string;
-  category: 'thong_bao' | 'tai_lieu' | 'bai_tap' | 'bai_viet';
+  category: 'thong_bao' | 'tai_lieu' | 'bai_tap' | string;
   date: string;
   is_published: boolean;
   is_pinned: boolean;
@@ -50,15 +50,13 @@ export default function PostCard({
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
-      case 'thong_bao':
-        return { styleClass: 'bg-[#3525cd]', label: 'THÔNG BÁO' };
       case 'tai_lieu':
         return { styleClass: 'bg-[#6063ee]', label: 'TÀI LIỆU' };
       case 'bai_tap':
         return { styleClass: 'bg-[#a44100]', label: 'BÀI TẬP' };
-      case 'bai_viet':
+      case 'thong_bao':
       default:
-        return { styleClass: 'bg-[#4648d4]', label: 'BÀI VIẾT' };
+        return { styleClass: 'bg-[#3525cd]', label: 'THÔNG BÁO' };
     }
   };
 

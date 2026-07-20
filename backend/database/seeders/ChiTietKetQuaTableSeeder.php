@@ -33605,6 +33605,54 @@ class ChiTietKetQuaTableSeeder extends Seeder
                 'ngay_tao' => '2026-07-07 03:47:34',
                 'ngay_cap_nhat' => '2026-07-07 03:47:34',
             ),
+            298 => 
+            array (
+                'id' => 2799,
+                'ket_qua_kiem_tra_id' => 707,
+                'cau_hoi_id' => 572,
+                'dap_an_id' => 2007,
+                'dap_an_ids' => NULL,
+                'dap_an_tu_luan' => NULL,
+                'diem_dat' => 2.0,
+                'ngay_tao' => '2026-07-13 03:14:12',
+                'ngay_cap_nhat' => '2026-07-13 03:14:12',
+            ),
+            299 => 
+            array (
+                'id' => 2800,
+                'ket_qua_kiem_tra_id' => 707,
+                'cau_hoi_id' => 573,
+                'dap_an_id' => NULL,
+                'dap_an_ids' => '["2011","2012"]',
+                'dap_an_tu_luan' => NULL,
+                'diem_dat' => 2.0,
+                'ngay_tao' => '2026-07-13 03:14:12',
+                'ngay_cap_nhat' => '2026-07-13 03:14:12',
+            ),
+            300 => 
+            array (
+                'id' => 2801,
+                'ket_qua_kiem_tra_id' => 707,
+                'cau_hoi_id' => 574,
+                'dap_an_id' => 2006,
+                'dap_an_ids' => NULL,
+                'dap_an_tu_luan' => NULL,
+                'diem_dat' => 1.0,
+                'ngay_tao' => '2026-07-13 03:14:12',
+                'ngay_cap_nhat' => '2026-07-13 03:14:12',
+            ),
+            301 => 
+            array (
+                'id' => 2802,
+                'ket_qua_kiem_tra_id' => 707,
+                'cau_hoi_id' => 575,
+                'dap_an_id' => NULL,
+                'dap_an_ids' => NULL,
+                'dap_an_tu_luan' => '10',
+                'diem_dat' => 0.0,
+                'ngay_tao' => '2026-07-13 03:14:12',
+                'ngay_cap_nhat' => '2026-07-13 03:14:12',
+            ),
         ));
         
         

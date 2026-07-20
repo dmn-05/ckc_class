@@ -141,14 +141,20 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
     }
 
     try {
-      await updateLecturer(lecturerId, submitData);
+      const res: any = await updateLecturer(lecturerId, submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Cập nhật giảng viên thất bại', 'error', 'Lỗi cập nhật');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      showAlert('Có lỗi xảy ra khi cập nhật giảng viên: ' + (error.message || 'Lỗi không xác định'), 'error', 'Lỗi cập nhật');
+      showAlert(error.message || 'Cập nhật giảng viên thất bại', 'error', 'Lỗi cập nhật');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }

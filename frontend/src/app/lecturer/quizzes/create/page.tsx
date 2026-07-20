@@ -57,7 +57,6 @@ export default function CreateQuizPage() {
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--color-on-surface)' }}>Thêm bài kiểm tra mới</h1>
             <QuizSettingsForm
                 initialData={initialSectionId ? { sectionId: initialSectionId } as any : undefined}
                 onSave={handleSave}

@@ -3,14 +3,13 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import QuizInterface, { QuestionData } from '@/components/student/quizzes/QuizInterface';
-import { getStudentQuizDetails, submitStudentQuiz, getStudentQuizzes } from '@/app/actions/student-quiz';
-import { QuizData } from '@/components/student/quizzes/QuizCard';
+import { getStudentQuizDetails, submitStudentQuiz } from '@/app/actions/student-quiz';
 import styles from '@/components/student/quizzes/QuizzesManagement.module.css';
 
 export default function TakeQuizPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
-    const [quizData, setQuizData] = useState<QuizData | null>(null);
+    const [quizMeta, setQuizMeta] = useState<{ title: string; durationMinutes: number } | null>(null);
     const [activeQuestions, setActiveQuestions] = useState<QuestionData[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -18,37 +17,46 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
         async function loadData() {
             setLoading(true);
             try {
-                // Fetch basic quiz info from list to get duration
-                const listRes = await getStudentQuizzes();
-                if (listRes.success && listRes.data) {
-                    const q = listRes.data.find((quiz: QuizData) => quiz.id === id);
-                    if (q) setQuizData(q);
-                }
-
-                // Fetch details for questions
+                // Fetch details — backend đã xáo trộn câu hỏi/đáp án theo cài đặt
                 const res = await getStudentQuizDetails(id);
-                if (res.success && res.data && res.data.cau_hois) {
-                    const questions: QuestionData[] = [];
-                    res.data.cau_hois.forEach((c: any) => {
-                        let type: 'single' | 'multiple' | 'text' = 'text';
-                        if (c.loai === 'single_choice' || c.loai === 'true_false') type = 'single';
-                        if (c.loai === 'multiple_choice') type = 'multiple';
+                if (res.success && res.data) {
+                    const quiz = res.data;
 
-                        const qData: QuestionData = {
-                            id: c.id.toString(),
-                            type,
-                            text: c.noi_dung,
-                        };
+                    // Kiểm tra thời gian mở bài
+                    const rawStart = quiz.thoi_gian_bat_dau;
+                    if (rawStart && new Date() < new Date(rawStart)) {
+                        router.replace(`/student/quizzes/${id}`);
+                        return;
+                    }
 
-                        if (c.dap_ans && type !== 'text') {
-                            qData.options = c.dap_ans.map((d: any) => ({
-                                id: d.id.toString(),
-                                text: d.noi_dung
-                            }));
-                        }
-                        questions.push(qData);
+                    setQuizMeta({
+                        title: quiz.tieu_de,
+                        durationMinutes: quiz.thoi_gian_lam_bai ?? 60,
                     });
-                    setActiveQuestions(questions);
+
+                    if (quiz.cau_hois) {
+                        const questions: QuestionData[] = quiz.cau_hois.map((c: any) => {
+                            let type: 'single' | 'multiple' | 'text' = 'text';
+                            if (c.loai === 'single_choice' || c.loai === 'true_false') type = 'single';
+                            if (c.loai === 'multiple_choice') type = 'multiple';
+
+                            const qData: QuestionData = {
+                                id: c.id.toString(),
+                                type,
+                                text: c.noi_dung,
+                            };
+
+                            if (c.dap_ans && type !== 'text') {
+                                // Thứ tự đáp án đã được xáo trộn (hoặc không) từ backend
+                                qData.options = c.dap_ans.map((d: any) => ({
+                                    id: d.id.toString(),
+                                    text: d.noi_dung
+                                }));
+                            }
+                            return qData;
+                        });
+                        setActiveQuestions(questions);
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -61,14 +69,13 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
     }, [id]);
 
     const handleSubmitQuiz = async (answers: Record<string, any>, timeLeft: number) => {
-        if (!quizData) return;
+        if (!quizMeta) return;
         setLoading(true);
         try {
-            const totalSeconds = quizData.durationMinutes * 60;
+            const totalSeconds = quizMeta.durationMinutes * 60;
             const spentSeconds = Math.max(0, totalSeconds - timeLeft);
             const res = await submitStudentQuiz(id, answers, spentSeconds);
             if (res.success && res.data) {
-                // Navigate to results page
                 router.push(`/student/quizzes/${id}/results`);
             } else {
                 alert('Có lỗi xảy ra khi nộp bài: ' + res.error);
@@ -89,7 +96,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
         );
     }
 
-    if (!quizData) {
+    if (!quizMeta) {
         return (
             <div className={styles.pageContainer}>
                 <div style={{ padding: '2rem', textAlign: 'center' }}>Không tìm thấy bài kiểm tra.</div>
@@ -97,12 +104,28 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
         );
     }
 
+    if (activeQuestions.length === 0) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+                    <h3 style={{ color: '#b45309', marginBottom: '1rem' }}>Bài kiểm tra chưa được mở hoặc chưa có câu hỏi.</h3>
+                    <button
+                        onClick={() => router.back()}
+                        style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', fontWeight: 600 }}
+                    >
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.pageContainer}>
             <QuizInterface
-                quizTitle={quizData.title}
+                quizTitle={quizMeta.title}
                 quizId={id}
-                durationMinutes={quizData.durationMinutes}
+                durationMinutes={quizMeta.durationMinutes}
                 questions={activeQuestions}
                 onSaveDraft={() => alert('Đã lưu bài làm nháp thành công!')}
                 onSubmit={handleSubmitQuiz}

@@ -1,25 +1,33 @@
-export async function downloadFile(url: string, fileName: string) {
-    try {
-        // Remove fl_attachment if it was accidentally added
-        const cleanUrl = url.replace('/fl_attachment/', '/');
-        
-        const response = await fetch(cleanUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        console.error('Download failed:', error);
-        // Fallback to opening in a new tab if fetch fails (e.g. CORS)
-        window.open(url, '_blank');
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
+
+export function formatFileUrl(url?: string | null): string {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+        return url;
     }
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    return `${BACKEND_ORIGIN}${cleanPath}`;
+}
+
+export async function downloadFile(url: string, fileName: string) {
+    if (!url) return;
+    const formattedUrl = formatFileUrl(url);
+    const targetFileName = fileName || 'download';
+
+    // Strip any existing fl_attachment transform so backend can re-inject correctly
+    const cleanUrl = formattedUrl
+        .replace(/\/fl_attachment:[^/]+\//, '/')
+        .replace(/\/fl_attachment\//, '/');
+
+    const downloadEndpoint = `${API_BASE_URL}/public/download?url=${encodeURIComponent(cleanUrl)}&filename=${encodeURIComponent(targetFileName)}`;
+
+    const a = document.createElement('a');
+    a.href = downloadEndpoint;
+    a.download = targetFileName;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }

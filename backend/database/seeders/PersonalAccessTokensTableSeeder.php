@@ -71,6 +71,58 @@ class PersonalAccessTokensTableSeeder extends Seeder
                 'created_at' => '2026-07-09 08:33:18',
                 'updated_at' => '2026-07-09 08:39:36',
             ),
+            4 => 
+            array (
+                'id' => 38,
+                'tokenable_type' => 'App\\Models\\NguoiDung',
+                'tokenable_id' => 1,
+                'name' => 'auth_token',
+                'token' => '799ce96df0c3779e68f103e4c91ae123b25fc9d288f2aa8fc5fec0b4aa8332be',
+                'abilities' => '["*"]',
+                'last_used_at' => '2026-07-11 13:48:02',
+                'expires_at' => NULL,
+                'created_at' => '2026-07-11 13:47:44',
+                'updated_at' => '2026-07-11 13:48:02',
+            ),
+            5 => 
+            array (
+                'id' => 40,
+                'tokenable_type' => 'App\\Models\\NguoiDung',
+                'tokenable_id' => 22,
+                'name' => 'auth_token',
+                'token' => '2780d75531fa4dc40596e7911d72886b6cd59700bf1f42db8463a1b2b06d64b9',
+                'abilities' => '["*"]',
+                'last_used_at' => '2026-07-11 15:55:39',
+                'expires_at' => NULL,
+                'created_at' => '2026-07-11 15:55:27',
+                'updated_at' => '2026-07-11 15:55:39',
+            ),
+            6 => 
+            array (
+                'id' => 41,
+                'tokenable_type' => 'App\\Models\\NguoiDung',
+                'tokenable_id' => 22,
+                'name' => 'auth_token',
+                'token' => '48f52da7e3b76e7e81be3eb63932fa3e6c9e727a61c17d6f5be5510005d2ed18',
+                'abilities' => '["*"]',
+                'last_used_at' => '2026-07-13 03:24:35',
+                'expires_at' => NULL,
+                'created_at' => '2026-07-12 19:14:40',
+                'updated_at' => '2026-07-13 03:24:35',
+            ),
+            7 => 
+            array (
+                'id' => 42,
+                'tokenable_type' => 'App\\Models\\NguoiDung',
+                'tokenable_id' => 104,
+                'name' => 'auth_token',
+                'token' => '0d6a3dd81b8ca9d15d18d6fc7e4ff51b7b9a375cd14f66d90001ac46f72a692f',
+                'abilities' => '["*"]',
+                'last_used_at' => '2026-07-13 03:22:37',
+                'expires_at' => NULL,
+                'created_at' => '2026-07-12 19:15:06',
+                'updated_at' => '2026-07-13 03:22:37',
+            ),
         ));
         
         

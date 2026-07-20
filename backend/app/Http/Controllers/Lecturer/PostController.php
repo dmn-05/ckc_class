@@ -4,16 +4,25 @@ namespace App\Http\Controllers\Lecturer;
 
 use App\Http\Controllers\Controller;
 use App\Models\BaiViet;
+use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary(config('services.cloudinary.url'));
+    }
+
     public function index(Request $request)
     {
         // For testing purposes, we might just get all posts by this lecturer
         // In reality, it should be filtered by lop_hoc_phan_id to show all posts in a class
         $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+            ->where('trang_thai', '!=', 'da_xoa')
             ->whereHas('nguoiTao', function($q) {
                 $q->whereIn('vai_tro_id', [1, 2]); // Chỉ hiển thị bài của Admin(1) hoặc Giảng viên(2)
             });
@@ -32,10 +41,10 @@ class PostController extends Controller
             'tieu_de' => 'required|string|max:255',
             'noi_dung' => 'required|string',
             'lop_hoc_phan_id' => 'required|integer',
-            'loai_bai_viet' => 'required|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'required|string|in:thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
-            'hinh_anh' => 'required|image|max:10240', // Ảnh bìa bắt buộc, tối đa 10MB
+            'hinh_anh' => 'required_unless:loai_bai_viet,thong_bao|nullable|image|max:10240', // Ảnh bìa không bắt buộc nếu là thông báo
             'file' => 'nullable|file|max:20480', // Tệp đính kèm, tối đa 20MB
         ]);
 
@@ -43,7 +52,6 @@ class PostController extends Controller
             'thong_bao' => 'Thông báo',
             'tai_lieu' => 'Tài liệu',
             'bai_tap' => 'Bài tập',
-            'bai_viet' => 'Thảo luận',
         ];
         $ten_chu_de = $ten_chu_de_map[$validated['loai_bai_viet']] ?? null;
         $chu_de_id = null;
@@ -63,12 +71,14 @@ class PostController extends Controller
         // Upload ảnh bìa lên Cloudinary
         $hinh_anh_url = null;
         if ($request->hasFile('hinh_anh')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
+            $uploadResult = $this->cloudinary->uploadApi()->upload(
                 $request->file('hinh_anh')->getRealPath(),
-                ['folder' => 'posts']
+                [
+                    'folder' => 'ckc_class/posts',
+                    'resource_type' => 'image'
+                ]
             );
-            $hinh_anh_url = $result['secure_url'];
+            $hinh_anh_url = $uploadResult['secure_url'];
         }
 
         $post = BaiViet::create([
@@ -102,6 +112,15 @@ class PostController extends Controller
             ]);
         }
 
+        \App\Helpers\NotificationHelper::createForClass(
+            $post->lop_hoc_phan_id,
+            "Thông báo mới: " . $post->tieu_de,
+            "Giảng viên vừa đăng bài viết/thông báo mới trong lớp học phần.",
+            'bai_viet_moi',
+            '/student/posts/' . $post->id,
+            Auth::id()
+        );
+
         return response()->json(['message' => 'Post created successfully', 'data' => $post], 201);
     }
 
@@ -129,21 +148,23 @@ class PostController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'sometimes|string|max:255',
             'noi_dung' => 'sometimes|string',
-            'loai_bai_viet' => 'sometimes|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'sometimes|string|in:thong_bao,tai_lieu,bai_tap',
             'trang_thai' => 'sometimes|string',
             'hinh_anh' => 'nullable|image|max:10240',
         ]);
 
         // Nếu có ảnh mới, upload lên Cloudinary
         if ($request->hasFile('hinh_anh')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
+            $uploadResult = $this->cloudinary->uploadApi()->upload(
                 $request->file('hinh_anh')->getRealPath(),
-                ['folder' => 'posts']
+                [
+                    'folder' => 'ckc_class/posts',
+                    'resource_type' => 'image'
+                ]
             );
-            $validated['hinh_anh'] = $result['secure_url'];
+            $validated['hinh_anh'] = $uploadResult['secure_url'];
         } else {
-            unset($validated['hinh_anh']); // Không ghi đè nếu không upload ảnh mới
+            unset($validated['hinh_anh']);
         }
 
         $post->update($validated);
@@ -155,11 +176,9 @@ class PostController extends Controller
     {
         $post = BaiViet::findOrFail($id);
         
-        // Delete related records to prevent foreign key constraint violations
-        \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->delete();
-        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->delete();
-
-        $post->delete();
+        // Xóa mềm: đổi trạng thái sang 'da_xoa'
+        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->update(['trang_thai' => 'da_xoa']);
+        $post->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Post deleted successfully']);
     }

@@ -113,14 +113,20 @@ export default function CreateLecturerForm() {
     }
 
     try {
-      await createLecturer(submitData);
+      const res: any = await createLecturer(submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Thêm giảng viên thất bại', 'error', 'Lỗi thêm giảng viên');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      showAlert('Có lỗi xảy ra khi thêm giảng viên: ' + (error.message || 'Lỗi không xác định'), 'error', 'Lỗi thêm giảng viên');
+      showAlert(error.message || 'Thêm giảng viên thất bại', 'error', 'Lỗi thêm giảng viên');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }

@@ -100,3 +100,40 @@ export async function updateAvatarAction(file: File) {
     return { success: false, message: "Lỗi kết nối máy chủ!" };
   }
 }
+
+export async function changePasswordAction(formData: {
+  mat_khau_hien_tai: string;
+  mat_khau_moi: string;
+  xac_nhan_mat_khau_moi: string;
+}) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  if (!token) {
+    return { success: false, message: "Vui lòng đăng nhập lại!" };
+  }
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/user/change-password`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      return { success: true, message: data.message || "Đổi mật khẩu thành công!" };
+    } else {
+      const firstError = data.errors ? (Object.values(data.errors)[0] as string[])?.[0] : null;
+      return { success: false, message: firstError || data.message || "Đổi mật khẩu thất bại!" };
+    }
+  } catch (error) {
+    console.error("Change password error:", error);
+    return { success: false, message: "Lỗi kết nối máy chủ!" };
+  }
+}

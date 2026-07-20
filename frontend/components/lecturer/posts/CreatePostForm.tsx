@@ -23,9 +23,9 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
 
   const [formData, setFormData] = useState({
     title: initialData?.tieu_de || initialData?.title || '',
-    category: initialData?.loai_bai_viet || initialData?.category || 'thong_bao',
+    category: (initialData?.loai_bai_viet === 'bai_viet' ? 'thong_bao' : initialData?.loai_bai_viet) || initialData?.category || 'thong_bao',
     status: initialData?.trang_thai || (initialData?.is_published ? 'hien_thi' : 'an') || 'hien_thi',
-    lopHocPhanId: initialData?.lop_hoc_phan_id || '',
+    lopHocPhanId: (initialData?.lop_hoc_phan_id || initialData?.sectionId || '').toString(),
     content: initialData?.noi_dung || '',
     hinhAnh: null as File | null,
     file: null as File | null
@@ -33,13 +33,27 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
   // Preview ảnh bìa: nếu đang edit thì dùng ảnh hiện tại, nếu chọn file mới thì dùng URL tạm
   const [hinhAnhPreview, setHinhAnhPreview] = useState<string | null>(
     initialData?.hinh_anh || null
-  );  useEffect(() => {
+  );
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId && sId !== '0') {
+      setInitialSectionId(sId);
+      if (!isEdit) {
+        setFormData(prev => ({ ...prev, lopHocPhanId: sId }));
+      }
+    }
+
     const fetchSections = async () => {
       try {
         const data = await getLecturerCourseSections();
         setCourseSections(data);
-        if (data.length > 0 && !formData.lopHocPhanId) {
+        if (data.length > 0 && !formData.lopHocPhanId && (!sId || sId === '0')) {
           setFormData(prev => ({ ...prev, lopHocPhanId: data[0].id.toString() }));
+        } else if (sId && sId !== '0' && !isEdit) {
+          setFormData(prev => ({ ...prev, lopHocPhanId: sId }));
         }
       } catch (err) {
         console.error(err);
@@ -75,8 +89,8 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
     setSubmitStatus('idle');
     setErrorMessage('');
 
-    // Khi tạo mới, ảnh bìa là bắt buộc
-    if (!isEdit && !formData.hinhAnh) {
+    // Khi tạo mới, ảnh bìa là bắt buộc (trừ khi là thông báo)
+    if (!isEdit && formData.category !== 'thong_bao' && !formData.hinhAnh) {
       setSubmitStatus('error');
       setErrorMessage('Vui lòng chọn ảnh bìa cho bài viết.');
       setIsSubmitting(false);
@@ -121,7 +135,12 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
 
       setSubmitStatus('success');
       setTimeout(() => {
-        router.push('/lecturer/posts');
+        const targetSectionId = initialSectionId || formData.lopHocPhanId || initialData?.lop_hoc_phan_id || initialData?.sectionId;
+        if (targetSectionId && targetSectionId !== '0') {
+          router.push(`/lecturer/sections/${targetSectionId}`);
+        } else {
+          router.push('/lecturer/posts');
+        }
       }, 1500);
     } catch (err: any) {
       setSubmitStatus('error');
@@ -166,7 +185,6 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                   required 
                   disabled={isEdit}
                 >
-                  <option value="bai_viet">Bài viết</option>
                   <option value="thong_bao">Thông báo</option>
                 </select>
                 {isEdit && <small style={{color: '#777587', marginTop: '4px'}}>Không thể đổi loại bài viết sau khi tạo.</small>}
@@ -195,12 +213,15 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                   value={formData.lopHocPhanId} 
                   onChange={handleChange} 
                   required
+                  disabled={isEdit || Boolean(initialSectionId && initialSectionId !== '0')}
                 >
                   <option value="">Chọn Lớp học phần</option>
                   {courseSections.map(s => (
                     <option key={s.id} value={s.id}>{s.code} - {s.name || (s.mon_hoc?.ten_mon)}</option>
                   ))}
                 </select>
+                {isEdit && <small style={{color: '#777587', marginTop: '4px'}}>Không thể đổi lớp học phần sau khi tạo.</small>}
+                {!isEdit && Boolean(initialSectionId && initialSectionId !== '0') && <small style={{color: '#777587', marginTop: '4px'}}>Đang thêm bài viết cho lớp học phần hiện tại (không thể thay đổi).</small>}
               </div>
             </div>
 
@@ -219,68 +240,51 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
               </div>
             </div>
 
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-              <div className={styles.formGroup}>
-                <h3 className={styles.uploadTitle}>
-                  Ảnh bìa {!isEdit && <span style={{color:'red'}}>*</span>}
-                </h3>
-                <label className={styles.uploadArea} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: hinhAnhPreview ? '200px' : undefined }}>
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleHinhAnhChange} 
-                    style={{ display: 'none' }}
-                    required={!isEdit}
-                  />
-                  {hinhAnhPreview ? (
-                    <div style={{ position: 'relative', width: '100%' }}>
-                      <img 
-                        src={hinhAnhPreview} 
-                        alt="Preview ảnh bìa" 
-                        style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', borderRadius: '0.5rem', display: 'block' }} 
-                      />
-                      <div style={{ 
-                        position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', 
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-                        borderRadius: '0.5rem', opacity: 0, transition: 'opacity 0.2s' 
-                      }}
-                        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                        onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>photo_camera</span>
-                        <span style={{ color: '#fff', fontSize: '14px', marginTop: '8px' }}>Nhấn để đổi ảnh</span>
+            {formData.category !== 'thong_bao' && (
+              <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
+                <div className={styles.formGroup}>
+                  <h3 className={styles.uploadTitle}>
+                    Ảnh bìa {!isEdit && <span style={{color:'red'}}>*</span>}
+                  </h3>
+                  <label className={styles.uploadArea} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: hinhAnhPreview ? '200px' : undefined }}>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleHinhAnhChange} 
+                      style={{ display: 'none' }}
+                      required={!isEdit && formData.category !== 'thong_bao'}
+                    />
+                    {hinhAnhPreview ? (
+                      <div style={{ position: 'relative', width: '100%' }}>
+                        <img 
+                          src={hinhAnhPreview} 
+                          alt="Preview ảnh bìa" 
+                          style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', borderRadius: '0.5rem', display: 'block' }} 
+                        />
+                        <div style={{ 
+                          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', 
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                          borderRadius: '0.5rem', opacity: 0, transition: 'opacity 0.2s' 
+                        }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#fff' }}>photo_camera</span>
+                          <span style={{ color: '#fff', fontSize: '14px', marginTop: '8px' }}>Nhấn để đổi ảnh</span>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className={styles.uploadContent}>
-                      <span className={`material-symbols-outlined ${styles.uploadIcon}`}>add_photo_alternate</span>
-                      <span className={styles.uploadText}>Nhấp để chọn ảnh bìa</span>
-                      <span className={styles.uploadHint}>JPG, PNG, WEBP (Tối đa 10MB) — Bắt buộc</span>
-                    </div>
-                  )}
-                </label>
+                    ) : (
+                      <div className={styles.uploadContent}>
+                        <span className={`material-symbols-outlined ${styles.uploadIcon}`}>add_photo_alternate</span>
+                        <span className={styles.uploadText}>Nhấp để chọn ảnh bìa</span>
+                        <span className={styles.uploadHint}>JPG, PNG, WEBP (Tối đa 10MB) — Bắt buộc</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-              <div className={styles.formGroup}>
-                <h3 className={styles.uploadTitle}>Tệp đính kèm</h3>
-                <label className={styles.uploadArea}>
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange} 
-                    style={{ display: 'none' }}
-                  />
-                  <div className={styles.uploadContent}>
-                    <span className={`material-symbols-outlined ${styles.uploadIcon}`}>cloud_upload</span>
-                    <span className={styles.uploadText}>
-                      {formData.file ? formData.file.name : 'Nhấp để chọn tệp'}
-                    </span>
-                    <span className={styles.uploadHint}>Hỗ trợ PDF, DOCX, XLSX, hình ảnh (Tối đa 10MB)</span>
-                  </div>
-                </label>
-              </div>
-            </div>
 
             {submitStatus === 'error' && (
               <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fef2f2', color: '#dc2626', borderRadius: '0.5rem', fontSize: '0.875rem' }}>
@@ -297,7 +301,14 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
               <button 
                 type="button" 
                 className={styles.btnSecondary}
-                onClick={() => router.back()}
+                onClick={() => {
+                  const targetSectionId = initialSectionId || formData.lopHocPhanId || initialData?.lop_hoc_phan_id || initialData?.sectionId;
+                  if (targetSectionId && targetSectionId !== '0') {
+                    router.push(`/lecturer/sections/${targetSectionId}`);
+                  } else {
+                    router.push('/lecturer/posts');
+                  }
+                }}
                 disabled={isSubmitting}
               >
                 Hủy bỏ
@@ -310,9 +321,9 @@ export default function CreatePostForm({ initialData, isEdit = false }: CreatePo
                 {isSubmitting ? (
                   <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
                 ) : (
-                  <span className="material-symbols-outlined">{isEdit ? 'save' : 'add'}</span>
+                  <span className="material-symbols-outlined">{isEdit ? 'save' : 'send'}</span>
                 )}
-                {isEdit ? 'Cập nhật Bài Viết' : 'Thêm Bài Viết'}
+                {isEdit ? 'Cập nhật' : 'Đăng'}
               </button>
             </div>
           </form>

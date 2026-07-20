@@ -75,7 +75,10 @@ export async function getLecturerAssignments(): Promise<AssignmentData[]> {
 
 export async function getLecturerAssignmentById(id: string) {
     const response = await fetchWithAuth(`/lecturer/assignments/${id}`, { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch assignment');
+    if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch assignment');
+    }
     const json = await response.json();
     return mapAssignmentFromApi(json.data || json);
 }
@@ -87,7 +90,16 @@ export async function createLecturerAssignment(formData: FormData) {
     });
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to create assignment');
+        let errMsg = err.message || 'Failed to create assignment';
+        if (err.error) {
+            errMsg += `: ${err.error}`;
+        } else if (err.errors) {
+            const firstKey = Object.keys(err.errors)[0];
+            if (firstKey && Array.isArray(err.errors[firstKey])) {
+                errMsg = err.errors[firstKey][0];
+            }
+        }
+        throw new Error(errMsg);
     }
     const json = await response.json();
     return mapAssignmentFromApi(json.data || json);
@@ -102,7 +114,16 @@ export async function updateLecturerAssignment(id: string, formData: FormData) {
     });
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to update assignment');
+        let errMsg = err.message || 'Failed to update assignment';
+        if (err.error) {
+            errMsg += `: ${err.error}`;
+        } else if (err.errors) {
+            const firstKey = Object.keys(err.errors)[0];
+            if (firstKey && Array.isArray(err.errors[firstKey])) {
+                errMsg = err.errors[firstKey][0];
+            }
+        }
+        throw new Error(errMsg);
     }
     const json = await response.json();
     return mapAssignmentFromApi(json.data || json);
@@ -119,7 +140,10 @@ export async function deleteLecturerAssignment(id: string) {
 
 export async function getLecturerAssignmentSubmissions(id: string) {
     const response = await fetchWithAuth(`/lecturer/assignments/${id}/submissions`, { method: 'GET', cache: 'no-store' });
-    if (!response.ok) throw new Error('Failed to fetch submissions');
+    if (!response.ok) {
+        if (response.status === 404) return [];
+        throw new Error('Failed to fetch submissions');
+    }
     const json = await response.json();
     return json.data || [];
 }

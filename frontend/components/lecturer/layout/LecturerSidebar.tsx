@@ -29,42 +29,42 @@ export default function LecturerSidebar() {
     },
 
 
-    {
-      name: 'Tài nguyên',
-      href: '/lecturer/resources',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Bài tập',
-      href: '/lecturer/assignments',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-      )
-    },
-    {
-      name: 'Bài kiểm tra',
-      href: '/lecturer/quizzes',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Bài viết',
-      href: '/lecturer/posts',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-.586-1.414l-4.5-4.5A2 2 0 0015.5 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14z" />
-        </svg>
-      )
-    },
+    // {
+    //   name: 'Tài nguyên',
+    //   href: '/lecturer/resources',
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+    //     </svg>
+    //   )
+    // },
+    // {
+    //   name: 'Bài tập',
+    //   href: '/lecturer/assignments',
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+    //     </svg>
+    //   )
+    // },
+    // {
+    //   name: 'Bài kiểm tra',
+    //   href: '/lecturer/quizzes',
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    //     </svg>
+    //   )
+    // },
+    // {
+    //   name: 'Bài viết',
+    //   href: '/lecturer/posts',
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-.586-1.414l-4.5-4.5A2 2 0 0015.5 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14z" />
+    //     </svg>
+    //   )
+    // },
     {
       name: 'Hồ sơ',
       href: '/lecturer/profile',
@@ -90,7 +90,20 @@ export default function LecturerSidebar() {
       </div>
       <nav className={styles.navMenu}>
         {navLinks.map((link) => {
-          const isActive = pathname === link.href || (link.href !== '/lecturer' && pathname?.startsWith(link.href));
+          let isActive = false;
+          if (link.href === '/lecturer') {
+            isActive = pathname === '/lecturer';
+          } else if (link.href === '/lecturer/sections') {
+            isActive =
+              pathname?.startsWith('/lecturer/sections') ||
+              pathname?.startsWith('/lecturer/assignments') ||
+              pathname?.startsWith('/lecturer/quizzes') ||
+              pathname?.startsWith('/lecturer/resources') ||
+              pathname?.startsWith('/lecturer/posts') ||
+              pathname?.startsWith('/lecturer/comments') || false;
+          } else {
+            isActive = pathname?.startsWith(link.href) || false;
+          }
           return (
             <Link 
               key={link.href} 

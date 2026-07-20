@@ -60,6 +60,13 @@ export default function BasicInfoForm({ profileData, formData, onChange }: { pro
             <span className={`material-symbols-outlined ${styles.inputIconRight}`}>lock</span>
           </div>
         </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="khoa_hoc">Khóa học</label>
+          <div className={`${styles.inputGlow} ${styles.inputDisabled}`}>
+            <input className={styles.inputField} id="khoa_hoc" type="text" defaultValue={profileData?.sinh_vien?.khoa_hoc || ''} readOnly disabled placeholder="Chưa cập nhật" />
+            <span className={`material-symbols-outlined ${styles.inputIconRight}`}>lock</span>
+          </div>
+        </div>
         
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="academic_status">Trạng thái học tập</label>

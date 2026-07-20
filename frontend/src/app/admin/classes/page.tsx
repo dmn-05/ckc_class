@@ -9,7 +9,9 @@ import ClassStatsModal from '@/components/admin/classes/ClassStatsModal';
 import { ClassData } from '@/components/admin/classes/ClassCard';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getClasses } from '@/app/actions/student';
+import { getClasses, deleteClass } from '@/app/actions/class';
+import ConfirmModal from '@/components/common/ConfirmModal';
+import AlertModal from '@/components/common/AlertModal';
 
 export default function LecturerClassesPage() {
   const [classes, setClasses] = useState<ClassData[]>([]);
@@ -19,6 +21,30 @@ export default function LecturerClassesPage() {
 
   // Modals state
   const [statsClassId, setStatsClassId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Alert modal state
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'success' | 'error' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'success'
+  });
+
+  const showAlert = (message: string, variant: 'success' | 'error' | 'warning' = 'success', title?: string) => {
+    setAlertConfig({
+      isOpen: true,
+      title: title || (variant === 'success' ? 'Thành công' : variant === 'error' ? 'Lỗi' : 'Thông báo'),
+      message,
+      variant
+    });
+  };
 
   const activeCount = classes.filter(s => s.status === 'dang_hoc').length;
   // Mock logic for pending assignments/quizzes just for visual
@@ -33,7 +59,7 @@ export default function LecturerClassesPage() {
         code: item.ma_lop,
         name: item.ten_lop,
         faculty: item.khoa?.ten_khoa || 'Không rõ',
-        enrollmentYear: item.nam_nhap_hoc || 2024,
+        enrollmentYear: item.khoa_hoc ? String(item.khoa_hoc) : '',
         studentCount: item.sinh_viens_count || 0,
         status: item.trang_thai || 'dang_hoc'
       }));
@@ -58,8 +84,23 @@ export default function LecturerClassesPage() {
   };
 
   const handleDeleteClass = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa lớp này?')) {
-      setClasses(prev => prev.filter(s => s.id !== id));
+    setDeleteId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await deleteClass(deleteId);
+      setClasses(prev => prev.filter(s => s.id !== deleteId));
+      setDeleteId(null);
+      showAlert('Xóa lớp học thành công!', 'success');
+      loadData();
+    } catch (error: any) {
+      setDeleteId(null);
+      showAlert(error.message || 'Có lỗi xảy ra khi xóa lớp học.', 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -119,6 +160,25 @@ export default function LecturerClassesPage() {
           onClose={() => setStatsClassId(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Xác nhận xóa Lớp học"
+        message="Bạn có chắc chắn muốn xóa lớp học này khỏi hệ thống? Dữ liệu không thể khôi phục sau khi xóa."
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteId(null)}
+        isLoading={deleting}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

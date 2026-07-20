@@ -85,6 +85,80 @@ export default function QuizInterface({ quizTitle, quizId, questions, durationMi
 
   const currentQ = questions[currentIdx];
 
+  if (!currentQ || questions.length === 0) {
+    return (
+      <div style={{
+        maxWidth: '640px',
+        margin: '2.5rem auto',
+        padding: '3rem 2.5rem',
+        textAlign: 'center',
+        backgroundColor: '#ffffff',
+        borderRadius: '1.25rem',
+        boxShadow: '0 20px 25px -5px rgba(53, 37, 205, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
+        border: '1px solid #eef0f6'
+      }}>
+        <div style={{
+          width: '76px',
+          height: '76px',
+          margin: '0 auto 1.5rem',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#3525cd',
+          boxShadow: '0 10px 15px -3px rgba(53, 37, 205, 0.15)'
+        }}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="38" height="38">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+
+        <h3 style={{
+          fontSize: '1.35rem',
+          fontWeight: 700,
+          color: '#1e1b4b',
+          marginBottom: '0.75rem'
+        }}>
+          Chưa có câu hỏi nào trong bài kiểm tra
+        </h3>
+
+        <p style={{
+          color: '#64748b',
+          fontSize: '0.975rem',
+          lineHeight: '1.6',
+          maxWidth: '480px',
+          margin: '0 auto 2rem'
+        }}>
+          Giảng viên phụ trách đang trong quá trình cập nhật bộ câu hỏi cho bài kiểm tra này. Vui lòng quay lại sau hoặc liên hệ giảng viên bộ môn.
+        </p>
+
+        <a
+          href="/student/quizzes"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.8rem 1.6rem',
+            backgroundColor: '#3525cd',
+            color: '#ffffff',
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            borderRadius: '0.75rem',
+            textDecoration: 'none',
+            boxShadow: '0 4px 14px 0 rgba(53, 37, 205, 0.35)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Quay lại danh sách bài kiểm tra
+        </a>
+      </div>
+    );
+  }
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -171,7 +245,7 @@ export default function QuizInterface({ quizTitle, quizId, questions, durationMi
         <div className={styles.questionBox}>
           <div>
             <span className={styles.questionTypeBadge}>
-              CÂU HỎI {currentIdx + 1} - {currentQ.type.toUpperCase()}
+              CÂU HỎI {currentIdx + 1} - {(currentQ.type || 'text').toUpperCase()}
             </span>
             <h3 className={styles.questionText}>{currentQ.text}</h3>
           </div>

@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\BaiViet;
+use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary(config('services.cloudinary.url'));
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -68,18 +76,18 @@ class PostController extends Controller
             'tieu_de' => 'required|string|max:255',
             'noi_dung' => 'required|string',
             'lop_hoc_phan_id' => 'required|integer',
-            'loai_bai_viet' => 'nullable|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'nullable|string|in:thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
             'file' => 'nullable|file|max:20480', // Max 20MB
+            'hinh_anh' => 'nullable|image|max:5120', // Max 5MB for image
         ]);
 
-        $loai_bai_viet = $validated['loai_bai_viet'] ?? 'bai_viet';
+        $loai_bai_viet = $validated['loai_bai_viet'] ?? 'thong_bao';
         $ten_chu_de_map = [
             'thong_bao' => 'Thông báo',
             'tai_lieu' => 'Tài liệu',
             'bai_tap' => 'Bài tập',
-            'bai_viet' => 'Thảo luận',
         ];
         $ten_chu_de = $ten_chu_de_map[$loai_bai_viet] ?? null;
         $chu_de_id = null;
@@ -96,13 +104,26 @@ class PostController extends Controller
             }
         }
 
+        $hinhAnhUrl = null;
+        if ($request->hasFile('hinh_anh')) {
+            $uploadResult = $this->cloudinary->uploadApi()->upload(
+                $request->file('hinh_anh')->getRealPath(),
+                [
+                    'folder' => 'ckc_class/posts',
+                    'resource_type' => 'image'
+                ]
+            );
+            $hinhAnhUrl = $uploadResult['secure_url'];
+        }
+
         $post = BaiViet::create([
             'tieu_de' => $validated['tieu_de'],
             'noi_dung' => $validated['noi_dung'],
+            'hinh_anh' => $hinhAnhUrl,
             'lop_hoc_phan_id' => $validated['lop_hoc_phan_id'],
             'chu_de_id' => $chu_de_id,
             'nguoi_tao_id' => Auth::id() ?? 4, // Fallback to SV Lê Thành Đạt
-            'loai_bai_viet' => $validated['loai_bai_viet'] ?? 'bai_viet', // Student usually posts bai_viet
+            'loai_bai_viet' => $validated['loai_bai_viet'] ?? 'thong_bao',
             'trang_thai' => $validated['trang_thai'] ?? 'hien_thi',
         ]);
 

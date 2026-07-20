@@ -24,20 +24,24 @@ class LecturerProfileController extends Controller
     {
         $user = $request->user() ?? \App\Models\NguoiDung::find(2); // Fallback to GV001 for testing
 
-        $validatedData = $request->validate([
+        $rules = [
             'ho_ten' => 'nullable|string|max:255',
             'email' => ['nullable', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@ckc\.edu\.vn$/i', 'unique:nguoi_dung,email,' . $user->id],
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'nullable|in:nam,nu,khac',
-            'cccd' => 'nullable|regex:/^\d{12}$/',
+            'cccd' => 'nullable|regex:/^\d{12}$/|unique:giang_vien,cccd,' . ($user->giangVien ? $user->giangVien->id : 'NULL'),
             'so_dien_thoai' => 'nullable|regex:/^\d{10}$/',
             'dia_chi' => 'nullable|string|max:255',
-        ], [
+        ];
+        $messages = [
             'email.email' => 'Email không đúng chuẩn email.',
             'email.regex' => 'Email phải có đuôi @ckc.edu.vn.',
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
             'cccd.regex' => 'Số CCCD / CMND phải gồm đúng 12 chữ số.',
+            'cccd.unique' => 'Số CCCD này đã trùng với một giảng viên khác trong hệ thống!',
             'so_dien_thoai.regex' => 'Số điện thoại phải gồm đúng 10 chữ số.',
-        ]);
+        ];
+        $validatedData = $request->validate($rules, $messages);
 
         if (isset($validatedData['ho_ten'])) {
             $user->ho_ten = $validatedData['ho_ten'];
