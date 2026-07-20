@@ -14,18 +14,29 @@ class LopHocPhan extends Model
     const CREATED_AT = 'ngay_tao';
     const UPDATED_AT = 'ngay_cap_nhat';
 
-    protected $appends = ['pending_grading_count', 'bai_taps_count', 'bai_kiem_tras_count'];
+    protected $appends = ['pending_grading_count', 'bai_taps_count', 'bai_kiem_tras_count', 'base_class_id'];
 
     protected $fillable = [
         'ma_lop_hoc_phan',
         'ten_lop',
         'mon_hoc_id',
+        'lop_id',
         'giang_vien_id',
         'hoc_ky',
         'nam_hoc',
         'si_so_toi_da',
         'trang_thai',
     ];
+
+    public function getBaseClassIdAttribute()
+    {
+        return $this->lop_id;
+    }
+
+    public function lop()
+    {
+        return $this->belongsTo(Lop::class, 'lop_id');
+    }
 
     public function monHoc()
     {

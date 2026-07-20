@@ -74,7 +74,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
           ma_lop_hoc_phan: data.ma_lop_hoc_phan || '',
           ten_lop: data.ten_lop || '',
           mon_hoc_id: data.mon_hoc_id ? data.mon_hoc_id.toString() : '',
-          base_class_id: '',
+          base_class_id: (data.base_class_id ?? data.lop_id ?? '')?.toString() || '',
           giang_vien_id: mainId,
           hoc_ky: data.hoc_ky ? data.hoc_ky.toString().replace('HK', '') : '1',
           nam_hoc: data.nam_hoc || '2024-2025',

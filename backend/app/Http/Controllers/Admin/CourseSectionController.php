@@ -11,7 +11,7 @@ class CourseSectionController extends Controller
 {
     public function index()
     {
-        $sections = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        $sections = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop'])
             ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
             ->get();
         return response()->json($sections);
@@ -82,6 +82,7 @@ class CourseSectionController extends Controller
         unset($validated['base_class_id'], $validated['giang_vien_ids'], $validated['giang_vien_phu_ids']);
 
         $validated['giang_vien_id'] = $mainLecturerId;
+        $validated['lop_id'] = $baseClassId;
 
         \DB::beginTransaction();
         try {
@@ -110,7 +111,7 @@ class CourseSectionController extends Controller
             }
 
             \DB::commit();
-            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
+            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop']);
             return response()->json($section, 201);
         } catch (\Exception $e) {
             \DB::rollBack();
@@ -120,7 +121,7 @@ class CourseSectionController extends Controller
 
     public function show($id)
     {
-        $section = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        $section = LopHocPhan::with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop'])
             ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
             ->findOrFail($id);
         return response()->json($section);
@@ -174,7 +175,10 @@ class CourseSectionController extends Controller
         }
 
         $validated['giang_vien_id'] = $mainLecturerId;
-        
+        if (array_key_exists('base_class_id', $request->all()) || $baseClassId !== null) {
+            $validated['lop_id'] = $baseClassId;
+        }
+
         \DB::beginTransaction();
         try {
             $section->update($validated);
@@ -188,7 +192,7 @@ class CourseSectionController extends Controller
             }
 
             \DB::commit();
-            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung']);
+            $section->load(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung', 'lop']);
             return response()->json($section);
         } catch (\Exception $e) {
             \DB::rollBack();
