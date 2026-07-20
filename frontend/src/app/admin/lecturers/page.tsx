@@ -69,6 +69,11 @@ export default function LecturersManagementPage() {
     loadData();
   }, [loadData]);
 
+  // Reset page when filters or lecturers change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, listFilter, showTeaching, showStopped, lecturers]);
+
   const totalCount = lecturers.length;
   const teachingCount = lecturers.filter(l => l.isActive).length;
   const stoppedTeachingCount = totalCount - teachingCount;

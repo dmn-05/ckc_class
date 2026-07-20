@@ -29,10 +29,10 @@ export default function ClassList({ classes, onEdit, onViewStats, onManageStuden
     currentPage * itemsPerPage
   );
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search or classes prop change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, classes]);
 
   return (
     <div className={styles.rightColumn}>
