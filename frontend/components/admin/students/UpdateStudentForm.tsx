@@ -175,7 +175,13 @@ export default function UpdateStudentForm({ studentId }: UpdateStudentFormProps)
     if (avatarFile) submitData.append('avatar', avatarFile);
 
     try {
-      await updateStudent(studentId, submitData);
+      const res: any = await updateStudent(studentId, submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Cập nhật sinh viên thất bại', 'error', 'Lỗi cập nhật');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/students');

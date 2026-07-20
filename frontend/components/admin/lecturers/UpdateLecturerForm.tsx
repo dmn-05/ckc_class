@@ -141,7 +141,13 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
     }
 
     try {
-      await updateLecturer(lecturerId, submitData);
+      const res: any = await updateLecturer(lecturerId, submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Cập nhật giảng viên thất bại', 'error', 'Lỗi cập nhật');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');
