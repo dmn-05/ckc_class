@@ -24,8 +24,20 @@ export default function AdminStudentsPage() {
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>(['active', 'graduated', 'reserved']); // array of selected statuses
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('admin_students_page');
+      return saved ? Number(saved) : 1;
+    }
+    return 1;
+  });
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_students_page', currentPage.toString());
+    }
+  }, [currentPage]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -50,10 +62,10 @@ export default function AdminStudentsPage() {
     loadData();
   }, [loadData]);
 
-  // Reset page when filters or students change
+  // Reset page ONLY when filters or search change (lọc hay tìm kiếm)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, facultyFilter, classFilter, statusFilter, students]);
+  }, [searchTerm, facultyFilter, classFilter, statusFilter]);
 
   // Reset classFilter when facultyFilter changes
   useEffect(() => {
@@ -104,6 +116,14 @@ export default function AdminStudentsPage() {
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+
+  // Adjust page if current page exceeds total pages after deletion/edit
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const currentStudents = filteredStudents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
