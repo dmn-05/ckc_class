@@ -15,8 +15,20 @@ interface ClassListProps {
 
 export default function ClassList({ classes, onEdit, onViewStats, onManageStudents, onDelete }: ClassListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('admin_classes_page');
+      return saved ? Number(saved) : 1;
+    }
+    return 1;
+  });
   const itemsPerPage = 4; // Adjust as needed
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_classes_page', currentPage.toString());
+    }
+  }, [currentPage]);
 
   const filteredClasses = classes.filter(sec => 
     sec.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,10 +41,17 @@ export default function ClassList({ classes, onEdit, onViewStats, onManageStuden
     currentPage * itemsPerPage
   );
 
-  // Reset to page 1 when search or classes prop change
+  // Reset to page 1 ONLY when search changes (tìm kiếm)
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, classes]);
+  }, [searchTerm]);
+
+  // Adjust page if current page exceeds total pages after deletion/edit
+  React.useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <div className={styles.rightColumn}>

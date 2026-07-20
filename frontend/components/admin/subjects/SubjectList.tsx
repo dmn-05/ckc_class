@@ -25,13 +25,25 @@ export default function SubjectList({
   onDelete 
 }: SubjectListProps) {
   const itemsPerPage = 5;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('admin_subjects_page');
+      return saved ? Number(saved) : 1;
+    }
+    return 1;
+  });
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Reset page when filter, search or subjects change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_subjects_page', currentPage.toString());
+    }
+  }, [currentPage]);
+
+  // Reset page ONLY when filter or search changes (lọc hay tìm kiếm)
   useEffect(() => {
     setCurrentPage(1);
-  }, [subjects, currentFilter, statusFilter, searchTerm]);
+  }, [currentFilter, statusFilter, searchTerm]);
 
   // Filter and search logic
   const filteredSubjects = subjects.filter(subject => {
@@ -55,6 +67,13 @@ export default function SubjectList({
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredSubjects.length / itemsPerPage));
+
+  // Adjust page if current page exceeds total pages after deletion/edit
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
   
   const currentSubjects = filteredSubjects.slice(
     (currentPage - 1) * itemsPerPage, 

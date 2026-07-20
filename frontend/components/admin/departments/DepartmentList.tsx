@@ -14,8 +14,20 @@ interface DepartmentListProps {
 
 export default function DepartmentList({ departments, facultyFilter, statusFilter, onDelete }: DepartmentListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('admin_departments_page');
+      return saved ? Number(saved) : 1;
+    }
+    return 1;
+  });
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_departments_page', currentPage.toString());
+    }
+  }, [currentPage]);
 
   // Filter logic
   const filtered = departments.filter(d => {
@@ -33,10 +45,17 @@ export default function DepartmentList({ departments, facultyFilter, statusFilte
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
 
-  // Reset to page 1 when filters or departments change
+  // Reset to page 1 ONLY when filter or search changes (lọc hay tìm kiếm)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, facultyFilter, departments]);
+  }, [searchTerm, statusFilter, facultyFilter]);
+
+  // Adjust page if current page exceeds total pages after deletion/edit
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 

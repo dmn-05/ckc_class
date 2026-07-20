@@ -22,8 +22,20 @@ export default function LecturersManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showTeaching, setShowTeaching] = useState(true);
   const [showStopped, setShowStopped] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('admin_lecturers_page');
+      return saved ? Number(saved) : 1;
+    }
+    return 1;
+  });
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_lecturers_page', currentPage.toString());
+    }
+  }, [currentPage]);
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -69,10 +81,10 @@ export default function LecturersManagementPage() {
     loadData();
   }, [loadData]);
 
-  // Reset page when filters or lecturers change
+  // Reset page ONLY when filters or search change (lọc hay tìm kiếm)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, listFilter, showTeaching, showStopped, lecturers]);
+  }, [searchQuery, listFilter, showTeaching, showStopped]);
 
   const totalCount = lecturers.length;
   const teachingCount = lecturers.filter(l => l.isActive).length;
@@ -112,6 +124,14 @@ export default function LecturersManagementPage() {
   });
 
   const totalPages = Math.ceil(filteredLecturers.length / itemsPerPage);
+
+  // Adjust page if current page exceeds total pages after deletion/edit
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const currentLecturers = filteredLecturers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
