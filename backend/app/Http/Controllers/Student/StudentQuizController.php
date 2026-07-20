@@ -21,7 +21,7 @@ class StudentQuizController extends Controller
         // Get all section IDs the student is enrolled in
         $sectionIds = $student->lopHocPhans()->pluck('lop_hoc_phan.id');
 
-        $quizzesQuery = BaiKiemTra::query();
+        $quizzesQuery = BaiKiemTra::where('trang_thai', '!=', 'da_xoa');
         if ($request->has('lop_hoc_phan_id') && $request->lop_hoc_phan_id) {
             $quizzesQuery->where('lop_hoc_phan_id', (int) $request->lop_hoc_phan_id);
         } else {
@@ -130,6 +130,10 @@ class StudentQuizController extends Controller
 
         if (!$quiz) {
             return response()->json(['message' => 'Quiz not found or unauthorized'], 404);
+        }
+
+        if ($quiz->lopHocPhan && $quiz->lopHocPhan->trang_thai === 'da_khoa') {
+            return response()->json(['message' => 'Lớp học phần đã được lưu trữ, không thể làm bài kiểm tra'], 403);
         }
 
         if ($quiz->thoi_gian_bat_dau && now()->lt($quiz->thoi_gian_bat_dau)) {

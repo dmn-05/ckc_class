@@ -19,7 +19,7 @@ interface PostData {
   isQuestion?: boolean;
 }
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function StudentPostsList() {
   const [posts, setPosts] = useState<PostData[]>([]);
@@ -47,17 +47,16 @@ export default function StudentPostsList() {
           return {
             id: item.id.toString(),
             authorName: item.nguoi_tao?.ho_ten || 'Unknown',
-            category: item.loai_bai_viet === 'thong_bao' ? 'Thông báo' : 
-                      item.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
-                      item.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
-            rawCategory: item.loai_bai_viet || 'bai_viet',
+            category: item.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
+                      item.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thông báo',
+            rawCategory: item.loai_bai_viet || 'thong_bao',
             date: new Date(item.ngay_tao).toLocaleDateString('vi-VN'),
             status: 'Đã đăng',
             title: item.tieu_de,
             views: item.luot_xem || 0, 
             commentsCount: item.binh_luan?.length || 0,
             image: item.hinh_anh || null,
-            isQuestion: item.loai_bai_viet === 'bai_viet',
+            isQuestion: false,
             attachment: attachment
           };
         });
@@ -104,7 +103,6 @@ export default function StudentPostsList() {
             <option value="thong_bao">Thông báo</option>
             <option value="tai_lieu">Tài liệu</option>
             <option value="bai_tap">Bài tập</option>
-            <option value="bai_viet">Thảo luận</option>
           </select>
           <select
             className={styles.sortSelect}

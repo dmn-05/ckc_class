@@ -8,18 +8,20 @@ import StudentsToolbar from '@/components/admin/students/StudentsToolbar';
 import StudentsList from '@/components/admin/students/StudentsList';
 import StudentsPagination from '@/components/admin/students/StudentsPagination';
 import styles from '@/components/admin/students/AdminStudents.module.css';
-import { getStudents } from '@/app/actions/student';
+import { getStudents, getClasses } from '@/app/actions/student';
 import { getFaculties } from '@/app/actions/faculty';
 import { StudentData } from '@/components/admin/students/StudentCard';
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [faculties, setFaculties] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters & Pagination State
   const [searchTerm, setSearchTerm] = useState('');
   const [facultyFilter, setFacultyFilter] = useState('all');
+  const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string[]>(['active', 'graduated', 'reserved']); // array of selected statuses
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,12 +30,14 @@ export default function AdminStudentsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [studentsData, facultiesData] = await Promise.all([
+      const [studentsData, facultiesData, classesData] = await Promise.all([
         getStudents(),
-        getFaculties()
+        getFaculties(),
+        getClasses()
       ]);
       setStudents(studentsData);
       setFaculties(facultiesData);
+      setClasses(classesData);
     } catch (error) {
       console.error('Error loading students data:', error);
       alert('Không thể tải dữ liệu sinh viên. Vui lòng thử lại.');
@@ -49,7 +53,12 @@ export default function AdminStudentsPage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, facultyFilter, statusFilter]);
+  }, [searchTerm, facultyFilter, classFilter, statusFilter]);
+
+  // Reset classFilter when facultyFilter changes
+  useEffect(() => {
+    setClassFilter('all');
+  }, [facultyFilter]);
 
   // Apply filters
   const filteredStudents = students.filter(student => {
@@ -66,6 +75,13 @@ export default function AdminStudentsPage() {
     // Faculty Filter
     if (facultyFilter !== 'all') {
       if (!student.faculty || student.faculty.toLowerCase() !== facultyFilter.toLowerCase()) {
+        return false;
+      }
+    }
+
+    // Class Filter
+    if (classFilter !== 'all') {
+      if (!student.classCode || student.classCode.toLowerCase() !== classFilter.toLowerCase()) {
         return false;
       }
     }
@@ -104,9 +120,12 @@ export default function AdminStudentsPage() {
           <StudentsFilter 
             facultyFilter={facultyFilter}
             onFacultyChange={setFacultyFilter}
+            classFilter={classFilter}
+            onClassChange={setClassFilter}
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
             faculties={faculties}
+            classes={classes}
           />
         </div>
         
@@ -123,7 +142,7 @@ export default function AdminStudentsPage() {
             <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
           ) : (
             <>
-              <StudentsList students={currentStudents} />
+              <StudentsList students={currentStudents} onDeleteSuccess={loadData} />
               <StudentsPagination 
                 currentPage={currentPage}
                 totalPages={totalPages}

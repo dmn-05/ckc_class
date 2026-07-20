@@ -38,6 +38,7 @@ export async function getStudents() {
             code: item.sinh_vien ? item.sinh_vien.ma_sinh_vien : '',
             classCode: item.sinh_vien?.lop ? item.sinh_vien.lop.ma_lop : '',
             faculty: item.sinh_vien?.khoa ? item.sinh_vien.khoa.ten_khoa : '',
+            khoaHoc: item.sinh_vien?.khoa_hoc || '',
             email: item.email || '',
             avatar: item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
             statusClassName: item.sinh_vien?.trang_thai === 'dang_hoc' ? 'bg-green-500' : 'bg-red-500',
@@ -122,14 +123,23 @@ export async function resetStudentPassword(id: string) {
         const response = await fetchWithAuth(`/students/${id}/reset-password`, {
             method: 'POST'
         });
+        const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Failed to reset password');
+            return {
+                success: false,
+                error: data.message || 'Lỗi đặt lại mật khẩu'
+            };
         }
-        return await response.json();
-    } catch (error) {
+        return {
+            success: true,
+            message: data.message || 'Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)'
+        };
+    } catch (error: any) {
         console.error('Error resetting student password:', error);
-        throw error;
+        return {
+            success: false,
+            error: error.message || 'Lỗi kết nối máy chủ'
+        };
     }
 }
 

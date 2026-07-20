@@ -5,17 +5,18 @@ import styles from '@/components/lecturer/posts/PostsManagement.module.css';
 import PostSummary from '@/components/lecturer/posts/PostSummary';
 import CommentInput from '@/components/lecturer/posts/CommentInput';
 import CommentThread, { CommentData } from '@/components/lecturer/posts/CommentThread';
-
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { authHeaders } from '@/lib/auth';
 import { getLecturerProfileAction } from '@/app/lecturer/profile/actions';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function LecturerPostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
   const [postData, setPostData] = useState<any>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -26,10 +27,17 @@ export default function LecturerPostDetailPage() {
     role: 'teacher',
     avatar: null
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  const [initialSectionId, setInitialSectionId] = React.useState<string>('');
   const fetchedRef = React.useRef(false);
 
   React.useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId) setInitialSectionId(sId);
+
     if (id && !fetchedRef.current) {
       fetchedRef.current = true;
       fetchPostDetail();
@@ -72,11 +80,11 @@ export default function LecturerPostDetailPage() {
             authorRole: json.data.nguoi_tao?.vai_tro_id === 2 ? 'Giảng viên' : 
                         json.data.nguoi_tao?.vai_tro_id === 1 ? 'Quản trị viên' : 'Sinh viên',
             authorAvatar: json.data.nguoi_tao?.avatar || null,
-            category: json.data.loai_bai_viet === 'thong_bao' ? 'Thông báo' : 
-                      json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
-                      json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
+            category: json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
+                      json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thông báo',
             attachment: attachment,
-            image: json.data.hinh_anh || null
+            image: json.data.hinh_anh || null,
+            lop_hoc_phan_id: json.data.lop_hoc_phan_id ? json.data.lop_hoc_phan_id.toString() : ''
           });
 
         const mappedComments = json.data.binh_luan?.map((c: any) => ({
@@ -200,16 +208,74 @@ export default function LecturerPostDetailPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <header className={styles.pageHeader} style={{ alignItems: 'flex-start', flexDirection: 'column' }}>
-        <h2 className={styles.pageTitle}>Bài viết</h2>
-        <div className={styles.breadcrumb}>
-          <Link href="/lecturer/posts" className={styles.btnCancel} style={{ padding: '0 0.5rem 0 0', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Quay lại danh sách
-          </Link>
+      <div className={styles.breadcrumb} style={{ marginBottom: '1rem' }}>
+        <button
+          type="button"
+          onClick={() => {
+            const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
+            if (targetSectionId && targetSectionId !== '0') {
+              router.push(`/lecturer/sections/${targetSectionId}`);
+            } else {
+              router.push('/lecturer/posts');
+            }
+          }}
+          style={{
+            backgroundColor: '#ffffff',
+            color: '#464555',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            border: '1px solid #c7c4d8',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {(initialSectionId || postData?.lop_hoc_phan_id) ? 'Quay lại lớp học phần' : 'Quay lại danh sách'}
+        </button>
+      </div>
+
+      <header className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <h2 className={styles.pageTitle} style={{ margin: 0 }}>
+            {postData?.category === 'Tài liệu' ? 'Tài nguyên' : postData?.category === 'Bài tập' ? 'Bài tập' : 'Bài viết'}
+          </h2>
         </div>
+        {postData && (
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const sectionQuery = initialSectionId || postData?.lop_hoc_phan_id ? `?sectionId=${initialSectionId || postData.lop_hoc_phan_id}` : '';
+                if (postData.category === 'Tài liệu') {
+                  router.push(`/lecturer/resources/${id}/edit${sectionQuery}`);
+                } else if (postData.category === 'Bài tập') {
+                  router.push(`/lecturer/assignments/${id}/edit${sectionQuery}`);
+                } else {
+                  router.push(`/lecturer/posts/${id}/edit${sectionQuery}`);
+                }
+              }}
+              style={{ padding: '0.5rem 1.25rem', backgroundColor: '#3525cd', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+              {postData.category === 'Tài liệu' ? 'Sửa tài nguyên' : postData.category === 'Bài tập' ? 'Sửa bài tập' : 'Sửa bài viết'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '0.5rem', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+              Xóa
+            </button>
+          </div>
+        )}
       </header>
 
       <PostSummary post={postData} />
@@ -254,6 +320,45 @@ export default function LecturerPostDetailPage() {
             ))}
 
         </section>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title={`Xác nhận xóa ${postData?.category === 'Tài liệu' ? 'tài nguyên' : postData?.category === 'Bài tập' ? 'bài tập' : 'bài viết'}`}
+        message={
+          <span>
+            Bạn có chắc chắn muốn xóa <strong>{postData?.title}</strong> không? Toàn bộ dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
+          </span>
+        }
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={isDeleting}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          const itemLabel = postData?.category === 'Tài liệu' ? 'tài nguyên' : postData?.category === 'Bài tập' ? 'bài tập' : 'bài viết';
+          const endpoint = postData?.category === 'Tài liệu' ? 'resources' : 'posts';
+          setIsDeleting(true);
+          fetch(`${API_BASE_URL}/lecturer/${endpoint}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json', ...authHeaders() }
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Xóa thất bại');
+            setShowDeleteConfirm(false);
+            const targetSectionId = initialSectionId || postData?.lop_hoc_phan_id;
+            if (targetSectionId && targetSectionId !== '0') {
+              router.push(`/lecturer/sections/${targetSectionId}`);
+            } else {
+              router.push('/lecturer/posts');
+            }
+          })
+          .catch(err => {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+            alert(err.message || `Lỗi khi xóa ${itemLabel}`);
+          });
+        }}
+      />
     </div>
   );
 }

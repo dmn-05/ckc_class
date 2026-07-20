@@ -16,7 +16,13 @@ export default function QuizResultsPage({ params }: { params: Promise<{ id: stri
 
     const [gradingAttempt, setGradingAttempt] = useState<QuizAttempt | null>(null);
 
+    const [initialSectionId, setInitialSectionId] = useState<string>('');
+
     useEffect(() => {
+        const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+        const sId = params.get('sectionId');
+        if (sId) setInitialSectionId(sId);
+
         Promise.all([
             getLecturerQuizById(id),
             getQuizAttempts(id)
@@ -63,7 +69,14 @@ export default function QuizResultsPage({ params }: { params: Promise<{ id: stri
             <QuizResultsView
                 quiz={quizData}
                 attempts={attempts}
-                onBack={() => router.push('/lecturer/quizzes')}
+                onBack={() => {
+                    const targetSectionId = initialSectionId || quizData.sectionId;
+                    if (targetSectionId) {
+                        router.push(`/lecturer/sections/${targetSectionId}`);
+                    } else {
+                        router.push('/lecturer/quizzes');
+                    }
+                }}
                 onGradeEssay={(attempt) => setGradingAttempt(attempt)}
             />
 

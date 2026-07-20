@@ -11,7 +11,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { getProfileAction } from '@/app/student/profile/actions';
 import { authHeaders } from '@/lib/auth';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -62,7 +63,7 @@ export default function PostDetailPage() {
             if (file) {
               const fullUrl = file.duong_dan.startsWith('http') 
                 ? file.duong_dan 
-                : `http://localhost:8000${file.duong_dan.startsWith('/') ? '' : '/'}${file.duong_dan}`;
+                : `${BACKEND_ORIGIN}${file.duong_dan.startsWith('/') ? '' : '/'}${file.duong_dan}`;
               attachment = { name: file.ten_file, url: fullUrl };
             }
           }
@@ -75,12 +76,11 @@ export default function PostDetailPage() {
             authorRole: json.data.nguoi_tao?.vai_tro_id === 2 ? 'Giảng viên' : 
                         json.data.nguoi_tao?.vai_tro_id === 1 ? 'Quản trị viên' : 'Sinh viên',
             authorAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(json.data.nguoi_tao?.ho_ten || 'User')}&background=3525cd&color=fff`,
-            category: json.data.loai_bai_viet === 'thong_bao' ? 'Thông báo' : 
-                      json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
-                      json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thảo luận',
+            category: json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
+                      json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thông báo',
             attachment: attachment,
             image: json.data.hinh_anh || null,
-            lop_hoc_phan_id: json.data.lop_hoc_phan_id
+            lop_hoc_phan_id: json.data.lop_hoc_phan_id || json.data.sectionId
           });
 
         // Map backend comments
@@ -219,10 +219,12 @@ export default function PostDetailPage() {
           {/* Back button */}
           <button 
             onClick={() => {
-              if (window.history.length > 2) {
+              if (postData?.lop_hoc_phan_id) {
+                router.push(`/student/courses/${postData.lop_hoc_phan_id}`);
+              } else if (window.history.length > 2) {
                 router.back();
               } else {
-                router.push(postData?.lop_hoc_phan_id ? `/student/courses/${postData.lop_hoc_phan_id}?tab=stream` : "/student/courses");
+                router.push("/student/courses");
               }
             }}
             style={{ 

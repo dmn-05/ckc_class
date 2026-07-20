@@ -25,6 +25,7 @@ class SinhVien extends Model
         'dia_chi',
         'lop_id',
         'khoa_id',
+        'khoa_hoc',
         'trang_thai',
     ];
 

@@ -11,6 +11,7 @@ import {
   deleteLecturerAssignment,
 } from '@/app/actions/lecturer-assignment';
 import { getLecturerCourseSections } from '@/app/actions/lecturer-course-section';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 interface SectionOption {
   id: string;
@@ -211,43 +212,25 @@ export default function LecturerAssignmentsPage() {
         />
       )}
 
-      {deleteConfirmId && (
-        <div className={styles.modalOverlay} style={{ zIndex: 1000 }}>
-          <div className={`${styles.modalContent} ${styles.modalContentSmall}`} style={{ maxWidth: '400px', textAlign: 'center', padding: '2rem 1.75rem', borderRadius: '1rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#fef2f2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="30" height="30">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#191c1e', marginBottom: '0.75rem' }}>
-              Xác nhận xóa bài tập
-            </h3>
-            <p style={{ fontSize: '0.95rem', color: '#464555', marginBottom: '1.75rem', lineHeight: 1.5 }}>
-              Bạn có chắc chắn muốn xóa bài tập này không? Hành động này không thể hoàn tác.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <button
-                type="button"
-                className={styles.btnSecondary}
-                style={{ flex: 1, padding: '0.65rem 1rem', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer' }}
-                onClick={() => setDeleteConfirmId(null)}
-                disabled={deleting}
-              >
-                Hủy bỏ
-              </button>
-              <button
-                type="button"
-                className={styles.btnPrimary}
-                style={{ flex: 1, padding: '0.65rem 1rem', borderRadius: '0.5rem', backgroundColor: '#ef4444', borderColor: '#ef4444', color: '#ffffff', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.7 : 1 }}
-                onClick={confirmDeleteAction}
-                disabled={deleting}
-              >
-                {deleting ? 'Đang xóa...' : 'Xóa bài tập'}
-              </button>
-            </div>
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        title="Xác nhận xóa bài tập"
+        message={
+          <div>
+            Bạn có chắc chắn muốn xóa bài tập{' '}
+            <strong style={{ color: '#1e293b' }}>
+              {assignments.find(a => a.id === deleteConfirmId)?.title || ''}
+            </strong>{' '}
+            không? Toàn bộ bài nộp và điểm số của sinh viên cho bài tập này sẽ bị xóa vĩnh viễn.
           </div>
-        </div>
-      )}
+        }
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={deleting}
+        onConfirm={confirmDeleteAction}
+        onCancel={() => !deleting && setDeleteConfirmId(null)}
+      />
 
       {toast && (
         <div style={{

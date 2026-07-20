@@ -227,7 +227,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  Giảng viên chính <span style={{color:'red'}}>*</span>
+                  Giảng viên phụ trách <span style={{color:'red'}}>*</span>
                 </label>
                 {isLecturer ? (
                   <input
@@ -250,7 +250,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
                     onChange={handleChange}
                     required
                   >
-                    <option value="">-- Chọn Giảng viên chính --</option>
+                    <option value="">-- Chọn Giảng viên phụ trách --</option>
                     {lecturers.map(l => {
                       const gvId = getLecId(l);
                       if (!gvId) return null;
@@ -266,7 +266,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
 
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  Giảng viên phụ / hỗ trợ (Có thể chọn nhiều)
+                  Đồng Giảng viên phụ trách (Có thể chọn nhiều)
                   <span style={{ fontWeight: 400, fontSize: '0.8rem', color: '#64748b', marginLeft: '6px' }}>(Tùy chọn)</span>
                 </label>
                 
@@ -389,7 +389,7 @@ export default function UpdateCourseSectionForm({ sectionId, isLecturer = false 
                 <label className={styles.formLabel}>Trạng thái</label>
                 <select name="trang_thai" className={`${styles.formInput} ${styles.formSelect}`} value={formData.trang_thai} onChange={handleChange}>
                   <option value="dang_mo">Đang mở</option>
-                  <option value="da_khoa">Đã khóa</option>
+                  <option value="da_khoa">Lưu trữ</option>
                   <option value="da_ket_thuc">Đã kết thúc</option>
                 </select>
               </div>

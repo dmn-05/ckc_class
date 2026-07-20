@@ -14,6 +14,7 @@ class PostController extends Controller
         // For testing purposes, we might just get all posts by this lecturer
         // In reality, it should be filtered by lop_hoc_phan_id to show all posts in a class
         $query = BaiViet::with(['nguoiTao', 'binhLuan', 'tepTinBaiViet.tepTin'])
+            ->where('trang_thai', '!=', 'da_xoa')
             ->whereHas('nguoiTao', function($q) {
                 $q->whereIn('vai_tro_id', [1, 2]); // Chỉ hiển thị bài của Admin(1) hoặc Giảng viên(2)
             });
@@ -32,10 +33,10 @@ class PostController extends Controller
             'tieu_de' => 'required|string|max:255',
             'noi_dung' => 'required|string',
             'lop_hoc_phan_id' => 'required|integer',
-            'loai_bai_viet' => 'required|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'required|string|in:thong_bao,tai_lieu,bai_tap',
             'chu_de_id' => 'nullable|integer',
             'trang_thai' => 'nullable|string|in:hien_thi,an',
-            'hinh_anh' => 'required|image|max:10240', // Ảnh bìa bắt buộc, tối đa 10MB
+            'hinh_anh' => 'required_unless:loai_bai_viet,thong_bao|nullable|image|max:10240', // Ảnh bìa không bắt buộc nếu là thông báo
             'file' => 'nullable|file|max:20480', // Tệp đính kèm, tối đa 20MB
         ]);
 
@@ -43,7 +44,6 @@ class PostController extends Controller
             'thong_bao' => 'Thông báo',
             'tai_lieu' => 'Tài liệu',
             'bai_tap' => 'Bài tập',
-            'bai_viet' => 'Thảo luận',
         ];
         $ten_chu_de = $ten_chu_de_map[$validated['loai_bai_viet']] ?? null;
         $chu_de_id = null;
@@ -107,7 +107,7 @@ class PostController extends Controller
             "Thông báo mới: " . $post->tieu_de,
             "Giảng viên vừa đăng bài viết/thông báo mới trong lớp học phần.",
             'bai_viet_moi',
-            '/student/courses/' . $post->lop_hoc_phan_id,
+            '/student/posts/' . $post->id,
             Auth::id()
         );
 
@@ -138,7 +138,7 @@ class PostController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'sometimes|string|max:255',
             'noi_dung' => 'sometimes|string',
-            'loai_bai_viet' => 'sometimes|string|in:bai_viet,thong_bao,tai_lieu,bai_tap',
+            'loai_bai_viet' => 'sometimes|string|in:thong_bao,tai_lieu,bai_tap',
             'trang_thai' => 'sometimes|string',
             'hinh_anh' => 'nullable|image|max:10240',
         ]);
@@ -164,11 +164,9 @@ class PostController extends Controller
     {
         $post = BaiViet::findOrFail($id);
         
-        // Delete related records to prevent foreign key constraint violations
-        \App\Models\TepTinBaiViet::where('bai_viet_id', $post->id)->delete();
-        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->delete();
-
-        $post->delete();
+        // Xóa mềm: đổi trạng thái sang 'da_xoa'
+        \App\Models\BinhLuan::where('bai_viet_id', $post->id)->update(['trang_thai' => 'da_xoa']);
+        $post->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Post deleted successfully']);
     }

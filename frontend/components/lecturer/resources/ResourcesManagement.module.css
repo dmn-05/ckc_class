@@ -55,6 +55,26 @@
   background-color: #4338ca;
 }
 
+.btnSecondary {
+  background-color: #ffffff;
+  color: #464555;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid #c7c4d8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+  background-color: #f2f4f6;
+  color: #191c1e;
+}
+
 /* Dashboard Bento Grid */
 .bentoGrid {
   display: grid;

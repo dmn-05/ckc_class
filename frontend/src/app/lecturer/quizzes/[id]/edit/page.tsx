@@ -72,8 +72,9 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
     }
 
     const handleBack = () => {
-        if (initialSectionId) {
-            router.push(`/lecturer/sections/${initialSectionId}`);
+        const targetSectionId = initialSectionId || quizData?.sectionId;
+        if (targetSectionId) {
+            router.push(`/lecturer/sections/${targetSectionId}`);
         } else {
             router.push('/lecturer/quizzes');
         }
@@ -86,6 +87,7 @@ export default function EditQuizPage({ params }: { params: Promise<{ id: string 
                 onSave={handleSave}
                 onClose={handleBack}
                 sections={sections}
+                isEditMode={true}
             />
         </div>
     );

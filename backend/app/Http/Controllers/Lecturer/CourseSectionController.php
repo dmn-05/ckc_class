@@ -27,7 +27,7 @@ class CourseSectionController extends Controller
               });
         })
         ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
-        ->withCount('sinhViens')
+        ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
         ->get();
         return response()->json($sections);
     }
@@ -103,6 +103,7 @@ class CourseSectionController extends Controller
               });
         })
         ->with(['monHoc.khoa', 'giangVien.nguoiDung', 'giangViens.nguoiDung'])
+        ->withCount(['sinhViens', 'baiTaps', 'baiKiemTras'])
         ->findOrFail($id);
         return response()->json($section);
     }

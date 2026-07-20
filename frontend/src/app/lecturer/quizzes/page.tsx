@@ -9,6 +9,7 @@ import {
     getLecturerQuizzes,
     deleteLecturerQuiz,
 } from '@/app/actions/lecturer-quiz';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function LecturerQuizzesPage() {
     const router = useRouter();
@@ -51,13 +52,25 @@ export default function LecturerQuizzesPage() {
         router.push(`/lecturer/quizzes/${quiz.id}/results`);
     };
 
-    const handleDeleteQuiz = async (id: string) => {
-        if (!window.confirm("Xóa bài kiểm tra này?")) return;
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; title?: string } | null>(null);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDeleteQuiz = (id: string) => {
+        const target = quizzes.find(q => q.id === id);
+        setDeleteTarget({ id, title: target?.title });
+    };
+
+    const executeDeleteQuiz = async () => {
+        if (!deleteTarget) return;
+        setDeleting(true);
         try {
-            await deleteLecturerQuiz(id);
-            setQuizzes(prev => prev.filter(q => q.id !== id));
+            await deleteLecturerQuiz(deleteTarget.id);
+            setQuizzes(prev => prev.filter(q => q.id !== deleteTarget.id));
+            setDeleteTarget(null);
         } catch (err: any) {
             alert(err.message || 'Xóa thất bại');
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -94,6 +107,23 @@ export default function LecturerQuizzesPage() {
                 onManageQuestions={handleGoToQuestions}
                 onViewResults={handleGoToResults}
                 onDelete={handleDeleteQuiz}
+            />
+
+            <ConfirmModal
+                isOpen={!!deleteTarget}
+                title="Xác nhận xóa bài kiểm tra"
+                message={
+                    <div>
+                        Bạn có chắc chắn muốn xóa bài kiểm tra{' '}
+                        <strong style={{ color: '#1e293b' }}>{deleteTarget?.title || ''}</strong> không? Toàn bộ câu hỏi và kết quả làm bài sẽ bị xóa vĩnh viễn.
+                    </div>
+                }
+                confirmText="Xóa ngay"
+                cancelText="Hủy bỏ"
+                variant="danger"
+                isLoading={deleting}
+                onConfirm={executeDeleteQuiz}
+                onCancel={() => !deleting && setDeleteTarget(null)}
             />
         </div>
     );

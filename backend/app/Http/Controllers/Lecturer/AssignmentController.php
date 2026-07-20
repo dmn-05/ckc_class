@@ -37,6 +37,7 @@ class AssignmentController extends Controller
 
         $assignments = BaiTap::with(['lopHocPhan.monHoc', 'nguoiTao', 'tepTinBaiTap.tepTin'])
             ->whereIn('lop_hoc_phan_id', $sectionIds)
+            ->where('trang_thai', '!=', 'da_xoa')
             ->orderBy('ngay_tao', 'desc')
             ->get()
             ->map(function ($item) {
@@ -69,6 +70,11 @@ class AssignmentController extends Controller
             abort(403, 'You do not own this course section');
         }
 
+        $secCheck = \App\Models\LopHocPhan::find($validated['lop_hoc_phan_id']);
+        if ($secCheck && $secCheck->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
+
         $baiTap = BaiTap::create([
             'tieu_de'          => $validated['tieu_de'],
             'noi_dung'         => $validated['noi_dung'] ?? null,
@@ -84,37 +90,52 @@ class AssignmentController extends Controller
             'trang_thai'       => $validated['trang_thai'] ?? 'hien_thi',
         ]);
 
-        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        if ($request->hasFile('files')) {
+            $cloudinary = env('CLOUDINARY_URL') ? new \Cloudinary\Cloudinary(env('CLOUDINARY_URL')) : null;
             foreach ($request->file('files') as $file) {
                 if ($file->getSize() === 0) continue;
                 $originalFileName = $file->getClientOriginalName();
-                try {
-                    $result = $cloudinary->uploadApi()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder'        => 'assignments',
-                            'resource_type' => 'auto',
-                            'filename_override' => $originalFileName,
-                            'use_filename'  => true,
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    $result = $cloudinary->uploadApi()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder'        => 'assignments',
-                            'resource_type' => 'raw',
-                            'filename_override' => $originalFileName,
-                            'use_filename'  => true,
-                        ]
-                    );
+                $secureUrl = null;
+                if ($cloudinary) {
+                    try {
+                        $result = $cloudinary->uploadApi()->upload(
+                            $file->getRealPath(),
+                            [
+                                'folder'            => 'assignments',
+                                'resource_type'     => 'auto',
+                                'filename_override' => $originalFileName,
+                                'use_filename'      => true,
+                                'chunk_size'        => 6000000,
+                            ]
+                        );
+                        $secureUrl = $result['secure_url'];
+                    } catch (\Exception $e) {
+                        try {
+                            $result = $cloudinary->uploadApi()->upload(
+                                $file->getRealPath(),
+                                [
+                                    'folder'            => 'assignments',
+                                    'resource_type'     => 'raw',
+                                    'filename_override' => $originalFileName,
+                                    'use_filename'      => true,
+                                    'chunk_size'        => 6000000,
+                                ]
+                            );
+                            $secureUrl = $result['secure_url'];
+                        } catch (\Exception $ex) {
+                            \Log::warning('Cloudinary upload failed for assignment, falling back to local storage: ' . $ex->getMessage());
+                        }
+                    }
+                }
+                if (!$secureUrl) {
+                    $path = $file->store('assignments', 'public');
+                    $secureUrl = '/storage/' . $path;
                 }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file'     => $file->getClientOriginalName(),
-                    'ten_file_luu' => basename($result['secure_url']),
-                    'duong_dan'    => $result['secure_url'],
+                    'ten_file_luu' => basename($secureUrl),
+                    'duong_dan'    => $secureUrl,
                     'loai_file'    => $file->getClientOriginalExtension() ?: 'unknown',
                     'kich_thuoc'   => $file->getSize(),
                     'nguoi_tao_id' => Auth::id(),
@@ -172,6 +193,9 @@ class AssignmentController extends Controller
         $sectionIds = $this->getSectionIds();
 
         $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
+        if ($baiTap->lopHocPhan && $baiTap->lopHocPhan->trang_thai === 'da_khoa') {
+            abort(403, 'Lớp học phần đã được lưu trữ, không thể chỉnh sửa trừ phi được khôi phục');
+        }
 
         $validated = $request->validate([
             'tieu_de'          => 'sometimes|string|max:255',
@@ -208,21 +232,52 @@ class AssignmentController extends Controller
         }
 
         // Upload file mới lên Cloudinary
-        if ($request->hasFile('files') && env('CLOUDINARY_URL')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        if ($request->hasFile('files')) {
+            $cloudinary = env('CLOUDINARY_URL') ? new \Cloudinary\Cloudinary(env('CLOUDINARY_URL')) : null;
             foreach ($request->file('files') as $file) {
-                $result = $cloudinary->uploadApi()->upload(
-                    $file->getRealPath(),
-                    [
-                        'folder'        => 'assignments',
-                        'resource_type' => 'auto',
-                    ]
-                );
+                if ($file->getSize() === 0) continue;
+                $originalFileName = $file->getClientOriginalName();
+                $secureUrl = null;
+                if ($cloudinary) {
+                    try {
+                        $result = $cloudinary->uploadApi()->upload(
+                            $file->getRealPath(),
+                            [
+                                'folder'            => 'assignments',
+                                'resource_type'     => 'auto',
+                                'filename_override' => $originalFileName,
+                                'use_filename'      => true,
+                                'chunk_size'        => 6000000,
+                            ]
+                        );
+                        $secureUrl = $result['secure_url'];
+                    } catch (\Exception $e) {
+                        try {
+                            $result = $cloudinary->uploadApi()->upload(
+                                $file->getRealPath(),
+                                [
+                                    'folder'            => 'assignments',
+                                    'resource_type'     => 'raw',
+                                    'filename_override' => $originalFileName,
+                                    'use_filename'      => true,
+                                    'chunk_size'        => 6000000,
+                                ]
+                            );
+                            $secureUrl = $result['secure_url'];
+                        } catch (\Exception $ex) {
+                            \Log::warning('Cloudinary upload failed for assignment update, falling back to local storage: ' . $ex->getMessage());
+                        }
+                    }
+                }
+                if (!$secureUrl) {
+                    $path = $file->store('assignments', 'public');
+                    $secureUrl = '/storage/' . $path;
+                }
 
                 $tepTin = \App\Models\TepTin::create([
                     'ten_file'     => $file->getClientOriginalName(),
-                    'ten_file_luu' => basename($result['secure_url']),
-                    'duong_dan'    => $result['secure_url'],
+                    'ten_file_luu' => basename($secureUrl),
+                    'duong_dan'    => $secureUrl,
                     'loai_file'    => $file->getClientOriginalExtension() ?: 'unknown',
                     'kich_thuoc'   => $file->getSize(),
                     'nguoi_tao_id' => Auth::id(),
@@ -257,8 +312,15 @@ class AssignmentController extends Controller
         $sectionIds = $this->getSectionIds();
 
         $baiTap = BaiTap::whereIn('lop_hoc_phan_id', $sectionIds)->findOrFail($id);
-        \App\Models\BaiViet::where('bai_tap_id', $baiTap->id)->delete();
-        $baiTap->delete();
+
+        // Xóa mềm: đổi trạng thái sang 'da_xoa' thay vì xóa cứng
+        $baiViets = \App\Models\BaiViet::where('bai_tap_id', $baiTap->id)->get();
+        foreach ($baiViets as $bv) {
+            \App\Models\BinhLuan::where('bai_viet_id', $bv->id)->update(['trang_thai' => 'da_xoa']);
+            $bv->update(['trang_thai' => 'da_xoa']);
+        }
+
+        $baiTap->update(['trang_thai' => 'da_xoa']);
 
         return response()->json(['message' => 'Assignment deleted successfully']);
     }
@@ -292,7 +354,7 @@ class AssignmentController extends Controller
                     'studentCode' => $sub->student_code,
                     'submittedAt' => \Carbon\Carbon::parse($sub->ngay_nop)->format('d/m/Y H:i'),
                     'fileUrl' => $sub->duong_dan_file,
-                    'fileName' => $sub->duong_dan_file ? basename($sub->duong_dan_file) : 'submission.pdf',
+                    'fileName' => !empty($sub->ten_file_goc) ? $sub->ten_file_goc : ($sub->duong_dan_file ? basename($sub->duong_dan_file) : 'submission.pdf'),
                     'status' => $status,
                     'score' => $sub->diem !== null ? (float)$sub->diem : null,
                     'feedback' => $sub->nhan_xet

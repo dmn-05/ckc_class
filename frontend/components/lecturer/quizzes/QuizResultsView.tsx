@@ -74,7 +74,7 @@ export default function QuizResultsView({
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Quay lại danh sách
+        Quay lại lớp học phần
       </button>
 
       <div className={styles.pageHeader}>

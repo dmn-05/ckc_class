@@ -97,8 +97,9 @@ export default function QuestionsPage({ params }: { params: Promise<{ id: string
     if (!quizData) return null;
 
     const handleBack = () => {
-        if (initialSectionId) {
-            router.push(`/lecturer/sections/${initialSectionId}`);
+        const targetSectionId = initialSectionId || quizData?.sectionId;
+        if (targetSectionId) {
+            router.push(`/lecturer/sections/${targetSectionId}`);
         } else {
             router.push('/lecturer/quizzes');
         }

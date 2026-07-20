@@ -53,8 +53,21 @@ export default function AssignmentSubmissionsPage() {
     if (id) loadData();
   }, [id]);
 
+  const [initialSectionId, setInitialSectionId] = useState<string>('');
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const sId = searchParams.get('sectionId');
+    if (sId) setInitialSectionId(sId);
+  }, []);
+
   const handleBackToList = () => {
-    router.push('/lecturer/assignments');
+    const targetSectionId = initialSectionId || assignment?.sectionId;
+    if (targetSectionId) {
+      router.push(`/lecturer/sections/${targetSectionId}`);
+    } else {
+      router.push('/lecturer/assignments');
+    }
   };
 
   const handleGrade = (submission: SubmissionData) => {

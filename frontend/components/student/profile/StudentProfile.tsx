@@ -7,7 +7,8 @@ import ProfileAvatar from './ProfileAvatar';
 import ProfileStatus from './ProfileStatus';
 import BasicInfoForm from './BasicInfoForm';
 import ContactInfoForm from './ContactInfoForm';
-import { updateProfileAction, updateAvatarAction } from '../../../src/app/student/profile/actions';
+import { updateProfileAction, updateAvatarAction, changePasswordAction } from '../../../src/app/student/profile/actions';
+import ChangePasswordModal from '../../common/ChangePasswordModal';
 
 export default function StudentProfile({ profileData }: { profileData?: any }) {
   const [isPending, startTransition] = useTransition();
@@ -25,6 +26,7 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
   const [formData, setFormData] = useState(initialData);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -114,7 +116,12 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
 
   return (
     <div className={styles.container}>
-      <ProfileHeader onSave={handleSave} onCancel={handleCancel} isSaving={isPending} />
+      <ProfileHeader
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onChangePassword={() => setIsChangePasswordOpen(true)}
+        isSaving={isPending}
+      />
       
       <div className={styles.mainGrid}>
         <div className={styles.leftColumn}>
@@ -163,6 +170,14 @@ export default function StudentProfile({ profileData }: { profileData?: any }) {
           to { transform: translateX(0); opacity: 1; }
         }
       `}</style>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSubmit={changePasswordAction}
+        onSuccessToast={(msg) => showToast(msg, 'success')}
+        onErrorToast={(msg) => showToast(msg, 'error')}
+      />
     </div>
   );
 }

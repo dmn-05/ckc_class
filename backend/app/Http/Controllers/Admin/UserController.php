@@ -13,6 +13,7 @@ class UserController extends Controller
     {
         // vai_tro_id = 2 is giang_vien
         $lecturers = NguoiDung::where('vai_tro_id', 2)
+            ->whereHas('giangVien')
             ->with(['giangVien.boMon.khoa'])
             ->get();
             
@@ -22,6 +23,7 @@ class UserController extends Controller
     public function getLecturerById($id)
     {
         $lecturer = NguoiDung::where('vai_tro_id', 2)
+            ->whereHas('giangVien')
             ->with(['giangVien.boMon.khoa'])
             ->findOrFail($id);
         return response()->json($lecturer);
@@ -154,6 +156,35 @@ class UserController extends Controller
         }
     }
 
+    public function destroyLecturer($id)
+    {
+        try {
+            \DB::beginTransaction();
+
+            $user = NguoiDung::where('vai_tro_id', 2)->findOrFail($id);
+            
+            // Soft delete the GiangVien record
+            if ($user->giangVien) {
+                $user->giangVien()->delete();
+            }
+
+            // Also lock the user account
+            $user->update(['trang_thai' => 'bi_khoa']);
+
+            \DB::commit();
+            return response()->json([
+                'message' => 'Xóa giảng viên thành công',
+                'data' => [
+                    'id' => $user->id,
+                    'deleted_at' => $user->giangVien ? $user->giangVien->deleted_at : now()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['message' => 'Lỗi xóa giảng viên', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getStudents()
     {
         // vai_tro_id = 3 is sinh_vien
@@ -168,6 +199,7 @@ class UserController extends Controller
     public function getStudentById($id)
     {
         $student = NguoiDung::where('vai_tro_id', 3)
+            ->whereHas('sinhVien')
             ->with(['sinhVien.khoa', 'sinhVien.lop'])
             ->findOrFail($id);
         return response()->json($student);
@@ -187,6 +219,7 @@ class UserController extends Controller
             'ma_sinh_vien' => 'required|string|unique:sinh_vien,ma_sinh_vien',
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
+            'khoa_hoc' => 'nullable|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
         ];
@@ -222,6 +255,7 @@ class UserController extends Controller
                 'ma_sinh_vien' => $validated['ma_sinh_vien'],
                 'khoa_id' => $validated['khoa_id'],
                 'lop_id' => $validated['lop_id'],
+                'khoa_hoc' => $validated['khoa_hoc'] ?? null,
                 'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
                 'cccd' => $validated['cccd'] ?? null,
                 'dia_chi' => $validated['dia_chi'] ?? null,
@@ -234,6 +268,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Thêm sinh viên thành công', 'data' => $user], 201);
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Error storing student: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['message' => 'Lỗi thêm sinh viên', 'error' => $e->getMessage()], 500);
         }
     }
@@ -253,6 +288,7 @@ class UserController extends Controller
             'ma_sinh_vien' => 'required|string|unique:sinh_vien,ma_sinh_vien,' . $user->sinhVien->id,
             'khoa_id' => 'required|exists:khoa,id',
             'lop_id' => 'required|exists:lop,id',
+            'khoa_hoc' => 'nullable|string|max:50',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
         ];
@@ -284,6 +320,7 @@ class UserController extends Controller
                 'ma_sinh_vien' => $validated['ma_sinh_vien'],
                 'khoa_id' => $validated['khoa_id'],
                 'lop_id' => $validated['lop_id'],
+                'khoa_hoc' => $validated['khoa_hoc'] ?? null,
                 'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
                 'cccd' => $validated['cccd'] ?? null,
                 'dia_chi' => $validated['dia_chi'] ?? null,
@@ -296,6 +333,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Cập nhật sinh viên thành công', 'data' => $user]);
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Error updating student: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['message' => 'Lỗi cập nhật sinh viên', 'error' => $e->getMessage()], 500);
         }
     }
@@ -306,7 +344,10 @@ class UserController extends Controller
         $user->mat_khau = \Hash::make('123456');
         $user->save();
 
-        return response()->json(['message' => 'Đặt lại mật khẩu thành công']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Đặt lại mật khẩu thành công (Mật khẩu mới: 123456)'
+        ]);
     }
 
     public function destroyStudent($id)

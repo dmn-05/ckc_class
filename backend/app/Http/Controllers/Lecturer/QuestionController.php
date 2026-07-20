@@ -133,6 +133,8 @@ class QuestionController extends Controller
     {
         $this->findExam($examId);
         $question = CauHoi::findOrFail($questionId);
+        $question->dapAns()->delete();
+        \App\Models\ChiTietKetQua::where('cau_hoi_id', $question->id)->delete();
         $question->delete();
         return response()->json(['message' => 'Question deleted successfully']);
     }

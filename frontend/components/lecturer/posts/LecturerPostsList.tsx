@@ -42,7 +42,7 @@ export default function LecturerPostsList() {
           return {
             id: item.id.toString(),
             title: item.tieu_de,
-            category: item.loai_bai_viet || 'bai_viet',
+            category: (item.loai_bai_viet === 'bai_viet' ? 'thong_bao' : item.loai_bai_viet) || 'thong_bao',
             date: new Date(item.ngay_tao).toLocaleDateString('vi-VN'),
             is_published: item.trang_thai === 'hien_thi',
             is_pinned: false,
@@ -186,7 +186,6 @@ export default function LecturerPostsList() {
                 onChange={(e) => setFilterCategory(e.target.value)}
               >
                 <option value="all">Tất cả loại bài</option>
-                <option value="bai_viet">Bài viết</option>
                 <option value="thong_bao">Thông báo</option>
                 <option value="tai_lieu">Tài liệu</option>
                 <option value="bai_tap">Bài tập</option>

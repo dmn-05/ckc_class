@@ -3,7 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { downloadFile } from '@/utils/download';
 import styles from '@/components/student/courses/ClassroomView.module.css';
+import { deleteLecturerAssignment } from '@/app/actions/lecturer-assignment';
+import { deleteLecturerQuiz } from '@/app/actions/lecturer-quiz';
+import { deleteLecturerResource } from '@/app/actions/lecturer-resource';
+import ConfirmModal from '@/components/common/ConfirmModal';
+import { authHeaders } from '@/lib/auth';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 interface LecturerClassroomClientProps {
   section: any;
@@ -25,18 +33,100 @@ export default function LecturerClassroomClient({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
 
+  const [assignmentList, setAssignmentList] = useState<any[]>(assignments || []);
+  const [quizList, setQuizList] = useState<any[]>(quizzes || []);
+  const [resourceList, setResourceList] = useState<any[]>(resources || []);
+
+  React.useEffect(() => {
+    setAssignmentList(assignments || []);
+  }, [assignments]);
+
+  React.useEffect(() => {
+    setQuizList(quizzes || []);
+  }, [quizzes]);
+
+  React.useEffect(() => {
+    setResourceList(resources || []);
+  }, [resources]);
+
+  const [postList, setPostList] = useState<any[]>(posts || []);
+  React.useEffect(() => {
+    setPostList(posts || []);
+  }, [posts]);
+
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string | number;
+    type: 'assignment' | 'quiz' | 'resource' | 'post';
+    title?: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAssignment = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    setDeleteTarget({ id: item.id, type: 'assignment', title: item.title || item.tieu_de });
+  };
+
+  const handleDeleteQuiz = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    setDeleteTarget({ id: item.id, type: 'quiz', title: item.title || item.tieu_de });
+  };
+
+  const handleDeleteResource = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    setDeleteTarget({ id: item.id, type: 'resource', title: item.title || item.tieu_de });
+  };
+
+  const handleDeletePost = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    setDeleteTarget({ id: item.id, type: 'post', title: item.title || item.tieu_de || 'Bài viết' });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const idStr = String(deleteTarget.id);
+      if (deleteTarget.type === 'assignment') {
+        await deleteLecturerAssignment(idStr);
+        setAssignmentList(prev => prev.filter(item => String(item.id) !== idStr));
+      } else if (deleteTarget.type === 'quiz') {
+        await deleteLecturerQuiz(idStr);
+        setQuizList(prev => prev.filter(item => String(item.id) !== idStr));
+      } else if (deleteTarget.type === 'resource') {
+        await deleteLecturerResource(idStr);
+        setResourceList(prev => prev.filter(item => String(item.id) !== idStr));
+      } else if (deleteTarget.type === 'post') {
+        const response = await fetch(`${API_BASE_URL}/lecturer/posts/${idStr}`, {
+          method: 'DELETE',
+          headers: { 'Accept': 'application/json', ...authHeaders() }
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.message || "Xóa bài viết thất bại.");
+        }
+        setPostList(prev => prev.filter(item => String(item.id) !== idStr));
+      }
+      setDeleteTarget(null);
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message || "Xóa thất bại.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const streamFeed = React.useMemo(() => {
     const items: any[] = [];
     const seenIds = new Set<string>();
 
-    (posts || []).forEach(post => {
+    (postList || []).forEach(post => {
       if (post.loai_bai_viet === 'bai_tap') {
         items.push({
           id: `post-${post.id}`,
           type: 'assignment',
           title: post.tieu_de,
           date: post.ngay_tao,
-          href: `/lecturer/assignments/${post.bai_tap_id || post.id}/submissions`
+          href: `/lecturer/assignments/${post.bai_tap_id || post.id}/submissions?sectionId=${section.id}`
         });
       } else if (post.loai_bai_viet === 'bai_kiem_tra') {
         // Skip duplicate post record for quiz; quizzes array contains full quiz details
@@ -50,7 +140,7 @@ export default function LecturerClassroomClient({
       }
     });
 
-    (quizzes || []).forEach(quiz => {
+    (quizList || []).forEach(quiz => {
       if (!seenIds.has(String(quiz.id))) {
         seenIds.add(String(quiz.id));
         items.push({
@@ -58,13 +148,13 @@ export default function LecturerClassroomClient({
           type: 'quiz',
           title: quiz.title || quiz.tieu_de || 'Bài kiểm tra',
           date: quiz.ngay_tao || quiz.createdAt || quiz.startTime || new Date().toISOString(),
-          href: `/lecturer/quizzes/${quiz.id}`
+          href: `/lecturer/quizzes/${quiz.id}/results?sectionId=${section.id}`
         });
       }
     });
 
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [posts, quizzes]);
+  }, [postList, quizList]);
 
   const courseCode = section.ma_lop_hoc_phan || section.code || '';
   const courseName = section.ten_lop || section.name || section.mon_hoc?.ten_mon || 'Lớp học phần';
@@ -106,16 +196,6 @@ export default function LecturerClassroomClient({
   };
 
   const getLecturerRoleLabel = (gv: any, index: number) => {
-    const vaiTro = gv.pivot?.vai_tro;
-    if (vaiTro === 'chinh' || gv.id === section.giang_vien_id || (index === 0 && !vaiTro)) {
-      return 'Giảng viên chính';
-    }
-    if (vaiTro === 'tro_giang') {
-      return 'Trợ giảng';
-    }
-    if (vaiTro === 'dong_giang') {
-      return 'Giảng viên đồng giảng';
-    }
     return 'Giảng viên';
   };
 
@@ -133,27 +213,28 @@ export default function LecturerClassroomClient({
     <div className={styles.pageContainer} style={{ padding: '24px', maxWidth: '1280px', margin: '0 auto' }}>
       {/* Back Button & Action Toolbar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <Link href="/lecturer/sections" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3525cd', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
+        <Link
+          href="/lecturer/sections"
+          style={{
+            backgroundColor: '#ffffff',
+            color: '#464555',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            border: '1px solid #c7c4d8',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Quay lại danh sách lớp học phần
         </Link>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
-            style={{ backgroundColor: '#ffffff', color: '#3525cd', border: '1px solid #3525cd', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            Quản lý sinh viên ({students.length})
-          </button>
-        </div>
       </div>
 
       {/* Hero Banner */}
@@ -245,7 +326,7 @@ export default function LecturerClassroomClient({
                         key={post.id} 
                         className={styles.postCard} 
                         style={{ cursor: 'pointer', marginBottom: '1rem' }}
-                        onClick={() => router.push(`/lecturer/posts/${post.id}`)}
+                        onClick={() => router.push(`/lecturer/posts/${post.id}?sectionId=${section.id}`)}
                       >
                         <div className={styles.postHeader}>
                           <div className={styles.postAuthorInfo}>
@@ -257,9 +338,34 @@ export default function LecturerClassroomClient({
                               <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}</p>
                             </div>
                           </div>
-                          <span style={{ padding: '4px 10px', backgroundColor: '#eef2ff', color: '#3525cd', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
-                            {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ padding: '4px 10px', backgroundColor: '#eef2ff', color: '#3525cd', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
+                              {post.loai_bai_viet === 'bai_tap' ? 'Bài tập' : post.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' : 'Thông báo'}
+                            </span>
+                            {(!post.loai_bai_viet || post.loai_bai_viet === 'thong_bao') && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/lecturer/posts/${post.id}/edit?sectionId=${section.id}`);
+                                  }}
+                                  style={{ backgroundColor: 'transparent', color: '#3525cd', border: '1px solid #3525cd', padding: '4px 12px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                                  title="Chỉnh sửa bài viết"
+                                >
+                                  Sửa
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeletePost(e, post)}
+                                  style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                  title="Xóa bài viết"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
 
                         <div className={styles.postBody}>
@@ -318,12 +424,12 @@ export default function LecturerClassroomClient({
                 <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
                   Danh sách Bài tập
                 </h2>
-                {assignments && assignments.length > 0 ? (
+                {assignmentList && assignmentList.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {assignments.map(a => (
+                    {assignmentList.map(a => (
                       <div
                         key={a.id}
-                        onClick={() => router.push(`/lecturer/assignments/${a.id}/submissions`)}
+                        onClick={() => router.push(`/lecturer/assignments/${a.id}/submissions?sectionId=${section.id}`)}
                         style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -351,11 +457,20 @@ export default function LecturerClassroomClient({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/lecturer/assignments/${a.id}/submissions`);
+                              router.push(`/lecturer/assignments/${a.id}/submissions?sectionId=${section.id}`);
                             }}
                             style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
                           >
                             Chấm bài
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteAssignment(e, a)}
+                            style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Xóa bài tập"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -371,12 +486,12 @@ export default function LecturerClassroomClient({
                 <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
                   Danh sách Bài kiểm tra
                 </h2>
-                {quizzes && quizzes.length > 0 ? (
+                {quizList && quizList.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {quizzes.map(q => (
+                    {quizList.map(q => (
                       <div
                         key={q.id}
-                        onClick={() => router.push(`/lecturer/quizzes/${q.id}/results`)}
+                        onClick={() => router.push(`/lecturer/quizzes/${q.id}/results?sectionId=${section.id}`)}
                         style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -410,11 +525,20 @@ export default function LecturerClassroomClient({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/lecturer/quizzes/${q.id}/results`);
+                              router.push(`/lecturer/quizzes/${q.id}/results?sectionId=${section.id}`);
                             }}
                             style={{ backgroundColor: '#059669', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
                           >
                             Xem kết quả
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteQuiz(e, q)}
+                            style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Xóa bài kiểm tra"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -430,12 +554,12 @@ export default function LecturerClassroomClient({
                 <h2 style={{ color: '#3525cd', fontSize: '18px', fontWeight: 600, marginBottom: '1rem', borderBottom: '2px solid #3525cd', paddingBottom: '0.5rem' }}>
                   Danh sách Tài nguyên
                 </h2>
-                {resources && resources.length > 0 ? (
+                {resourceList && resourceList.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {resources.map(r => (
+                    {resourceList.map(r => (
                       <div
                         key={r.id}
-                        onClick={() => router.push(`/lecturer/resources/${r.id}/edit`)}
+                        onClick={() => router.push(`/lecturer/resources/${r.id}/edit?sectionId=${section.id}`)}
                         style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f8fafc' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -451,15 +575,17 @@ export default function LecturerClassroomClient({
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           {r.fileUrl || (r.files && r.files.length > 0) ? (
-                            <a
-                              href={r.fileUrl || r.files[0]?.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ backgroundColor: '#fef3c7', color: '#b45309', textDecoration: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px' }}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = r.fileUrl || r.files[0]?.url;
+                                const name = r.files?.[0]?.name || r.title || 'download';
+                                downloadFile(url, name);
+                              }}
+                              style={{ backgroundColor: '#fef3c7', color: '#b45309', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
                             >
                               Tải về / Xem
-                            </a>
+                            </button>
                           ) : r.externalUrl ? (
                             <a
                               href={r.externalUrl}
@@ -479,6 +605,15 @@ export default function LecturerClassroomClient({
                             style={{ backgroundColor: 'transparent', color: '#d97706', border: '1px solid #d97706', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
                           >
                             Chỉnh sửa
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteResource(e, r)}
+                            style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Xóa tài nguyên"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -525,12 +660,6 @@ export default function LecturerClassroomClient({
                 <h2 style={{ color: '#3525cd', fontSize: '20px', fontWeight: 700, margin: 0 }}>Sinh viên</h2>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <span style={{ fontSize: '14px', color: '#3525cd', fontWeight: 600 }}>{students.length} sinh viên</span>
-                  <button
-                    onClick={() => router.push(`/lecturer/sections/${section.id}/students`)}
-                    style={{ backgroundColor: '#3525cd', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
-                  >
-                    Quản lý danh sách
-                  </button>
                 </div>
               </div>
 
@@ -572,15 +701,15 @@ export default function LecturerClassroomClient({
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#64748b', fontSize: '14px' }}>Bài tập:</span>
-                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{assignments.length}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{assignmentList.length}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#64748b', fontSize: '14px' }}>Bài kiểm tra:</span>
-                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{quizzes.length}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{quizList.length}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#64748b', fontSize: '14px' }}>Tài nguyên:</span>
-                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{resources ? resources.length : 0}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '15px' }}>{resourceList ? resourceList.length : 0}</strong>
               </div>
             </div>
           </div>
@@ -608,6 +737,34 @@ export default function LecturerClassroomClient({
           </div>
         </aside>
       </section>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title={
+          deleteTarget?.type === 'assignment'
+            ? 'Xác nhận xóa bài tập'
+            : deleteTarget?.type === 'quiz'
+            ? 'Xác nhận xóa bài kiểm tra'
+            : deleteTarget?.type === 'post'
+            ? 'Xác nhận xóa bài viết / thông báo'
+            : 'Xác nhận xóa tài nguyên'
+        }
+        message={
+          <div>
+            Bạn có chắc chắn muốn xóa{' '}
+            <strong style={{ color: '#1e293b' }}>
+              {deleteTarget?.title || (deleteTarget?.type === 'assignment' ? 'bài tập này' : deleteTarget?.type === 'quiz' ? 'bài kiểm tra này' : deleteTarget?.type === 'post' ? 'bài viết này' : 'tài nguyên này')}
+            </strong>{' '}
+            không? Toàn bộ dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.
+          </div>
+        }
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={executeDelete}
+        onCancel={() => !isDeleting && setDeleteTarget(null)}
+      />
     </div>
   );
 }

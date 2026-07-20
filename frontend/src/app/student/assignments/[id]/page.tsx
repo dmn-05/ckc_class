@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import styles from '@/components/student/assignments/AssignmentsManagement.module.css';
 import SubmitModal from '@/components/student/assignments/SubmitModal';
 import { getStudentAssignmentById } from '@/app/actions/student-assignment';
+import { formatFileUrl, downloadFile } from '@/utils/download';
 
 interface ApiAssignment {
   id: number;
@@ -204,10 +205,10 @@ export default function AssignmentDetailPage() {
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {assignment.files.map(file => (
-                <a key={file.id} href={file.url} 
+                <a key={file.id} href={formatFileUrl(file.url)} 
                   onClick={(e) => {
                     e.preventDefault();
-                    import('@/utils/download').then(m => m.downloadFile(file.url, file.name));
+                    downloadFile(file.url, file.name);
                   }}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', backgroundColor: '#f0f9ff', borderRadius: '0.375rem', border: '1px solid #bae6fd', textDecoration: 'none', color: '#0284c7', fontSize: '0.875rem', cursor: 'pointer' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
@@ -254,7 +255,13 @@ export default function AssignmentDetailPage() {
             {assignment.submission.duong_dan_file && (
               <div style={{ marginBottom: assignment.submission.nhan_xet ? '1rem' : 0 }}>
                 <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.5rem 0' }}>File bài làm đã nộp:</p>
-                <a href={assignment.submission.duong_dan_file} target="_blank" rel="noopener noreferrer"
+                <a href={formatFileUrl(assignment.submission.duong_dan_file)} target="_blank" rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (assignment.submission?.duong_dan_file) {
+                      downloadFile(assignment.submission.duong_dan_file, assignment.submission.ten_file || 'bai_lam');
+                    }
+                  }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', backgroundColor: 'white', borderRadius: '0.5rem', border: '1px solid #cbd5e1', textDecoration: 'none', color: '#2563eb', fontSize: '0.875rem', fontWeight: 500 }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -319,14 +326,23 @@ export default function AssignmentDetailPage() {
             const formData = new FormData();
             formData.append('file', file);
             if (note) formData.append('note', note);
-            
-            const res = await import('@/app/actions/student-assignment').then(m => m.submitStudentAssignment(id, formData));
-            if (res.success) {
+
+            // Gọi thẳng Laravel API từ browser để tránh giới hạn Next.js server action
+            const { authHeaders } = await import('@/lib/auth');
+            const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+            const res = await fetch(`${API_BASE_URL}/student/assignments/${id}/submit`, {
+              method: 'POST',
+              headers: authHeaders(),
+              body: formData,
+            });
+
+            const data = await res.json();
+            if (res.ok) {
               showToast('Nộp bài thành công!', 'success');
               setIsSubmitModalOpen(false);
-              loadData(); // Tải lại dữ liệu thay vì reload trang
+              loadData();
             } else {
-              showToast(res.message || 'Có lỗi xảy ra khi nộp bài.', 'error');
+              showToast(data.message || 'Có lỗi xảy ra khi nộp bài.', 'error');
             }
           } catch (err) {
             console.error(err);

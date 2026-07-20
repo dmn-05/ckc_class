@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './AdminCourseSections.module.css';
-import CourseSectionCard, { CourseSectionData } from './CourseSectionCard';
+import CourseSectionCard, { CourseSectionData, CourseSectionStatus } from './CourseSectionCard';
 import CourseSectionsPagination from './CourseSectionsPagination';
 
 interface CourseSectionListProps {
@@ -13,9 +13,11 @@ interface CourseSectionListProps {
   onDelete: (sectionId: string) => void;
   hideDelete?: boolean;
   hideEdit?: boolean;
+  hideManageStudents?: boolean;
   onViewDetail?: (sectionId: string) => void;
   selectedSemester?: string;
   selectedYear?: string;
+  onArchive?: (sectionId: string, currentStatus: CourseSectionStatus) => void;
 }
 
 export default function CourseSectionList({
@@ -26,7 +28,9 @@ export default function CourseSectionList({
   onDelete,
   hideDelete,
   hideEdit,
+  hideManageStudents,
   onViewDetail,
+  onArchive,
   selectedSemester = 'all',
   selectedYear = 'all'
 }: CourseSectionListProps) {
@@ -95,7 +99,9 @@ export default function CourseSectionList({
             onDelete={onDelete}
             hideDelete={hideDelete}
             hideEdit={hideEdit}
+            hideManageStudents={hideManageStudents}
             onViewDetail={onViewDetail}
+            onArchive={onArchive}
           />
         ))}
 
