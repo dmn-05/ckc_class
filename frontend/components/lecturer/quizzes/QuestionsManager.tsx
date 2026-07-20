@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styles from './QuizzesManagement.module.css';
+import AlertModal from '@/components/common/AlertModal';
 
 export type QuestionType = 'single_choice' | 'multiple_choice' | 'true_false' | 'essay';
 
@@ -47,6 +48,13 @@ export default function QuestionsManager({
   const [localQuestions, setLocalQuestions] = useState<QuestionData[]>([]);
   const [draftForms, setDraftForms] = useState<{id: number, data: Partial<QuestionData>}[]>([]);
   const [isSavingAll, setIsSavingAll] = useState(false);
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+    title?: string;
+    variant: 'warning' | 'error';
+  }>({ isOpen: false, message: '', variant: 'warning' });
 
   useEffect(() => {
     // Sort by order initially
@@ -102,22 +110,76 @@ export default function QuestionsManager({
   const totalQuestions = localQuestions.length + draftForms.length;
 
   const handleSaveAllDrafts = async () => {
+    // Validate all drafts first
+    for (const draft of draftForms) {
+      // Check if content is empty
+      if (!draft.data.content || draft.data.content.trim() === '') {
+        setAlertConfig({
+          isOpen: true,
+          title: 'Thiếu nội dung câu hỏi',
+          message: 'Vui lòng nhập đầy đủ nội dung câu hỏi cho tất cả các form nháp.',
+          variant: 'warning'
+        });
+        return;
+      }
+
+      // Check if question type requires options (not essay)
+      if (draft.data.type !== 'essay') {
+        const options = draft.data.options || [];
+        
+        // Check if options exist
+        if (options.length === 0) {
+          setAlertConfig({
+            isOpen: true,
+            title: 'Thiếu đáp án',
+            message: 'Vui lòng thêm ít nhất 2 đáp án cho câu hỏi trắc nghiệm.',
+            variant: 'warning'
+          });
+          return;
+        }
+
+        // Check if any option has empty content
+        const hasEmptyOption = options.some(opt => !opt.content || opt.content.trim() === '');
+        if (hasEmptyOption) {
+          setAlertConfig({
+            isOpen: true,
+            title: 'Đáp án chưa hoàn thiện',
+            message: 'Vui lòng nhập nội dung cho tất cả các đáp án.',
+            variant: 'warning'
+          });
+          return;
+        }
+
+        // Check if at least one correct answer is selected
+        const hasCorrectAnswer = options.some(opt => opt.isCorrect);
+        if (!hasCorrectAnswer) {
+          setAlertConfig({
+            isOpen: true,
+            title: 'Chưa chọn đáp án đúng',
+            message: 'Vui lòng đánh dấu ít nhất một đáp án đúng cho câu hỏi.',
+            variant: 'warning'
+          });
+          return;
+        }
+      }
+    }
+
     setIsSavingAll(true);
     try {
       // Save them one by one or Promise.all. 
       // For simplicity, let's await sequentially so backend doesn't get flooded if there are many.
       for (const draft of draftForms) {
-        if (!draft.data.content) {
-          alert('Vui lòng nhập đầy đủ nội dung câu hỏi cho tất cả các form nháp.');
-          setIsSavingAll(false);
-          return;
-        }
         await onSaveNewQuestion(draft.data);
       }
       // If all successful, clear draft forms
       setDraftForms([]);
     } catch (err: any) {
-      alert(err.message || 'Có lỗi xảy ra khi lưu câu hỏi.');
+      setAlertConfig({
+        isOpen: true,
+        title: 'Lỗi lưu câu hỏi',
+        message: err.message || 'Có lỗi xảy ra khi lưu câu hỏi.',
+        variant: 'error'
+      });
     } finally {
       setIsSavingAll(false);
     }
@@ -253,6 +315,14 @@ export default function QuestionsManager({
           </div>
         )}
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+      />
     </div>
   );
 }
