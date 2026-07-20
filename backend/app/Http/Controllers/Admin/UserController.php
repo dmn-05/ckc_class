@@ -13,6 +13,7 @@ class UserController extends Controller
     {
         // vai_tro_id = 2 is giang_vien
         $lecturers = NguoiDung::where('vai_tro_id', 2)
+            ->whereHas('giangVien')
             ->with(['giangVien.boMon.khoa'])
             ->get();
             
@@ -22,6 +23,7 @@ class UserController extends Controller
     public function getLecturerById($id)
     {
         $lecturer = NguoiDung::where('vai_tro_id', 2)
+            ->whereHas('giangVien')
             ->with(['giangVien.boMon.khoa'])
             ->findOrFail($id);
         return response()->json($lecturer);
@@ -181,6 +183,7 @@ class UserController extends Controller
     public function getStudentById($id)
     {
         $student = NguoiDung::where('vai_tro_id', 3)
+            ->whereHas('sinhVien')
             ->with(['sinhVien.khoa', 'sinhVien.lop'])
             ->findOrFail($id);
         return response()->json($student);
