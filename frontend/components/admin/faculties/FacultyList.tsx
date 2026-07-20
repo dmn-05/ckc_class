@@ -31,10 +31,10 @@ export default function FacultyList({ faculties, filter, onDelete }: FacultyList
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or faculties change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filter]);
+  }, [searchTerm, filter, faculties]);
 
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 

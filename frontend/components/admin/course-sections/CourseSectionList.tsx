@@ -66,10 +66,10 @@ export default function CourseSectionList({
     currentPage * itemsPerPage
   );
 
-  // Reset to page 1 when search or filters change
+  // Reset to page 1 when search, filters or sections prop change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedSemester, selectedYear]);
+  }, [searchTerm, selectedSemester, selectedYear, sections]);
 
   return (
     <div className={styles.rightColumn}>

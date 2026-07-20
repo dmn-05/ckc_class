@@ -33,10 +33,10 @@ export default function DepartmentList({ departments, facultyFilter, statusFilte
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or departments change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, facultyFilter]);
+  }, [searchTerm, statusFilter, facultyFilter, departments]);
 
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 

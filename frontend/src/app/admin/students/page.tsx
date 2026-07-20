@@ -50,10 +50,10 @@ export default function AdminStudentsPage() {
     loadData();
   }, [loadData]);
 
-  // Reset page when filters change
+  // Reset page when filters or students change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, facultyFilter, classFilter, statusFilter]);
+  }, [searchTerm, facultyFilter, classFilter, statusFilter, students]);
 
   // Reset classFilter when facultyFilter changes
   useEffect(() => {
