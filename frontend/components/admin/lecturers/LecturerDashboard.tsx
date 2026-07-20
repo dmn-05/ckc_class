@@ -99,7 +99,7 @@ export default function LecturerDashboard({
                 checked={showStopped}
                 onChange={(e) => onShowStoppedChange(e.target.checked)} 
               />
-              <span className={styles.checkboxText}>Đang nghỉ phép</span>
+              <span className={styles.checkboxText}>Ngừng giảng dạy</span>
             </label>
           </div>
         </div>

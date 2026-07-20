@@ -22,18 +22,22 @@ export async function getLecturers() {
 
         const data = await response.json();
         
-        return data.map((item: any) => ({
-            id: item.id.toString(),
-            name: item.ho_ten,
-            code: item.giang_vien ? item.giang_vien.ma_giang_vien : '',
-            department: item.giang_vien?.bo_mon ? item.giang_vien.bo_mon.ten_bo_mon : '',
-            facultyName: item.giang_vien?.bo_mon?.khoa ? item.giang_vien.bo_mon.khoa.ten_khoa : '',
-            email: item.email || '',
-            avatarUrl: item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
-            isActive: item.trang_thai === 'dang_hoat_dong',
-            theme: 'primary',
-            status: item.trang_thai
-        }));
+        return data.map((item: any) => {
+            const gvStatus = item.giang_vien?.trang_thai || item.trang_thai;
+            const isActive = gvStatus === 'dang_day' || gvStatus === 'dang_hoat_dong';
+            return {
+                id: item.id.toString(),
+                name: item.ho_ten,
+                code: item.giang_vien ? item.giang_vien.ma_giang_vien : '',
+                department: item.giang_vien?.bo_mon ? item.giang_vien.bo_mon.ten_bo_mon : '',
+                facultyName: item.giang_vien?.bo_mon?.khoa ? item.giang_vien.bo_mon.khoa.ten_khoa : '',
+                email: item.email || '',
+                avatarUrl: item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.ho_ten),
+                isActive: isActive,
+                theme: 'primary',
+                status: gvStatus
+            };
+        });
     } catch (error) {
         console.error("Error fetching lecturers", error);
         throw error;
