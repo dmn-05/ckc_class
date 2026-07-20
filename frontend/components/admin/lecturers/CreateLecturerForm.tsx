@@ -113,7 +113,13 @@ export default function CreateLecturerForm() {
     }
 
     try {
-      await createLecturer(submitData);
+      const res: any = await createLecturer(submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Thêm giảng viên thất bại', 'error', 'Lỗi thêm giảng viên');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/lecturers');

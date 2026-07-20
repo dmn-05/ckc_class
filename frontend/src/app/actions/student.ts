@@ -83,12 +83,12 @@ export async function createStudent(data: FormData) {
             } else if (errData.error) {
                 errMsg += `: ${errData.error}`;
             }
-            throw new Error(errMsg);
+            return { success: false, error: errMsg };
         }
-        return await response.json();
-    } catch (error) {
+        return { success: true, data: await response.json() };
+    } catch (error: any) {
         console.error('Error creating student:', error);
-        throw error;
+        return { success: false, error: error?.message || 'Failed to create student' };
     }
 }
 
@@ -109,12 +109,12 @@ export async function updateStudent(id: string, data: FormData) {
             } else if (errData.error) {
                 errMsg += `: ${errData.error}`;
             }
-            throw new Error(errMsg);
+            return { success: false, error: errMsg };
         }
-        return await response.json();
-    } catch (error) {
+        return { success: true, data: await response.json() };
+    } catch (error: any) {
         console.error('Error updating student:', error);
-        throw error;
+        return { success: false, error: error?.message || 'Failed to update student' };
     }
 }
 

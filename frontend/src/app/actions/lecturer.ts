@@ -76,67 +76,77 @@ export async function getLecturerById(id: string) {
 }
 
 export async function createLecturer(data: FormData) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+        if (!token) return { success: false, error: "Unauthorized" };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers`, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        },
-        body: data
-    });
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            body: data
+        });
 
-    if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        let errMsg = errData.message || `Failed to create lecturer: ${response.statusText}`;
-        if (errData.errors) {
-            const firstKey = Object.keys(errData.errors)[0];
-            if (firstKey && Array.isArray(errData.errors[firstKey])) {
-                errMsg = errData.errors[firstKey][0];
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            let errMsg = errData.message || `Failed to create lecturer: ${response.statusText}`;
+            if (errData.errors) {
+                const firstKey = Object.keys(errData.errors)[0];
+                if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                    errMsg = errData.errors[firstKey][0];
+                }
+            } else if (errData.error) {
+                errMsg += `: ${errData.error}`;
             }
-        } else if (errData.error) {
-            errMsg += `: ${errData.error}`;
+            return { success: false, error: errMsg };
         }
-        throw new Error(errMsg);
-    }
 
-    return await response.json();
+        return { success: true, data: await response.json() };
+    } catch (error: any) {
+        console.error('Error creating lecturer:', error);
+        return { success: false, error: error?.message || 'Failed to create lecturer' };
+    }
 }
 
 export async function updateLecturer(id: string, data: FormData) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth_token")?.value;
 
-    if (!token) throw new Error("Unauthorized");
+        if (!token) return { success: false, error: "Unauthorized" };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers/${id}`, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        },
-        body: data
-    });
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/lecturers/${id}`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            },
+            body: data
+        });
 
-    if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        let errMsg = errData.message || `Failed to update lecturer: ${response.statusText}`;
-        if (errData.errors) {
-            const firstKey = Object.keys(errData.errors)[0];
-            if (firstKey && Array.isArray(errData.errors[firstKey])) {
-                errMsg = errData.errors[firstKey][0];
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            let errMsg = errData.message || `Failed to update lecturer: ${response.statusText}`;
+            if (errData.errors) {
+                const firstKey = Object.keys(errData.errors)[0];
+                if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                    errMsg = errData.errors[firstKey][0];
+                }
+            } else if (errData.error) {
+                errMsg += `: ${errData.error}`;
             }
-        } else if (errData.error) {
-            errMsg += `: ${errData.error}`;
+            return { success: false, error: errMsg };
         }
-        throw new Error(errMsg);
-    }
 
-    return await response.json();
+        return { success: true, data: await response.json() };
+    } catch (error: any) {
+        console.error('Error updating lecturer:', error);
+        return { success: false, error: error?.message || 'Failed to update lecturer' };
+    }
 }
 
 export async function deleteLecturer(id: string) {

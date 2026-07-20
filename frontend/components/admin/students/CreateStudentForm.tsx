@@ -147,7 +147,13 @@ export default function CreateStudentForm() {
     if (avatarFile) submitData.append('avatar', avatarFile);
 
     try {
-      await createStudent(submitData);
+      const res: any = await createStudent(submitData);
+      if (res && res.success === false) {
+        showAlert(res.error || 'Thêm sinh viên thất bại', 'error', 'Lỗi thêm sinh viên');
+        setIsSubmitting(false);
+        setSubmitStatus('idle');
+        return;
+      }
       setSubmitStatus('success');
       setTimeout(() => {
         router.push('/admin/students');
