@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Lecturer;
 
 use App\Http\Controllers\Controller;
 use App\Models\BaiViet;
+use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary(config('services.cloudinary.url'));
+    }
+
     public function index(Request $request)
     {
         // For testing purposes, we might just get all posts by this lecturer
@@ -63,12 +71,14 @@ class PostController extends Controller
         // Upload ảnh bìa lên Cloudinary
         $hinh_anh_url = null;
         if ($request->hasFile('hinh_anh')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
+            $uploadResult = $this->cloudinary->uploadApi()->upload(
                 $request->file('hinh_anh')->getRealPath(),
-                ['folder' => 'posts']
+                [
+                    'folder' => 'ckc_class/posts',
+                    'resource_type' => 'image'
+                ]
             );
-            $hinh_anh_url = $result['secure_url'];
+            $hinh_anh_url = $uploadResult['secure_url'];
         }
 
         $post = BaiViet::create([
@@ -145,14 +155,16 @@ class PostController extends Controller
 
         // Nếu có ảnh mới, upload lên Cloudinary
         if ($request->hasFile('hinh_anh')) {
-            $cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
-            $result = $cloudinary->uploadApi()->upload(
+            $uploadResult = $this->cloudinary->uploadApi()->upload(
                 $request->file('hinh_anh')->getRealPath(),
-                ['folder' => 'posts']
+                [
+                    'folder' => 'ckc_class/posts',
+                    'resource_type' => 'image'
+                ]
             );
-            $validated['hinh_anh'] = $result['secure_url'];
+            $validated['hinh_anh'] = $uploadResult['secure_url'];
         } else {
-            unset($validated['hinh_anh']); // Không ghi đè nếu không upload ảnh mới
+            unset($validated['hinh_anh']);
         }
 
         $post->update($validated);
