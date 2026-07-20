@@ -21,6 +21,7 @@ export default function ClassStudentManagement({ classId }: { classId: string })
 
   const [targetStudentId, setTargetStudentId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [classStatus, setClassStatus] = useState<string>('');
   const [alertConfig, setAlertConfig] = useState<{
     isOpen: boolean;
     title?: string;
@@ -32,11 +33,16 @@ export default function ClassStudentManagement({ classId }: { classId: string })
     variant: 'success',
   });
 
+  const isLockedOrEnded = classStatus === 'da_tot_nghiep' || classStatus === 'da_ket_thuc' || classStatus === 'ket_thuc' || classStatus === 'ngung_hoat_dong';
+
   const fetchStudents = async () => {
     setLoading(true);
     const res = await getClassStudents(classId);
     if (res.success) {
       setStudents(res.data);
+      if ((res as any).class) {
+        setClassStatus((res as any).class.trang_thai);
+      }
     }
     setLoading(false);
   };
@@ -57,7 +63,7 @@ export default function ClassStudentManagement({ classId }: { classId: string })
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.trim().length >= 2) {
+      if (!isLockedOrEnded && searchQuery.trim().length >= 2) {
         setIsSearching(true);
         const res = await searchStudents(searchQuery, undefined, classId);
         if (res.success) {
@@ -72,7 +78,7 @@ export default function ClassStudentManagement({ classId }: { classId: string })
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, classId]);
+  }, [searchQuery, classId, isLockedOrEnded]);
 
   const handleSelectStudent = (maSinhVien: string) => {
     setSearchQuery(maSinhVien);
@@ -82,7 +88,7 @@ export default function ClassStudentManagement({ classId }: { classId: string })
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!searchQuery.trim()) return;
+    if (isLockedOrEnded || !searchQuery.trim()) return;
     
     setSubmitting(true);
     const res = await addStudentToClass(classId, searchQuery.trim());
@@ -127,6 +133,23 @@ export default function ClassStudentManagement({ classId }: { classId: string })
   return (
     <div className={styles.container}>
       <div className={styles.searchSection}>
+        {isLockedOrEnded && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            border: '1px solid #ffeeba',
+            borderRadius: '6px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '14px',
+            fontWeight: 500
+          }}>
+            Lớp học này đã {classStatus === 'da_tot_nghiep' ? 'tốt nghiệp' : 'kết thúc'}, không thể thêm học sinh/sinh viên vào danh sách lớp.
+          </div>
+        )}
         <form onSubmit={handleAdd} className={styles.formGroup}>
           <div className={styles.inputWrapper} ref={searchRef}>
             <label className={styles.label}>Thêm học sinh/sinh viên vào lớp</label>
@@ -134,13 +157,14 @@ export default function ClassStudentManagement({ classId }: { classId: string })
               type='text' 
               value={searchQuery} 
               onChange={e => setSearchQuery(e.target.value)} 
-              onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
-              placeholder='Nhập tên hoặc mã sinh viên (VD: DH52...)' 
+              onFocus={() => { if (!isLockedOrEnded && searchResults.length > 0) setShowResults(true); }}
+              placeholder={isLockedOrEnded ? `Lớp học đã ${classStatus === 'da_tot_nghiep' ? 'tốt nghiệp' : 'kết thúc'}, không thể thêm sinh viên` : 'Nhập tên hoặc mã sinh viên (VD: DH52...)'} 
               className={styles.input}
+              disabled={isLockedOrEnded}
               autoComplete="off"
             />
             
-            {showResults && (
+            {showResults && !isLockedOrEnded && (
               <div className={styles.searchResults}>
                 {isSearching ? (
                   <div className={styles.searchItem}>Đang tìm kiếm...</div>
@@ -165,8 +189,9 @@ export default function ClassStudentManagement({ classId }: { classId: string })
           </div>
           <button 
             type='submit' 
-            disabled={submitting || !searchQuery.trim()}
+            disabled={isLockedOrEnded || submitting || !searchQuery.trim()}
             className={styles.btnPrimary}
+            style={isLockedOrEnded ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
           >
             {submitting ? 'Đang xử lý...' : 'Thêm vào lớp'}
           </button>
