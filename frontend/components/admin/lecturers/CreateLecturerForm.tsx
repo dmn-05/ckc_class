@@ -120,7 +120,7 @@ export default function CreateLecturerForm() {
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      showAlert('Có lỗi xảy ra khi thêm giảng viên: ' + (error.message || 'Lỗi không xác định'), 'error', 'Lỗi thêm giảng viên');
+      showAlert(error.message || 'Thêm giảng viên thất bại', 'error', 'Lỗi thêm giảng viên');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }

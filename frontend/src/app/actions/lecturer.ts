@@ -91,8 +91,17 @@ export async function createLecturer(data: FormData) {
     });
 
     if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        throw new Error(errData?.message || `Failed to create lecturer: ${response.statusText}`);
+        const errData = await response.json().catch(() => ({}));
+        let errMsg = errData.message || `Failed to create lecturer: ${response.statusText}`;
+        if (errData.errors) {
+            const firstKey = Object.keys(errData.errors)[0];
+            if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                errMsg = errData.errors[firstKey][0];
+            }
+        } else if (errData.error) {
+            errMsg += `: ${errData.error}`;
+        }
+        throw new Error(errMsg);
     }
 
     return await response.json();
@@ -114,8 +123,17 @@ export async function updateLecturer(id: string, data: FormData) {
     });
 
     if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        throw new Error(errData ? JSON.stringify(errData) : `Failed to update lecturer: ${response.statusText}`);
+        const errData = await response.json().catch(() => ({}));
+        let errMsg = errData.message || `Failed to update lecturer: ${response.statusText}`;
+        if (errData.errors) {
+            const firstKey = Object.keys(errData.errors)[0];
+            if (firstKey && Array.isArray(errData.errors[firstKey])) {
+                errMsg = errData.errors[firstKey][0];
+            }
+        } else if (errData.error) {
+            errMsg += `: ${errData.error}`;
+        }
+        throw new Error(errMsg);
     }
 
     return await response.json();

@@ -24,15 +24,20 @@ class StudentProfileController extends Controller
     {
         $user = $request->user();
 
-        $validatedData = $request->validate([
+        $rules = [
             'ho_ten' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255|unique:nguoi_dung,email,' . $user->id,
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'nullable|in:nam,nu,khac',
-            'cccd' => 'nullable|string|max:20',
+            'cccd' => 'nullable|string|max:20|unique:sinh_vien,cccd,' . ($user->sinhVien ? $user->sinhVien->id : 'NULL'),
             'so_dien_thoai' => 'nullable|string|max:20',
             'dia_chi' => 'nullable|string|max:255',
-        ]);
+        ];
+        $messages = [
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
+            'cccd.unique' => 'Số CCCD này đã trùng với một sinh viên khác trong hệ thống!',
+        ];
+        $validatedData = $request->validate($rules, $messages);
 
         if (isset($validatedData['ho_ten'])) {
             $user->ho_ten = $validatedData['ho_ten'];

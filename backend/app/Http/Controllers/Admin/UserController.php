@@ -29,7 +29,7 @@ class UserController extends Controller
 
     public function storeLecturer(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'ho_ten' => 'required|string|max:100',
             'email' => 'required|email|unique:nguoi_dung,email',
             'mat_khau' => 'nullable|string|min:6',
@@ -42,7 +42,15 @@ class UserController extends Controller
             'bo_mon_id' => 'required|exists:bo_mon,id',
             'trang_thai' => 'required|in:dang_day,ngung_day',
             'avatar' => 'nullable|image|max:5120',
-        ]);
+        ];
+        $messages = [
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
+            'ma_giang_vien.unique' => 'Mã giảng viên này đã tồn tại trong hệ thống!',
+            'cccd.unique' => 'Số CCCD này đã trùng với một giảng viên khác trong hệ thống!',
+            'cccd.regex' => 'Số CCCD phải bao gồm đúng 12 chữ số.',
+            'so_dien_thoai.regex' => 'Số điện thoại phải bao gồm đúng 10 chữ số.',
+        ];
+        $validated = $request->validate($rules, $messages);
 
         \DB::beginTransaction();
         try {
@@ -88,7 +96,7 @@ class UserController extends Controller
     {
         $user = NguoiDung::where('vai_tro_id', 2)->findOrFail($id);
 
-        $validated = $request->validate([
+        $rules = [
             'ho_ten' => 'required|string|max:100',
             'email' => 'required|email|unique:nguoi_dung,email,' . $id,
             'ma_giang_vien' => 'required|string|max:20|unique:giang_vien,ma_giang_vien,' . $user->giangVien->id,
@@ -100,7 +108,15 @@ class UserController extends Controller
             'bo_mon_id' => 'required|exists:bo_mon,id',
             'trang_thai' => 'required|in:dang_day,ngung_day',
             'avatar' => 'nullable|image|max:5120',
-        ]);
+        ];
+        $messages = [
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
+            'ma_giang_vien.unique' => 'Mã giảng viên này đã tồn tại trong hệ thống!',
+            'cccd.unique' => 'Số CCCD này đã trùng với một giảng viên khác trong hệ thống!',
+            'cccd.regex' => 'Số CCCD phải bao gồm đúng 12 chữ số.',
+            'so_dien_thoai.regex' => 'Số điện thoại phải bao gồm đúng 10 chữ số.',
+        ];
+        $validated = $request->validate($rules, $messages);
 
         \DB::beginTransaction();
         try {
@@ -159,12 +175,12 @@ class UserController extends Controller
 
     public function storeStudent(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'ho_ten' => 'required|string|max:100',
             'email' => 'required|email|unique:nguoi_dung,email',
             'mat_khau' => 'nullable|string|min:6',
             'so_dien_thoai' => 'nullable|string|max:20',
-            'cccd' => 'nullable|string|max:20',
+            'cccd' => 'nullable|string|max:20|unique:sinh_vien,cccd',
             'dia_chi' => 'nullable|string',
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'required|in:nam,nu,khac',
@@ -173,7 +189,13 @@ class UserController extends Controller
             'lop_id' => 'required|exists:lop,id',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
-        ]);
+        ];
+        $messages = [
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
+            'ma_sinh_vien.unique' => 'Mã sinh viên này đã tồn tại trong hệ thống!',
+            'cccd.unique' => 'Số CCCD này đã trùng với một sinh viên khác trong hệ thống!',
+        ];
+        $validated = $request->validate($rules, $messages);
 
         \DB::beginTransaction();
         try {
@@ -220,11 +242,11 @@ class UserController extends Controller
     {
         $user = NguoiDung::where('vai_tro_id', 3)->findOrFail($id);
 
-        $validated = $request->validate([
+        $rules = [
             'ho_ten' => 'required|string|max:100',
             'email' => 'required|email|unique:nguoi_dung,email,' . $id,
             'so_dien_thoai' => 'nullable|string|max:20',
-            'cccd' => 'nullable|string|max:20',
+            'cccd' => 'nullable|string|max:20|unique:sinh_vien,cccd,' . $user->sinhVien->id,
             'dia_chi' => 'nullable|string',
             'ngay_sinh' => 'nullable|date',
             'gioi_tinh' => 'required|in:nam,nu,khac',
@@ -233,7 +255,13 @@ class UserController extends Controller
             'lop_id' => 'required|exists:lop,id',
             'trang_thai' => 'required|in:dang_hoc,tam_nghi,da_tot_nghiep',
             'avatar' => 'nullable|image|max:5120',
-        ]);
+        ];
+        $messages = [
+            'email.unique' => 'Email này đã được sử dụng bởi một tài khoản khác trong hệ thống!',
+            'ma_sinh_vien.unique' => 'Mã sinh viên này đã tồn tại trong hệ thống!',
+            'cccd.unique' => 'Số CCCD này đã trùng với một sinh viên khác trong hệ thống!',
+        ];
+        $validated = $request->validate($rules, $messages);
 
         \DB::beginTransaction();
         try {

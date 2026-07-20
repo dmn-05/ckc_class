@@ -148,7 +148,7 @@ export default function UpdateLecturerForm({ lecturerId }: UpdateLecturerFormPro
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      showAlert('Có lỗi xảy ra khi cập nhật giảng viên: ' + (error.message || 'Lỗi không xác định'), 'error', 'Lỗi cập nhật');
+      showAlert(error.message || 'Cập nhật giảng viên thất bại', 'error', 'Lỗi cập nhật');
       setIsSubmitting(false);
       setSubmitStatus('idle');
     }
