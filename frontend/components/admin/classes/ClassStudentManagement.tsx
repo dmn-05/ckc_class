@@ -211,13 +211,12 @@ export default function ClassStudentManagement({ classId }: { classId: string })
                 <th className={styles.th}>Họ và tên</th>
                 <th className={styles.th}>Ngày sinh</th>
                 <th className={styles.th}>Giới tính</th>
-                <th className={styles.th}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className={styles.emptyState}>Chưa có học sinh/sinh viên nào trong lớp này.</td>
+                  <td colSpan={5} className={styles.emptyState}>Chưa có học sinh/sinh viên nào trong lớp này.</td>
                 </tr>
               ) : (
                 students.map((student, index) => (
@@ -227,15 +226,6 @@ export default function ClassStudentManagement({ classId }: { classId: string })
                     <td className={styles.td}>{student.nguoi_dung?.ho_ten}</td>
                     <td className={styles.td}>{student.ngay_sinh || '---'}</td>
                     <td className={styles.td} style={{ textTransform: 'capitalize' }}>{student.gioi_tinh || '---'}</td>
-                    <td className={styles.td}>
-                      <button 
-                        type="button"
-                        onClick={() => handleRemoveClick(student.id)}
-                        className={styles.btnDelete}
-                      >
-                        Xóa khỏi lớp
-                      </button>
-                    </td>
                   </tr>
                 ))
               )}
