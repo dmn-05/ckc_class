@@ -212,7 +212,12 @@ export default function ClassroomClient({ section, posts, assignments, quizzes }
                           </div>
                           <div>
                             <h4 className={styles.postAuthorName}>{post.nguoi_tao?.ho_ten || 'Người dùng'}</h4>
-                            <p className={styles.postDate}>{formatDate(post.ngay_tao)} • {post.nguoi_tao?.vai_tro === 'giang_vien' ? 'Giảng viên' : 'Sinh viên'}</p>
+                            <p className={styles.postDate}>
+                              {formatDate(post.ngay_tao)} • {
+                                Number(post.nguoi_tao?.vai_tro_id) === 2 ? 'Giảng viên' : 
+                                Number(post.nguoi_tao?.vai_tro_id) === 1 ? 'Quản trị viên' : 'Sinh viên'
+                              }
+                            </p>
                           </div>
                         </div>
                         <button className={styles.postMenuBtn} onClick={(e) => e.stopPropagation()}>

@@ -73,9 +73,9 @@ export default function PostDetailPage() {
             content: json.data.noi_dung,
             date: new Date(json.data.ngay_tao).toLocaleDateString('vi-VN'),
             authorName: json.data.nguoi_tao?.ho_ten || 'Người dùng ẩn danh',
-            authorRole: json.data.nguoi_tao?.vai_tro_id === 2 ? 'Giảng viên' : 
-                        json.data.nguoi_tao?.vai_tro_id === 1 ? 'Quản trị viên' : 'Sinh viên',
-            authorAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(json.data.nguoi_tao?.ho_ten || 'User')}&background=3525cd&color=fff`,
+            authorRole: Number(json.data.nguoi_tao?.vai_tro_id) === 2 ? 'Giảng viên' : 
+                        Number(json.data.nguoi_tao?.vai_tro_id) === 1 ? 'Quản trị viên' : 'Sinh viên',
+            authorAvatar: json.data.nguoi_tao?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(json.data.nguoi_tao?.ho_ten || 'User')}&background=3525cd&color=fff`,
             category: json.data.loai_bai_viet === 'tai_lieu' ? 'Tài liệu' :
                       json.data.loai_bai_viet === 'bai_tap' ? 'Bài tập' : 'Thông báo',
             attachment: attachment,
@@ -87,18 +87,20 @@ export default function PostDetailPage() {
         const mappedComments = json.data.binh_luan?.map((c: any) => ({
           id: c.id.toString(),
           authorId: c.nguoi_dung_id,
-          authorName: c.nguoi_dung?.ho_ten || 'Sinh Viên',
+          authorName: c.nguoi_dung?.ho_ten || 'Người dùng',
           authorAvatar: c.nguoi_dung?.avatar || null,
-          role: c.nguoi_dung?.vai_tro_id === 2 ? 'teacher' : 'student',
+          role: Number(c.nguoi_dung?.vai_tro_id) === 2 ? 'teacher' : 
+                Number(c.nguoi_dung?.vai_tro_id) === 1 ? 'admin' : 'student',
           content: c.noi_dung,
           timeAgo: new Date(c.ngay_tao).toLocaleDateString('vi-VN'),
           isDeleted: c.trang_thai === 'an',
           replies: c.replies?.map((r: any) => ({
             id: r.id.toString(),
             authorId: r.nguoi_dung_id,
-            authorName: r.nguoi_dung?.ho_ten || 'Sinh Viên',
+            authorName: r.nguoi_dung?.ho_ten || 'Người dùng',
             authorAvatar: r.nguoi_dung?.avatar || null,
-            role: r.nguoi_dung?.vai_tro_id === 2 ? 'teacher' : 'student',
+            role: Number(r.nguoi_dung?.vai_tro_id) === 2 ? 'teacher' : 
+                  Number(r.nguoi_dung?.vai_tro_id) === 1 ? 'admin' : 'student',
             content: r.noi_dung,
             timeAgo: new Date(r.ngay_tao).toLocaleDateString('vi-VN'),
             isDeleted: r.trang_thai === 'an',
